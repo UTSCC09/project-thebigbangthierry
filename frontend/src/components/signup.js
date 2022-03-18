@@ -1,13 +1,24 @@
-import {Box, Paper, TextField , Input} from "@mui/material"; 
+import {Box, Paper, TextField , Input, IconButton, Button} from "@mui/material"; 
 import { useForm, Controller } from "react-hook-form";
-import {useRef} from "react"; 
+import {useRef, useState} from "react"; 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+
+/*** SOURCES THAT NEEDED TO BE CREDITED ***/
+/***
+ * For file upload:  https://stackoverflow.com/questions/69485737/upload-file-using-react-hook-form-in-version-7 
+ * For Text field:  https://levelup.gitconnected.com/using-react-hook-form-with-material-ui-components-ba42ace9507a
+ * For Confirm Password: https://codesandbox.io/s/react-hook-form-password-match-check-standard-validation-eo6en?file=/src/index.js
+ * Customization for input : https://kiranvj.com/blog/blog/file-upload-in-material-ui/
+***/
+
 
 const signUpPaper={padding: 20, height: '75%' , width: '40vw', margin:"20px auto"};
 
 export function Signup() {
-  const { handleSubmit, control, watch } = useForm();
+  const { register ,handleSubmit, control, watch } = useForm();
   const onSubmit = data => console.log(data);
+  const [uploaded, setUploaded] = useState(false); 
   const password = useRef({}); 
   password.current = watch("password", "");  
   const signupOptions = [
@@ -44,7 +55,6 @@ export function Signup() {
       key: "confirmPass", 
       label: "Confirm Password",
       type: "password",
-      validate: value => value === password.current || "The passwords do not match"
     }
   ]
 
@@ -61,6 +71,14 @@ export function Signup() {
         <AccountCircleIcon fontSize="large"/>
         <h1> Sign up </h1>
         <form onSubmit={handleSubmit(onSubmit)}>
+          <label htmlFor="upload-photo">
+            <Input  {...register("profilePicture", { onChange: (e) => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
+            <IconButton size="large" component="span"> <PersonAddIcon/> </IconButton>
+            {uploaded? <body> Uploaded </body> : null }
+          </label>
+
+          <TextField label="About" variant="standard" multiline maxRows={5} {...register("about")} fullWidth/> 
+
           {signupOptions.map((option) => {
             return (
               <Controller 
@@ -80,14 +98,22 @@ export function Signup() {
                  fullWidth
                  /> 
                )} 
-               rules={{
-                 required: option.label + ' required', 
-                 pattern: {value: option.pattern , message: option.patternmessage }, 
-                 validate: option.validate
-                }}
+               rules={option.id==="confirmPass" ? {
+                  required: "Please confirm your password",
+                  validate: value => value === password.current || "The passwords do not match"
+                }:
+                {
+                  required: option.label + ' required', 
+                  pattern: {value: option.pattern , message: option.patternmessage }, 
+                 }
+              }
             /> )
           })}
-          <Input type="submit"/>
+          <label htmlFor="submit-signup">
+            <Input value="Signup" type="submit" id="submit-signup" sx={{ display: 'none'}}/>
+            <Button sx={{margin: '10px'}} variant="outlined " component="span"> Sign Up </Button>
+          </label>
+          
         </form>
       </Paper>
     </Box>
