@@ -43,9 +43,12 @@ mongoose
 
 // Display the HTTPS request requested on console
 app.use(function (req, res, next){
-    let cookies = cookie.parse(req.headers.cookie || '');
-    req.username = (cookies.username)? cookies.username : null;
-    console.log("HTTPS request", req.username, req.method, req.url, req.body);
+    let username = (req.session.user)? req.session.user.username : '';
+    res.setHeader('Set-Cookie', cookie.serialize('username', username, {
+        path : '/', 
+        maxAge: 60 * 60 * 24 * 7 // 1 week in number of seconds
+    }));
+    console.log("HTTPS request", username, req.method, req.url, req.body);
     next();
 });
 
@@ -65,7 +68,7 @@ const checkPassword = function(req, res, next) {
 
 // Signup rest api
 app.post('/signup', checkUsername, checkPassword, (req, res, err) => {
-    // extract data from HTTP request
+    // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).end('username is missing');
     if (!('password' in req.body)) return res.status(400).end('password is missing');
     if (!('fullName' in req.body)) return res.status(400).end('Full name is missing');
@@ -116,31 +119,62 @@ app.post('/signup', checkUsername, checkPassword, (req, res, err) => {
 });
 
 // Login rest api
-app.post('/login', (req, res, err) => {
+app.post('/login', checkUsername, checkPassword, (req, res, err) => {
+    // extract data from HTTPS request
+    if (!('username' in req.body)) return res.status(400).end('username is missing');
+    if (!('password' in req.body)) return res.status(400).end('password is missing');
+
     let username = req.body.username;
     let password = req.body.password;
-    Users.findOne({username: username, password: password})
-        .exec()
-        .then(accounts => {
-            if (accounts == null)
-            {
-                res.status(422).json({message: "Invalid username and password"});
-            }
-            else
-            {
-                res.status(200).json({
-                    message: "login successful",
-                    currentUser: username
+
+    // retrieve user
+    Users.findOne({username: username})
+        .then(user => {
+            console.log(user);
+            if (!user) return res.status(401).end("Invalid username or password");
+            bcrypt.compare(password, user.password)
+                .then(validUser => {
+                    if (!validUser) return res.status(401).end("Invalid username or password");
+
+                    // start a session
+                    req.session.user = user;
+                    res.setHeader('Set-Cookie', cookie.serialize('username', username, {
+                        path : '/', 
+                        maxAge: 60 * 60 * 24 * 7, // 1 week in number of seconds
+                        httpOnly: false,
+                        secure: true,
+                        sameSite: 'strict'
+                   }));
+                   return res.status(200).json(username);
+                })
+                .catch(error => {
+                    console.log(error);
+                    throw error;
                 });
-            }
         })
         .catch(error => {
             console.log(error);
             res.status(500).json({
                 error: error
             });
-        })
+        });
 });
+
+// Rest api for sign out
+app.get('/signout/', function (req, res, next) {
+    // destroy session after sign out
+    req.session.destroy(function(err){
+        if (err) return res.status(500).end(err);
+        res.setHeader('Set-Cookie', cookie.serialize('username', '', {
+            path : '/', 
+            maxAge: 60 * 60 * 24 * 7 // 1 week in number of seconds
+      }));
+      return res.json("Signout successful");
+    }); 
+});
+
+console.log(__dirname + "/.." + "/frontend/src");
+app.use(express.static(path.join(__dirname, "..", "/frontend/src")));
 
 app.use('/graphql', graphqlHTTP({
     schema: typedefsSchema,
