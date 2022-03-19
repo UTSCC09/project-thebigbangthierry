@@ -175,6 +175,8 @@ app.get('/signout/', function (req, res, next) {
 
 console.log(__dirname + "/.." + "/frontend/src");
 app.use(express.static(path.join(__dirname, "..", "/frontend/src")));
+app.get('*',
+(req, res) => res.sendFile(path.resolve('../frontend/src', 'build', 'index.html')));
 
 app.use('/graphql', graphqlHTTP({
     schema: typedefsSchema,

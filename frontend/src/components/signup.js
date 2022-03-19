@@ -17,7 +17,17 @@ const signUpPaper={padding: 20, height: '75%' , width: '40vw', margin:"20px auto
 
 export function Signup() {
   const { register ,handleSubmit, control, watch } = useForm();
-  const onSubmit = data => console.log(data);
+  const onSubmit = (data) => {
+    // console.log(data);
+    fetch("https://localhost:4000/signup", {
+      method: "POST",
+      headers: {
+        'Content-type' : " application/json", 
+      },
+      body: JSON.stringify(data)
+    })
+    .then(res=> res.json())
+  }
   const [uploaded, setUploaded] = useState(false); 
   const password = useRef({}); 
   password.current = watch("password", "");  
@@ -74,7 +84,7 @@ export function Signup() {
           <label htmlFor="upload-photo">
             <Input  {...register("profilePicture", { onChange: (e) => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
             <IconButton size="large" component="span"> <PersonAddIcon/> </IconButton>
-            {uploaded? <body> Uploaded </body> : null }
+            {uploaded? <label> Uploaded </label> : null }
           </label>
 
           <TextField label="About" variant="standard" multiline maxRows={5} {...register("about")} fullWidth/> 
@@ -105,7 +115,7 @@ export function Signup() {
                 {
                   required: option.label + ' required', 
                   pattern: {value: option.pattern , message: option.patternmessage }, 
-                 }
+                }
               }
             /> )
           })}
