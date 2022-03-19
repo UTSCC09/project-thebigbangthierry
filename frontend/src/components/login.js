@@ -20,13 +20,13 @@ export function Login() {
           <h1> Login </h1>
           <TextField id="username" label="Username" variant="standard" fullWidth {...register("username")}/>
           <TextField id="password" label="Password" variant="standard" fullWidth {...register("password")} />
-          <div>
+          <Box sx={{ display: 'flex' , flexDirection: 'column'}}>
             <label htmlFor="submit-login">
               <Input value="Login" type="submit" id="submit-login" sx={{ display: 'none'}}/>
               <Button sx={{margin: '10px'}} variant="outlined " component="span"> Login </Button>
             </label>  
-            <Link to="/signup"> Login </Link>
-          </div>  
+            <Link to="/signup"> Create an Account </Link>
+          </Box>  
         </form>
          
       </Paper>
