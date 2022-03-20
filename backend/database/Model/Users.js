@@ -30,7 +30,15 @@ const UserProfileSchema = new Schema({
     profilePicture: {
         type: String
     },
-    friendsList: [{
+    followerList: [{
+        username: {
+            type: String
+        },
+        profilePicture: {
+            type: String
+        }
+    }],
+    followingList: [{
         username: {
             type: String
         },

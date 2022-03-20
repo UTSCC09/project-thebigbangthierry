@@ -141,7 +141,7 @@ app.post('/api/signup', checkUsername, (req, res, err) => {
 });
 
 // Login rest api
-app.post('/login', checkUsername, checkPassword, (req, res, err) => {
+app.post('/login', checkUsername, (req, res, err) => {
     // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).end('username is missing');
     if (!('password' in req.body)) return res.status(400).end('password is missing');
