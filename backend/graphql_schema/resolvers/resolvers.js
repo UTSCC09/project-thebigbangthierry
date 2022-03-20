@@ -1,12 +1,17 @@
-const Users = require('../../database/model/Users');
+const Users = require('../../database/Model/Users');
 
-const resolvers = {
+module.exports = {
     Query: {
         users: async () => {
-            const users = await Users.find();
-            return users;
+            return await Users.find({})
+                .then(user => {
+                    console.log(user);
+                    return [user];
+                })
+                .catch(err => {
+                    console.log(err);
+                    throw err;
+                })
         }
     }
 };
-
-module.exports = resolvers;

@@ -19,7 +19,7 @@ export function Signup() {
   const { register ,handleSubmit, control, watch } = useForm();
   const onSubmit = (data) => {
     // console.log(data);
-    fetch("https://localhost:4000/signup", {
+    fetch("/api/signup", {
       method: "POST",
       headers: {
         'Content-type' : " application/json", 
@@ -81,11 +81,11 @@ export function Signup() {
         <AccountCircleIcon fontSize="large"/>
         <h1> Sign up </h1>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <label htmlFor="upload-photo">
+          {/* <label htmlFor="upload-photo">
             <Input  {...register("profilePicture", { onChange: (e) => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
             <IconButton size="large" component="span"> <PersonAddIcon/> </IconButton>
             {uploaded? <label> Uploaded </label> : null }
-          </label>
+          </label> */}
 
           <TextField label="About" variant="standard" multiline maxRows={5} {...register("about")} fullWidth/> 
 

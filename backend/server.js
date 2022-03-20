@@ -9,17 +9,23 @@ const session = require('express-session');
 const cookie = require('cookie');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
+const enforce = require("express-sslify");
+const cors = require('cors');
 
 const typedefsSchema = require('./graphql_schema/typedefs/typedefs');
 const resolvers = require('./graphql_schema/resolvers/resolvers');
 const db = require('./config/keys').mongoURI;
-const Users = require('./database/model/Users');
-const graphqlSchema = require('./graphql_schema/schema');
+const Users = require('./database/Model/Users');
+const schema = require('./graphql_schema/schema');
 
 // Calling express server
 const app = express();
 app.use(bodyParser.json());
 
+// Add cors
+app.use(cors());
+
+// Add cookie session
 app.use(session({
     secret: 'please change this secret',
     resave: false,
@@ -40,6 +46,12 @@ mongoose
     .catch((err) => {
         console.log(err);
     });
+
+// GraphQL APIs
+app.use('/graphql', graphqlHTTP({
+    schema: schema,
+    graphiql: true
+}));
 
 // Display the HTTPS request requested on console
 app.use(function (req, res, next){
@@ -67,7 +79,7 @@ const checkPassword = function(req, res, next) {
 };
 
 // Signup rest api
-app.post('/signup', checkUsername, checkPassword, (req, res, err) => {
+app.post('/api/signup', checkUsername, (req, res, err) => {
     // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).end('username is missing');
     if (!('password' in req.body)) return res.status(400).end('password is missing');
@@ -161,7 +173,7 @@ app.post('/login', checkUsername, checkPassword, (req, res, err) => {
 });
 
 // Rest api for sign out
-app.get('/signout/', function (req, res, next) {
+app.get('/signout', function (req, res, next) {
     // destroy session after sign out
     req.session.destroy(function(err){
         if (err) return res.status(500).end(err);
@@ -173,28 +185,20 @@ app.get('/signout/', function (req, res, next) {
     }); 
 });
 
-console.log(__dirname + "/.." + "/frontend/src");
-app.use(express.static(path.join(__dirname, "..", "/frontend/src")));
-app.get('*',
-(req, res) => res.sendFile(path.resolve('../frontend/src', 'build', 'index.html')));
-
-app.use('/graphql', graphqlHTTP({
-    schema: typedefsSchema,
-    rootValue: resolvers,
-    graphiql: true
-}));
-
-// HTTPS server
-var privateKey = fs.readFileSync( 'server.key' );
-var certificate = fs.readFileSync( 'server.crt' );
-var config = {
-        key: privateKey,
-        cert: certificate
-};
+// Frontend connect
+// console.log(process.env);
+if (process.env.NODE_ENV === "production") {
+    app.use(enforce.HTTPS({ trustProtoHeader: true }));
+    app.use(express.static(path.join(__dirname, "../frontend/build")));
+  
+    app.get("*", (req, res) =>
+      res.sendFile(path.join(__dirname, "../frontend/build/index.html"))
+    );
+}
 
 // Listen localhost server at port 4000
 const PORT = 4000;
-https.createServer(config, app).listen(PORT, function (err) {
+app.listen(PORT, function(err){
     if (err) console.log(err);
-    else console.log("HTTPS server on https://localhost:%s", PORT);
+    else console.log("HTTP server on http://localhost:%s", PORT);
 });
