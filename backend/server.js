@@ -12,8 +12,8 @@ const bcrypt = require('bcrypt');
 const enforce = require("express-sslify");
 const cors = require('cors');
 
-const typedefsSchema = require('./graphql_schema/typedefs/typedefs');
-const resolvers = require('./graphql_schema/resolvers/resolvers');
+// const typedefsSchema = require('./graphql_schema/typedefs/typedefs');
+// const resolvers = require('./graphql_schema/resolvers/resolvers');
 const db = require('./config/keys').mongoURI;
 const Users = require('./database/Model/Users');
 const schema = require('./graphql_schema/schema');
@@ -86,48 +86,58 @@ app.post('/api/signup', checkUsername, (req, res, err) => {
     if (!('fullName' in req.body)) return res.status(400).end('Full name is missing');
     if (!('email' in req.body)) return res.status(400).end('Email is missing');
 
-    // Avoid repeating email by users
-    Users.findOne({email: req.body.email})
-        .then((user, error) => {
-            if(error) return res.status(500).end(error);
-            if(user) return res.status(409).end("Email " + req.body.email + " is already in use");
-            let pass = req.body.password;
-            // Store password as a hashtable
-            bcrypt.genSalt(10)
-                .then(salt => {
-                    bcrypt.hash(pass, salt)
-                        .then(hashPass => {
-                            const userDetails = new Users({
-                                username: req.body.username,
-                                password: hashPass,
-                                fullName: req.body.fullName,
-                                email: req.body.email,
-                                about: req.body.about,
-                                profilePicture: req.body.profilePicture
-                            });
-                            userDetails.save()
-                                .then(data => res.json(data))
+    Users.findOne({username: req.body.username})
+        .then((checkUser, error) => {
+            if(error) return res.status(500).json(error);
+            if(checkUser) return res.status(409).json({"error": "Username " + req.body.username + " is already in use"});
+
+            // Avoid repeating email by users
+            Users.findOne({email: req.body.email})
+                .then((user, error) => {
+                    if(error) return res.status(500).json(error);
+                    if(user) return res.status(409).json({"error": "Email " + req.body.email + " is already in use"});
+                    let pass = req.body.password;
+                    // Store password as a hashtable
+                    bcrypt.genSalt(10)
+                        .then(salt => {
+                            bcrypt.hash(pass, salt)
+                                .then(hashPass => {
+                                    const userDetails = new Users({
+                                        username: req.body.username,
+                                        password: hashPass,
+                                        fullName: req.body.fullName,
+                                        email: req.body.email,
+                                        about: req.body.about,
+                                        profilePicture: req.body.profilePicture
+                                    });
+                                    userDetails.save()
+                                        .then(data => res.json(data))
+                                        .catch(error => {
+                                            console.log(error);
+                                            res.status(500).json({
+                                                error: error
+                                            });
+                                        });
+                                })
                                 .catch(error => {
                                     console.log(error);
-                                    res.status(500).json({
-                                        error: error
-                                    });
+                                    throw new error;
                                 });
                         })
                         .catch(error => {
                             console.log(error);
-                            throw error;
+                            throw new error;
                         });
                 })
                 .catch(error => {
                     console.log(error);
-                    throw error;
+                    throw new error;
                 });
         })
-        .catch(error => {
+        .catch(err=> {
             console.log(error);
-            throw error;
-        });
+            throw new error;
+        })
 });
 
 // Login rest api

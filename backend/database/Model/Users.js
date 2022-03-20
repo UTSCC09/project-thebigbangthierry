@@ -21,15 +21,14 @@ const UserProfileSchema = new Schema({
     email: {
         type: String,
         unique: true,
-        // Need to add match regex for utoronto mail
+        match: /^[A-Za-z0-9._%+-]+@[mail.utoronto.ca|utoronto.ca|alum.utoronto.ca|alumni.utoronto.ca]/g,
         required: true
     },
     about: {
         type: String
     },
     profilePicture: {
-        type: String,
-        default: ""
+        type: String
     },
     friendsList: [{
         username: {
