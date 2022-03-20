@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import {useRef, useState} from "react"; 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { useNavigate } from 'react-router-dom'
 
 /*** SOURCES THAT NEEDED TO BE CREDITED ***/
 /***
@@ -17,6 +18,7 @@ const signUpPaper={padding: 20, height: '75%' , width: '40vw', margin:"20px auto
 
 export function Signup() {
   const { register ,handleSubmit, control, watch } = useForm();
+  const navigate = useNavigate(); 
   const onSubmit = (data) => {
     // console.log(data);
     fetch("/api/signup", {
@@ -26,9 +28,13 @@ export function Signup() {
       },
       body: JSON.stringify(data)
     })
-    .then(res=> res.json())
+    .then(res=> {
+      if (res.ok) navigate("/login")
+    })
+
   }
-  const [uploaded, setUploaded] = useState(false); 
+  const [uploaded, setUploaded] = useState(false);
+
   const password = useRef({}); 
   password.current = watch("password", "");  
   const signupOptions = [
@@ -111,12 +117,15 @@ export function Signup() {
                rules={option.id==="confirmPass" ? {
                   required: "Please confirm your password",
                   validate: value => value === password.current || "The passwords do not match"
-                }:
-                {
+                }: option.id==="username"? {
                   required: option.label + ' required', 
-                  pattern: {value: option.pattern , message: option.patternmessage }, 
+                  // validate: value => userTaken || "The username was taken"
                 }
-              }
+                  :{
+                    required: option.label + ' required', 
+                    pattern: {value: option.pattern , message: option.patternmessage }, 
+                  }  
+                }
             /> )
           })}
           <label htmlFor="submit-signup">
