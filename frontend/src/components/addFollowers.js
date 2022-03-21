@@ -37,7 +37,7 @@ const Result = (user) => {
   );
 };
 
-export function AddFriends() {
+export function AddFollowers() {
  
   const users = [
   {

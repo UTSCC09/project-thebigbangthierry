@@ -11,5 +11,5 @@ db
 # jshint
 .jshintrc
 
-#env
-.env
+# env for file upload 
+.env 

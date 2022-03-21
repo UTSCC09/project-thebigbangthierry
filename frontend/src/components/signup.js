@@ -23,13 +23,29 @@ export function Signup() {
   //setError
   const navigate = useNavigate(); 
   const onSubmit = (data) => {
-    // console.log(data);
+    const formData = new FormData(); 
+    console.log(data);
+    for (var key in data) {
+      if (key === "profilePicture") {
+        console.log("honk"); 
+        if (data.profilePicture.length === 1) {
+          // console.log("screech"); 
+          // console.log(data.profilePicture[0]);
+          formData.append(key, data.profilePicture[0])
+        } 
+      }
+      else {
+        // console.log("beep: " + key + " what: " + data[key]);
+        formData.append(key, data[key]); 
+      }
+    }
+    // console.log(formData); 
     fetch("/api/signup", {
       method: "POST",
       headers: {
-        'Content-type' : " application/json", 
+        'Content-type' : 'multipart/form-data', 
       },
-      body: JSON.stringify(data)
+      body: formData
     })
     .then(res=> {
       if (res.ok) navigate("/login")

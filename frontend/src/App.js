@@ -5,7 +5,7 @@ import {Login} from "./components/login";
 import {Profile} from "./components/profile";
 import {Home} from "./components/home";
 import {EditProfile} from "./components/editProfile";
-import {AddFriends} from "./components/addFriends";
+import {AddFollowers} from "./components/addFollowers";
 import {useState} from "react"; 
 import Cookies from 'js-cookie'; 
 import { ApolloProvider } from "@apollo/react-hooks";
@@ -121,7 +121,7 @@ function AppRoutes() {
       {/* <Route path="/profile" element={<ProtectedRoute auth={auth}><Profile/> </ProtectedRoute> }/> */}
       <Route path="/profile" element={<Profile/>}/> 
       <Route path="/profile/edit" element={<ProtectedRoute auth={auth}> <EditProfile/> </ProtectedRoute> }/>
-      <Route path="/add/friends" element={<AddFriends/>} /> 
+      <Route path="/add/followers" element={<AddFollowers/>} /> 
     </Routes>
  
   );
