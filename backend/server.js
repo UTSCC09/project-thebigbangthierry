@@ -75,7 +75,6 @@ const checkUsername = function(req, res, next) {
 const checkPassword = function(req, res, next) {
     let password = req.body.password;
     const regex = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$");
-    console.log(password);
     if (!regex.test(password))
     {
         return res.status(400).end("Password should be atleast 1 uppercase and atleast 1 lowercase alphabet, atleast 1 number and atleast 1 of !@#$&*");   
@@ -114,7 +113,7 @@ app.post('/api/signup', upload.single('profilePicture'), checkUsername, checkPas
                                         if (req.file != undefined)
                                         {
                                             let pathFile = req.file.path;
-                                            if (pathFile != undefined && pathFile != null && pathFile == "")
+                                            if (pathFile != undefined && pathFile != null && pathFile != "")
                                             {
                                                 const picture = await cloudinary.uploader.upload(pathFile, {
                                                     public_id: req.body.username,
@@ -123,7 +122,7 @@ app.post('/api/signup', upload.single('profilePicture'), checkUsername, checkPas
                                                 profilePicUrl = picture.eager[0].secure_url
                                             }
                                         }
-        
+                                        
                                         const userDetails = new Users({
                                             username: req.body.username,
                                             password: hashPass,
@@ -132,6 +131,7 @@ app.post('/api/signup', upload.single('profilePicture'), checkUsername, checkPas
                                             about: req.body.about,
                                             profilePicture: profilePicUrl
                                         });
+                                        console.log(userDetails);
                                         userDetails.save()
                                             .then(data => res.json(data))
                                             .catch(error => {
