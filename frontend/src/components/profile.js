@@ -5,6 +5,7 @@ import { useQuery } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
 import Cookies from 'js-cookie'; 
 import {TabPanel} from "./tabPanel";
+import { ProfileName } from "./profileName";
 
 const GET_PROFILE = gql`
   query($user: String!) {
@@ -12,6 +13,7 @@ const GET_PROFILE = gql`
       fullName,
       email
       about
+      profilePicture
       followerList {
         username
         profilePicture
@@ -68,7 +70,8 @@ export function Profile(){
   if (error) return <div>Error!</div>
 
   return (
-    <Box sx={backgroundBoxStyle}>   
+    <Box sx={backgroundBoxStyle}>  
+    {console.log(data)} 
         <Paper sx={{width: "75vw" , padding: '2vh'}}>
           <Box sx={mainBoxStyle}>
             <Box id="about-picture" sx={pictureStyle}>
@@ -89,14 +92,25 @@ export function Profile(){
               <TabPanel value={value} index={0}>
                 <Box sx={aboutStyle}>
                   <p> <b> Full Name: </b> {data.user.fullName} </p>
-                  <p><b> Email: </b>{data.user.email} </p>
+                  <p> <b> Email: </b>{data.user.email} </p>
                 </Box>
               </TabPanel>
               <TabPanel value={value} index={1}>
                 In Construction 
               </TabPanel>
               <TabPanel value={value} index={2}>
-                <Box>
+                <Box sx={{display:'flex'}}> 
+                  <Box sx={{width: '35vw',borderRight: "2px grey solid",  height: "45 vh"}}>
+                    <p style={{fontSize: "2vmin"}}> <b> Following </b> </p>
+                    {data.user.followingList.map((follow) => {
+                      return (
+                        <ProfileName key={follow.username} user={follow}/> 
+                      );
+                    })}
+                  </Box>
+                  <Box sx={{width: '35vw', paddingLeft: '2vw'}}>
+                    <p> <b> Followers  </b> </p>
+                  </Box>
                 </Box>
               </TabPanel>
              </Box> 

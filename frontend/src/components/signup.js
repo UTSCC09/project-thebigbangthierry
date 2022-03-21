@@ -27,9 +27,9 @@ export function Signup() {
     console.log(data);
     for (var key in data) {
       if (key === "profilePicture") {
-        console.log("honk"); 
+        // console.log("honk"); 
         if (data.profilePicture.length === 1) {
-          // console.log("screech"); 
+          console.log("screech"); 
           // console.log(data.profilePicture[0]);
           formData.append(key, data.profilePicture[0])
         } 
