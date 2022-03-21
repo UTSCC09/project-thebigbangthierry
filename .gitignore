@@ -10,3 +10,6 @@ db
 
 # jshint
 .jshintrc
+
+# env for file upload 
+.env 
