@@ -1,10 +1,10 @@
-import {Box, Paper, TextField , Input, Button} from "@mui/material"; 
+import {Box, Paper, TextField , Input, Button, IconButton} from "@mui/material"; 
 //IconButton
 import { useForm, Controller } from "react-hook-form";
-import {useRef} from "react";
+import {useRef, useState} from "react";
 //setState 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-// import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useNavigate , Link } from 'react-router-dom'
 
 /*** SOURCES THAT NEEDED TO BE CREDITED ***/
@@ -36,7 +36,7 @@ export function Signup() {
     }) 
     // setError("username", {type: "manual", message: "Username taken"});    
   }
-  // const [uploaded, setUploaded] = useState(false);
+  const [uploaded, setUploaded] = useState(false);
   // const [userTaken, setUserTaken] = useState(true); 
   const password = useRef({}); 
   password.current = watch("password", "");  
@@ -90,11 +90,11 @@ export function Signup() {
         <AccountCircleIcon fontSize="large"/>
         <h1> Sign up </h1>
         <form onSubmit={handleSubmit(onSubmit)}>
-          {/* <label htmlFor="upload-photo">
+          <label htmlFor="upload-photo">
             <Input  {...register("profilePicture", { onChange: (e) => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
             <IconButton size="large" component="span"> <PersonAddIcon/> </IconButton>
             {uploaded? <label> Uploaded </label> : null }
-          </label> */}
+          </label>
 
           <TextField label="About" variant="standard" multiline maxRows={5} {...register("about")} fullWidth/> 
 

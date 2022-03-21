@@ -11,12 +11,13 @@ const validator = require('validator');
 const bcrypt = require('bcrypt');
 const enforce = require("express-sslify");
 const cors = require('cors');
+const multer = require('multer');
 
-// const typedefsSchema = require('./graphql_schema/typedefs/typedefs');
-// const resolvers = require('./graphql_schema/resolvers/resolvers');
 const db = require('./config/keys').mongoURI;
 const Users = require('./database/Model/Users');
 const schema = require('./graphql_schema/schema');
+const cloudinary = require('./config/cloudinary');
+const upload = multer();
 
 // Calling express server
 const app = express();
@@ -79,7 +80,7 @@ const checkPassword = function(req, res, next) {
 };
 
 // Signup rest api
-app.post('/api/signup', checkUsername, (req, res, err) => {
+app.post('/api/signup', upload.single('profilePicture'), checkUsername, (req, res, err) => {
     // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).end('username is missing');
     if (!('password' in req.body)) return res.status(400).end('password is missing');
@@ -102,13 +103,17 @@ app.post('/api/signup', checkUsername, (req, res, err) => {
                         .then(salt => {
                             bcrypt.hash(pass, salt)
                                 .then(hashPass => {
+                                    const picture = cloudinary.uploader.upload(req.profilePicture[0], {
+                                        public_id: user._id,
+                                        eager: [{ width: 180, height: 180, crop: "scale", quality: "100" }]
+                                    });
                                     const userDetails = new Users({
                                         username: req.body.username,
                                         password: hashPass,
                                         fullName: req.body.fullName,
                                         email: req.body.email,
                                         about: req.body.about,
-                                        profilePicture: req.body.profilePicture
+                                        profilePicture: picture.eager[0].secure_url
                                     });
                                     userDetails.save()
                                         .then(data => res.json(data))
