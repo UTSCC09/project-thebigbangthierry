@@ -1,9 +1,11 @@
-import {Box, Paper, TextField , Input, IconButton, Button} from "@mui/material"; 
+import {Box, Paper, TextField , Input, Button} from "@mui/material"; 
+//IconButton
 import { useForm, Controller } from "react-hook-form";
-import {useRef, useState} from "react"; 
+import {useRef} from "react";
+//setState 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import { useNavigate } from 'react-router-dom'
+// import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { useNavigate , Link } from 'react-router-dom'
 
 /*** SOURCES THAT NEEDED TO BE CREDITED ***/
 /***
@@ -18,6 +20,7 @@ const signUpPaper={padding: 20, height: '75%' , width: '40vw', margin:"20px auto
 
 export function Signup() {
   const { register ,handleSubmit, control, watch } = useForm();
+  //setError
   const navigate = useNavigate(); 
   const onSubmit = (data) => {
     // console.log(data);
@@ -30,11 +33,11 @@ export function Signup() {
     })
     .then(res=> {
       if (res.ok) navigate("/login")
-    })
-
+    }) 
+    // setError("username", {type: "manual", message: "Username taken"});    
   }
-  const [uploaded, setUploaded] = useState(false);
-
+  // const [uploaded, setUploaded] = useState(false);
+  // const [userTaken, setUserTaken] = useState(true); 
   const password = useRef({}); 
   password.current = watch("password", "");  
   const signupOptions = [
@@ -134,6 +137,7 @@ export function Signup() {
           </label>
           
         </form>
+        <Link to="/login"> Already have an Account ? Log in </Link>
       </Paper>
     </Box>
   );

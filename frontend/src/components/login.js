@@ -6,19 +6,20 @@ import { useForm } from "react-hook-form";
 const loginBoxStyle = {
   textAlign: "center",
   backgroundColor: '#002f65',
-  backgroundSize: 'cover', 
-  height: '100%', 
+  height: '100vh',
+  paddingTop: '20px', 
 }; 
 const loginPaper={
-  padding: 20, 
-  height: '75%' , 
+  padding: 30, 
+  height: '80vh' , 
   width: '40vw', 
-  margin:"20px auto"
+  margin: 'auto'
 };
 
 export function Login(props) {
   const {register, handleSubmit} = useForm();
   const onSubmit = data =>{
+    // console.log(data); 
     props.handleLogin(data); 
   }; 
 

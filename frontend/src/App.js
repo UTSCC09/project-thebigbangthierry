@@ -5,10 +5,11 @@ import {Login} from "./components/login";
 import {Profile} from "./components/profile";
 import {Home} from "./components/home";
 import {EditProfile} from "./components/editProfile";
+import {AddFriends} from "./components/addFriends";
 import {useState} from "react"; 
 import Cookies from 'js-cookie'; 
-// import { ApolloProvider } from "@apollo/react-hooks";
-// import ApolloClient from "apollo-client";
+import { ApolloProvider } from "@apollo/react-hooks";
+import ApolloClient from "apollo-boost";
 // import { WebSocketLink } from "apollo-link-ws";
 // import { InMemoryCache } from "apollo-cache-inmemory";
 import {
@@ -20,20 +21,21 @@ import {
   useNavigate, 
 } from 'react-router-dom';
 
-// const client = new ApolloClient({
-//   link: new WebSocketLink({
-//     uri: "wss://localhost:4000/graphql",
-//     options: {
-//       reconnect: true,
-//       connectionParams: {
-//         headers: {
-//           Authorization: "Bearer yourauthtoken",
-//         },
-//       },
-//     },
-//   }),
-//   cache: new InMemoryCache(),
-// });
+const client = new ApolloClient({
+  uri: "http://localhost:4000/graphql",
+  // link: new WebSocketLink({
+  //   uri: "wss://localhost:4000/graphql",
+  //   options: {
+  //     reconnect: true,
+  //     connectionParams: {
+  //       headers: {
+  //         Authorization: "Bearer yourauthtoken",
+  //       },
+  //     },
+  //   },
+  // }),
+  // cache: new InMemoryCache(),
+});
 
 /*** SOURCES THAT NEEDED TO BE CREDITED ***/
 /***
@@ -52,15 +54,12 @@ const ProtectedRoute = ({
 };
 
 function App() {
-  
-  
-  
   return (
-    // <ApolloProvider client={client}>
+    <ApolloProvider client={client}>
       <BrowserRouter>
         <AppRoutes/>
       </BrowserRouter>
-    // </ApolloProvider>
+    </ApolloProvider>
     
   );
 }
@@ -118,12 +117,11 @@ function AppRoutes() {
     <Routes>
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login handleLogin={handleLogin} loginError={loginError}/>}/>
-      <Route path="/profile" element={<Profile/>}/>
-      <Route path="/profile/edit" element={<EditProfile/>}/>  
-      <Route path="/" element={
-      <ProtectedRoute auth={auth}>
-          <Home handleLogout={handleLogout}/> 
-      </ProtectedRoute> }/>
+      <Route path="/" element={<ProtectedRoute auth={auth}> <Home handleLogout={handleLogout}/> </ProtectedRoute> }/>
+      {/* <Route path="/profile" element={<ProtectedRoute auth={auth}><Profile/> </ProtectedRoute> }/> */}
+      <Route path="/profile" element={<Profile/>}/> 
+      <Route path="/profile/edit" element={<ProtectedRoute auth={auth}> <EditProfile/> </ProtectedRoute> }/>
+      <Route path="/add/friends" element={<AddFriends/>} /> 
     </Routes>
  
   );
