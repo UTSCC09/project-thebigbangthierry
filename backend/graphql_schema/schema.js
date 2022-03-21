@@ -88,7 +88,7 @@ const Mutation = new GraphQLObjectType({
           }
           else
           {
-            return {error: args.fullName + " not defined or null or empty. Please send a legitimate string."}
+            return new Error(args.fullName + " not defined or null or empty. Please send a legitimate string.");
           }
         } 
         catch(err) 
@@ -113,33 +113,50 @@ const Mutation = new GraphQLObjectType({
           let user2 = args.username2;
           let pic = args.profilePicture;
 
-          Users.findOne({username: user1})
+          return Users.findOne({username: user1})
             .exec()
             .then((user) => {
-              if (!user) return {error: user + " not in database "}
-              Users.findOne({username: user2})
+              if (!user) return new Error(user + " not in database ");
+              return Users.findOne({username: user2})
                 .exec()
                 .then((user2exist) => {
-                  if (!user2exist) return {error: user2exist + " not in database "}
+                  if (!user2exist) return new Error(user2exist + " not in database ");
                   let followerList = user.followerList;
+                  let followingList = user2exist.followingList;
                   for(let i = 0; i < followerList.length; i++)
                   {
                     if (followerList[i].username == user2)
                     {
-                      return {message: user2 + " already following the user " + user1};
+                      return new Error(user2 + " already following the user " + user1);
                     }
-                    followerList.push({"username": user2, "profilePicture": pic});
-                    console.log(followerList);
-                    Users.updateOne({username: user1}, {followerList: followerList})
-                      .exec()
-                      .then(() => {
-                        return {message: user2 + " added to the follower list of " + user1 + " successfully"}
-                      })
-                      .catch((err) => {
-                        console.log(err);
-                        throw new err;
-                      });
                   }
+                  for(let j = 0; j < followerList.length; j++)
+                  {
+                    if (followerList[j].username == user1)
+                    {
+                      return new Error(user2 + " already following the user " + user1);
+                    }
+                  }
+                  followerList.push({"username": user2, "profilePicture": pic});
+                  followingList.push({"username": user1, "profilePicture": user1.profilePicture})
+                  return Users.updateOne({username: user1}, {followerList: followerList})
+                    .exec()
+                    .then(() => {
+                      return Users.updateOne({username: user2}, {followingList: followingList})
+                        .exec()
+                        .then(() => {
+                          const updatedUsers = Users.findOne({username: user2});
+                          return updatedUsers;
+                        })
+                        .catch((err) => {
+                          console.log(err);
+                          throw new err;
+                        });
+                      })
+                    .catch((err) => {
+                      console.log(err);
+                      throw new err;
+                    });
                 })
                 .catch((err) => {
                   console.log(err);
@@ -153,7 +170,8 @@ const Mutation = new GraphQLObjectType({
         } 
         catch (error) 
         {
-          
+          console.log(error);
+          throw new error;
         }
       }
     }

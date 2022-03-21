@@ -28,7 +28,8 @@ const UserProfileSchema = new Schema({
         type: String
     },
     profilePicture: {
-        type: String
+        type: String,
+        default: ""
     },
     followerList: [{
         username: {
