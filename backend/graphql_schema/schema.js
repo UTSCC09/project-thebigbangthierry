@@ -1,3 +1,8 @@
+/*** SOURCES THAT NEED TO BE CREDITED ***/
+/*** 
+ * Idea for structure of graphql apis from https://atheros.ai/blog/graphql-list-how-to-use-arrays-in-graphql-schema
+***/
+
 // package imports
 const graphql = require('graphql');
 const Users = require('../database/Model/Users');

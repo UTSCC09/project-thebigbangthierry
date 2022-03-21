@@ -42,9 +42,6 @@ export function Signup() {
     // console.log(formData); 
     fetch("/api/signup", {
       method: "POST",
-      headers: {
-        'Content-type' : 'multipart/form-data', 
-      },
       body: formData
     })
     .then(res=> {

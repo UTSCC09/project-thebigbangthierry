@@ -11,13 +11,13 @@ const validator = require('validator');
 const bcrypt = require('bcrypt');
 const enforce = require("express-sslify");
 const cors = require('cors');
-const multer = require('multer');
+require('dotenv').config({path: __dirname + '/./../.env'});
 
 const db = require('./config/keys').mongoURI;
 const Users = require('./database/Model/Users');
 const schema = require('./graphql_schema/schema');
 const cloudinary = require('./config/cloudinary');
-const upload = multer();
+const upload = require('./config/multer');
 
 // Calling express server
 const app = express();
@@ -61,7 +61,7 @@ app.use(function (req, res, next){
         path : '/', 
         maxAge: 60 * 60 * 24 * 7 // 1 week in number of seconds
     }));
-    console.log("HTTPS request", username, req.method, req.url, req.body);
+    console.log("HTTP request", username, req.method, req.url, req.body);
     next();
 });
 
@@ -74,13 +74,18 @@ const checkUsername = function(req, res, next) {
 // Check password for bad inputs
 const checkPassword = function(req, res, next) {
     let password = req.body.password;
-    if (!validator.isAlphanumeric(password)) return res.status(400).end(" Password should be alphabet or numeric");
+    const regex = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$");
+    console.log(password);
+    if (!regex.test(password))
+    {
+        return res.status(400).end("Password should be atleast 1 uppercase and atleast 1 lowercase alphabet, atleast 1 number and atleast 1 of !@#$&*");   
+    }
     if(password.length <= 7) return res.status(400).end(" Password should atleast be 8 characters long")
     next();
 };
 
 // Signup rest api
-app.post('/api/signup', upload.single('profilePicture'), checkUsername, (req, res, err) => {
+app.post('/api/signup', upload.single('profilePicture'), checkUsername, checkPassword, (req, res, err) => {
     // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).end('username is missing');
     if (!('password' in req.body)) return res.status(400).end('password is missing');
@@ -102,51 +107,79 @@ app.post('/api/signup', upload.single('profilePicture'), checkUsername, (req, re
                     bcrypt.genSalt(10)
                         .then(salt => {
                             bcrypt.hash(pass, salt)
-                                .then(hashPass => {
-                                    const picture = cloudinary.uploader.upload(req.profilePicture[0], {
-                                        public_id: user._id,
-                                        eager: [{ width: 180, height: 180, crop: "scale", quality: "100" }]
-                                    });
-                                    const userDetails = new Users({
-                                        username: req.body.username,
-                                        password: hashPass,
-                                        fullName: req.body.fullName,
-                                        email: req.body.email,
-                                        about: req.body.about,
-                                        profilePicture: picture.eager[0].secure_url
-                                    });
-                                    userDetails.save()
-                                        .then(data => res.json(data))
-                                        .catch(error => {
-                                            console.log(error);
-                                            res.status(500).json({
-                                                error: error
-                                            });
+                                .then(async (hashPass) => {
+                                    try
+                                    {
+                                        let profilePicUrl = "";
+                                        if (req.file != undefined)
+                                        {
+                                            let pathFile = req.file.path;
+                                            if (pathFile != undefined && pathFile != null && pathFile == "")
+                                            {
+                                                const picture = await cloudinary.uploader.upload(pathFile, {
+                                                    public_id: req.body.username,
+                                                    eager: [{ width: 180, height: 180, crop: "scale", quality: "100" }]
+                                                });
+                                                profilePicUrl = picture.eager[0].secure_url
+                                            }
+                                        }
+        
+                                        const userDetails = new Users({
+                                            username: req.body.username,
+                                            password: hashPass,
+                                            fullName: req.body.fullName,
+                                            email: req.body.email,
+                                            about: req.body.about,
+                                            profilePicture: profilePicUrl
                                         });
+                                        userDetails.save()
+                                            .then(data => res.json(data))
+                                            .catch(error => {
+                                                console.log(error);
+                                                res.status(500).json({
+                                                    error: error
+                                                });
+                                            });
+                                    }
+                                    catch(e)
+                                    {
+                                        console.log(e);
+                                        res.status(500).json({
+                                            error: e
+                                        });
+                                    }
                                 })
                                 .catch(error => {
                                     console.log(error);
-                                    throw new error;
+                                    res.status(500).json({
+                                        error: error
+                                    });
                                 });
                         })
                         .catch(error => {
                             console.log(error);
-                            throw new error;
+                            res.status(500).json({
+                                error: error
+                            });
                         });
                 })
                 .catch(error => {
                     console.log(error);
-                    throw new error;
+                    res.status(500).json({
+                        error: error
+                    });
                 });
         })
-        .catch(err=> {
-            console.log(error);
-            throw new error;
-        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: error
+            });
+        });
 });
 
 // Login rest api
-app.post('/login', checkUsername, (req, res, err) => {
+app.post('/login', checkUsername, checkPassword, (req, res, err) => {
     // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).end('username is missing');
     if (!('password' in req.body)) return res.status(400).end('password is missing');
@@ -200,8 +233,7 @@ app.get('/signout', function (req, res, next) {
     }); 
 });
 
-// Frontend connect
-// console.log(process.env);
+// Frontend connect for deployment
 if (process.env.NODE_ENV === "production") {
     app.use(enforce.HTTPS({ trustProtoHeader: true }));
     app.use(express.static(path.join(__dirname, "../frontend/build")));
