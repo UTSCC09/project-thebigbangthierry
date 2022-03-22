@@ -47,10 +47,16 @@ const RootQuery = new GraphQLObjectType({
     user: {
       type: new GraphQLNonNull(UserType),
       args: { username: { type: new GraphQLNonNull(GraphQLString) } },
-      async resolve(parent, args) {
+      async resolve(parent, args, req) {
+        console.log(req);
+        if(!req.isAuth)
+        {
+          throw new Error("Unauthenticated user");
+        }
         try 
         {
           const users = await User.findOne({username: args.username});
+
           console.log(users);
           return users;
         } 
@@ -73,8 +79,12 @@ const Mutation = new GraphQLObjectType({
         username: { type: new GraphQLNonNull(GraphQLString) } ,
         fullName: { type: new GraphQLNonNull(GraphQLString) }
       },
-      async resolve(parent, args)
+      async resolve(parent, args, req)
       {
+        if(!req.isAuth)
+        {
+          throw new Error("Unauthenticated user");
+        }
         try 
         {
           if(args.fullName != null && args.fullName != undefined && args.fullName != "")
@@ -111,7 +121,11 @@ const Mutation = new GraphQLObjectType({
         profilePicture: { type: GraphQLString }
       },
       // Username1 gets followed by Username2. Profile picture of username2
-      async resolve(parent, args) {
+      async resolve(parent, args, req) {
+        if(!req.isAuth)
+        {
+          throw new Error("Unauthenticated user");
+        }
         try 
         {
           let user1 = args.username1;

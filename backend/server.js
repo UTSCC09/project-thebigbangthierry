@@ -11,6 +11,7 @@ const validator = require('validator');
 const bcrypt = require('bcrypt');
 const enforce = require("express-sslify");
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require('dotenv').config({path: __dirname + '/./../.env'});
 
 const db = require('./config/keys').mongoURI;
@@ -18,10 +19,14 @@ const Users = require('./database/Model/Users');
 const schema = require('./graphql_schema/schema');
 const cloudinary = require('./config/cloudinary');
 const upload = require('./config/multer');
+const auth = require('./auth/authJwt');
 
 // Calling express server
 const app = express();
 app.use(bodyParser.json());
+
+// Jwt auth
+app.use(auth);
 
 // Add cors
 app.use(cors());
@@ -205,7 +210,8 @@ app.post('/login', checkUsername, checkPassword, (req, res, err) => {
                         secure: true,
                         sameSite: 'strict'
                    }));
-                   return res.status(200).json(username);
+                   const token = jwt.sign({username}, process.env.JSON_SECRET, {expiresIn: 3 * 24 * 60 * 60});
+                   return res.status(200).json({username: username, token: token, tokenExpiration: 3});
                 })
                 .catch(error => {
                     console.log(error);
