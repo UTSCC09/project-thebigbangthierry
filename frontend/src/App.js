@@ -5,14 +5,10 @@ import {Login} from "./components/login";
 import {Profile} from "./components/profile";
 import {Home} from "./components/home";
 import {EditProfile} from "./components/editProfile";
-import {AddFollowers} from "./components/addFollowers";
 import { ApolloProvider } from "@apollo/react-hooks";
-// import ApolloClient from "apollo-boost";
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
-import PrivateRoute from "./services/privateRoute"; 
 // import { WebSocketLink } from "apollo-link-ws";
-// import { InMemoryCache } from "apollo-cache-inmemory";
 import {
   BrowserRouter,
   Routes,
@@ -60,7 +56,6 @@ const client = new ApolloClient({
 
 /*** SOURCES THAT NEEDED TO BE CREDITED ***/
 /***
- * For privated routes:  https://www.robinwieruch.de/react-router-private-routes/
  * JWT Authetication: https://www.bezkoder.com/react-hooks-jwt-auth/ 
 ***/
 
@@ -71,14 +66,9 @@ function App() {
         <Routes>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />}/>
-          {/* <Route path="/" element={ <Home/>}/> */}
-          {/* <Route path="/profile" element={<ProtectedRoute auth={auth}><Profile/> </ProtectedRoute> }/> */}
-          {/* <Route exact path='/' element={<PrivateRoute/>}> */}
-            <Route exact path='/' element={<Home/>}/>
-          {/* </Route> */}
+          <Route exact path='/' element={<Home/>}/>
           <Route path="/profile" element={<Profile/>}/> 
           <Route path="/profile/edit" element={<EditProfile/>}/>
-          <Route path="/add/followers" element={<AddFollowers/>} /> 
         </Routes>
       </BrowserRouter>
     </ApolloProvider>

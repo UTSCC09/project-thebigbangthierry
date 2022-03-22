@@ -1,4 +1,4 @@
-import {Container, InputAdornment, Paper, TextField, Box, IconButton, Snackbar} from "@mui/material"; 
+import {InputAdornment,  TextField, Box, IconButton, Snackbar} from "@mui/material"; 
 import SearchIcon from '@mui/icons-material/Search';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useState } from "react";
@@ -6,8 +6,6 @@ import { useMutation } from "@apollo/react-hooks";
 import Cookies from "js-cookie";
 import { gql } from "apollo-boost";
 import { ProfileName } from "./profileName";
-import {NavBar} from "./navbar"
-
 
 const ADD_FOLLOWER = gql`
   mutation AddFollower($username1: String!, $username2: String!, $profilePicture: String!) {
@@ -17,12 +15,10 @@ const ADD_FOLLOWER = gql`
   }
   `;
 const BoxStyle = {
-  backgroundColor: '#002f65',
-  height: '100vh',
-  paddingTop: '20px', 
-}; 
+  width: '40vw',
+};  
 
-export function AddFollowers() {
+export default function AddFollowers(props) {
   const [addNotif, setAddNotif] = useState(false); 
   const [notifMsg, setNotifMsg] = useState(" "); 
 
@@ -41,6 +37,7 @@ export function AddFollowers() {
     onCompleted: () => {
       changeMsg("Followed successfully");
       displayNotif(); 
+      props.loadProfile();
     },
     onError: (error) => {
       changeMsg(error.message); 
@@ -56,48 +53,43 @@ export function AddFollowers() {
   } 
   const users = [
   {
-    username: 'test'
+    username: 'testing'
   }
   ,
   {
-    username: 'test6'
+    username: 'user2'
   },
   {
-    username: 'test7'
+    username: 'test8'
   }
 ]; 
+
   
   return (
     <div>
-      <NavBar/> 
     <Box sx={BoxStyle}>
-      <Container maxWidth="sm">
-        <Paper>
-        <TextField
-          id="search bar"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-          variant="standard"
-          fullWidth
-        />
-        </Paper>
-        <Paper>
-          {users.map((user, index)=> {
-            return (
-              <Box key={index} sx={{display: 'flex', padding: "10px"}}>
-                  <Box sx={{width: 500}}><ProfileName user={user} picSize="10vh"/> </Box>
-                  <IconButton onClick={() => handleSubmit(user.username)} sx={{width: '10vh' , height: '10vh' }}> <PersonAddIcon/> </IconButton>        
-              </Box>
-            );
-          })}
-        </Paper>
-      </Container>
-      <Snackbar open={addNotif} onClose={closeNotif} autoHideDuration={2000} message={notifMsg} />
+      <TextField
+        id="search bar"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
+        variant="outlined"
+        fullWidth
+      />
+
+        {users.map((user, index)=> {
+          return (
+            <Box key={index} sx={{display: 'flex', padding: "10px"}}>
+                <Box sx={{width: 500}}><ProfileName user={user} picSize="10vh"/> </Box>
+                <IconButton onClick={() => handleSubmit(user.username)} sx={{width: '10vh' , height: '10vh' }}> <PersonAddIcon/> </IconButton>        
+            </Box>
+          );
+        })}
+    <Snackbar open={addNotif} onClose={closeNotif} autoHideDuration={2000} message={notifMsg} />
     </Box>
     </div>
   );

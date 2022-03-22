@@ -1,52 +1,39 @@
-// import {Link} from "react-router-dom"; 
-
-// export function NavBar() {
-//   const pages = [
-//     {name: "Profile", link: "/profile"},
-//     {name: "Home" , link: "/"}
-//   ]
-//   return (
-//     <div>
-//       {pages.map((page) => {
-//         return (
-//           <Link to={page.link}> {page.name} </Link>
-//         )
-//       })}
-//     </div>
-//   );
-// }
-import React from "react";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-
-} from "@mui/material";
+import * as React from 'react';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import Menu from '@mui/material/Menu';
+import MenuIcon from '@mui/icons-material/Menu';
+import Container from '@mui/material/Container';
+import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
+import { Link , useNavigate} from "react-router-dom";
+import AuthService from "../services/auth.service";
+import UofTSocialLogo from "../media/UofTSocials_logo.png"
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { Link } from "react-router-dom";
-
-const navLinkStyles ={
-  marginLeft: 10,
-  display: "flex",
-}; 
-
-const logoStyles = {
-  flexGrow: "1",
-  cursor: "pointer",
-};
-
-const linkStyles = {
-  textDecoration: "none",
-  color: "white",
-  fontSize: "20px",
-  marginLeft: 20,
-  "&:hover": {
-    color: "yellow",
-    borderBottom: "1px solid white",
+ 
+const pages = [
+  {
+    name: 'Chatting', 
+    link: 'chatting',
+  }, 
+  {
+    name: 'Profile',
+    link: '/profile'
   }
- };
+];
 
-const darkTheme = createTheme({
+export const NavBar = () => {
+  const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const navigate = useNavigate(); 
+  const logout = () => {
+    AuthService.logout(); 
+    // props.handleLogout(); 
+    navigate("/login");
+  }
+  const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
@@ -54,32 +41,82 @@ const darkTheme = createTheme({
     },
   },
 });
-export function NavBar() {
+  const handleOpenNavMenu = (event) => {
+    setAnchorElNav(event.currentTarget);
+  };
+
+
+  const handleCloseNavMenu = () => {
+    setAnchorElNav(null);
+  };
+
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <AppBar position="static">
-      <Toolbar>
-        <Typography variant="h4" style={logoStyles}>
-          UofTSocials
-        </Typography>
-          <div style={navLinkStyles}>
-            <Link to="/" style={linkStyles}>
-              Home
-            </Link>
-            <Link to="/add/followers" style={linkStyles}>
-              Add Follower
-            </Link>
-            <Link to="/profile" style={linkStyles}>
-              Profile
-            </Link>
-            {/* <Link to="/faq" style={linkStyles}>
-              FAQ
-            </Link> */}
-          </div>
-      </Toolbar>
+    <AppBar position="static">
+      <Container maxWidth="xl">
+        <Toolbar disableGutters>
+          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+            
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}
+            >
+              UofTSocials
+              <img style={{width: '5vh', height: '5vh'}} src={UofTSocialLogo} alt=""></img>
+            </Typography>
+            <Box sx={{ flexGrow: 1, alignSelf: 'center',display: { xs: 'none', md: 'flex' } }}>
+              {pages.map((page) => (
+                <Button
+                  key={page.name}
+                  onClick={handleCloseNavMenu}
+                  sx={{ my: 2, color: 'white', display: 'block' }}
+                >
+                  {page.name}
+                </Button>
+              ))}
+            </Box>
+            <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleOpenNavMenu}
+                color="inherit"
+              >
+                <MenuIcon />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorElNav}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'left',
+                }}
+                open={Boolean(anchorElNav)}
+                onClose={handleCloseNavMenu}
+                sx={{
+                  display: { xs: 'block', md: 'none' },
+                }}
+              >
+                {pages.map((page) => (
+                  <MenuItem key={page.name} onClick={handleCloseNavMenu}>
+                    <Link style={{color: 'white', textDecoration: 'none'}} to={page.link}>{page.name}</Link>
+                  </MenuItem>
+                ))}
+                <MenuItem> <Typography sx={{color: 'white'}} onClick={logout}>Logout</Typography> </MenuItem>
+              </Menu>
+            </Box>
+        </Toolbar>
+      </Container>
     </AppBar>
     </ThemeProvider>
-    
   );
-}
+};
