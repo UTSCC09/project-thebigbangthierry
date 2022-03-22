@@ -6,23 +6,43 @@ import {Profile} from "./components/profile";
 import {Home} from "./components/home";
 import {EditProfile} from "./components/editProfile";
 import {AddFollowers} from "./components/addFollowers";
-import {useState} from "react"; 
-import Cookies from 'js-cookie'; 
 import { ApolloProvider } from "@apollo/react-hooks";
-import ApolloClient from "apollo-boost";
+// import ApolloClient from "apollo-boost";
+import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
 // import { WebSocketLink } from "apollo-link-ws";
 // import { InMemoryCache } from "apollo-cache-inmemory";
 import {
   BrowserRouter,
   Routes,
   Route,
-  Navigate,
-  Outlet,
-  useNavigate, 
+  
 } from 'react-router-dom';
 
+const httpLink = createHttpLink({
+  uri: '/graphql',
+});
+
+const authLink = setContext((_, { headers }) => {
+  // get the authentication token from local storage if it exists
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (user) {
+    const token = user.token; 
+    // return the headers to the context so  httpLink can read them
+    return {
+      headers: {
+        ...headers,
+        authorization: token ? `Bearer ${token}` : "",
+      }
+    }
+  }
+  
+});
+
 const client = new ApolloClient({
-  uri: "http://localhost:4000/graphql",
+  // uri: "http://localhost:4000/graphql",
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache()
   // link: new WebSocketLink({
   //   uri: "wss://localhost:4000/graphql",
   //   options: {
@@ -39,91 +59,27 @@ const client = new ApolloClient({
 
 /*** SOURCES THAT NEEDED TO BE CREDITED ***/
 /***
- * For privated routes:  https://www.robinwieruch.de/react-router-private-routes/ 
+ * For privated routes:  https://www.robinwieruch.de/react-router-private-routes/
+ * JWT Authetication: https://www.bezkoder.com/react-hooks-jwt-auth/ 
 ***/
-const ProtectedRoute = ({
-  auth, 
-  redirectPath = '/login',
-  children,
-}) => {
-  if (!auth) {
-    return <Navigate to={redirectPath} replace />;
-  }
-
-  return children ? children : <Outlet />;
-};
 
 function App() {
   return (
     <ApolloProvider client={client}>
       <BrowserRouter>
-        <AppRoutes/>
+        <Routes>
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />}/>
+          <Route path="/" element={ <Home/>}/>
+          {/* <Route path="/profile" element={<ProtectedRoute auth={auth}><Profile/> </ProtectedRoute> }/> */}
+          <Route path="/profile" element={<Profile/>}/> 
+          <Route path="/profile/edit" element={<EditProfile/>}/>
+          <Route path="/add/followers" element={<AddFollowers/>} /> 
+        </Routes>
       </BrowserRouter>
     </ApolloProvider>
     
   );
 }
 
-function AppRoutes() {
-  const [auth, setAuth] = useState(false);
-  const [loginError, setLoginError] = useState(false); 
-  const navigate = useNavigate(); 
-
-  const checkCookie = (username) => {
-    const user = Cookies.get("username");
-    if (username) {
-      // console.log("cookie " + user);
-      // console.log("returned " + username); 
-      if (username === user) {
-        return true; 
-      } 
-    }
-    return false; 
-    
-  }
-  const handleLogin = (data) => {
-    // console.log(data);
-    fetch("/login", {
-      method: "POST",
-      headers: {
-        'Content-type' : " application/json", 
-      },
-      body: JSON.stringify(data)
-    })
-    .then(res=> res.json()) 
-    .catch(err => setLoginError(true))
-    .then(data => {
-      const valid = checkCookie(data)
-      if (valid) {
-        setAuth(true); 
-        navigate("/"); 
-      }
-    })
-  }
-
-  const handleLogout = () => {
-    //logout();
-    fetch("/signout", {
-      method: "GET",
-      headers: {
-        'Content-type' : " application/json", 
-      },
-    })
-    .then(res=> res.json())
-    .then(setAuth(false))
-  };
-
-  return (
-    <Routes>
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login" element={<Login handleLogin={handleLogin} loginError={loginError}/>}/>
-      <Route path="/" element={<ProtectedRoute auth={auth}> <Home handleLogout={handleLogout}/> </ProtectedRoute> }/>
-      {/* <Route path="/profile" element={<ProtectedRoute auth={auth}><Profile/> </ProtectedRoute> }/> */}
-      <Route path="/profile" element={<Profile/>}/> 
-      <Route path="/profile/edit" element={<ProtectedRoute auth={auth}> <EditProfile/> </ProtectedRoute> }/>
-      <Route path="/add/followers" element={<AddFollowers/>} /> 
-    </Routes>
- 
-  );
-}
 export default App;

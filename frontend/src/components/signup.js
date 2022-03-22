@@ -6,6 +6,7 @@ import {useRef, useState} from "react";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useNavigate , Link } from 'react-router-dom'
+import AuthService from "../services/auth.service";
 
 /*** SOURCES THAT NEEDED TO BE CREDITED ***/
 /***
@@ -23,30 +24,20 @@ export function Signup() {
   //setError
   const navigate = useNavigate(); 
   const onSubmit = (data) => {
-    const formData = new FormData(); 
-    console.log(data);
-    for (var key in data) {
-      if (key === "profilePicture") {
-        // console.log("honk"); 
-        if (data.profilePicture.length === 1) {
-          console.log("screech"); 
-          // console.log(data.profilePicture[0]);
-          formData.append(key, data.profilePicture[0])
-        } 
+    AuthService.register(data)
+    .then (async (res)=> {
+      //console.log(res.body); 
+      if (!res.ok) {
+        throw await res.json();
       }
       else {
-        // console.log("beep: " + key + " what: " + data[key]);
-        formData.append(key, data[key]); 
+        navigate("/login"); 
       }
-    }
-    // console.log(formData); 
-    fetch("/api/signup", {
-      method: "POST",
-      body: formData
     })
-    .then(res=> {
-      if (res.ok) navigate("/login")
-    }) 
+    .catch(err => {
+      // err is not a promise
+      console.log(err)
+    });
     // setError("username", {type: "manual", message: "Username taken"});    
   }
   const [uploaded, setUploaded] = useState(false);
