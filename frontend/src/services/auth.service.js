@@ -1,3 +1,4 @@
+
 const register = (data) => {
   const formData = new FormData(); 
   // console.log(data);
@@ -23,6 +24,7 @@ const register = (data) => {
 };
 const login = (data) => {
    // console.log(data);
+  // const { setUser } = useContext(UserContext);
   return fetch("/login", {
     method: "POST",
     headers: {

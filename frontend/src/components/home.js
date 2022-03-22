@@ -16,8 +16,8 @@ export function Home(props) {
       <NavBar/> 
       Hello , this is a home page
       <Button onClick={logout}>Logout</Button>
-      <Button onClick={() => navigate("/profile")}> View Profile </Button>
-      <Button onClick={() => navigate("/add/followers")}> Add Follower </Button>
+      {/* <Button onClick={() => navigate("/profile")}> View Profile </Button>
+      <Button onClick={() => navigate("/add/followers")}> Add Follower </Button> */}
     </div>
   );
 }

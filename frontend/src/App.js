@@ -10,6 +10,7 @@ import { ApolloProvider } from "@apollo/react-hooks";
 // import ApolloClient from "apollo-boost";
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
+import PrivateRoute from "./services/privateRoute"; 
 // import { WebSocketLink } from "apollo-link-ws";
 // import { InMemoryCache } from "apollo-cache-inmemory";
 import {
@@ -70,8 +71,11 @@ function App() {
         <Routes>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />}/>
-          <Route path="/" element={ <Home/>}/>
+          {/* <Route path="/" element={ <Home/>}/> */}
           {/* <Route path="/profile" element={<ProtectedRoute auth={auth}><Profile/> </ProtectedRoute> }/> */}
+          {/* <Route exact path='/' element={<PrivateRoute/>}> */}
+            <Route exact path='/' element={<Home/>}/>
+          {/* </Route> */}
           <Route path="/profile" element={<Profile/>}/> 
           <Route path="/profile/edit" element={<EditProfile/>}/>
           <Route path="/add/followers" element={<AddFollowers/>} /> 
