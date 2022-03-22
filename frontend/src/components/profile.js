@@ -59,7 +59,7 @@ export function Profile(){
   const [value, setValue] = useState(0);
   const [post, setPost] = useState(""); 
   const username = Cookies.get("username"); 
-  const { loading, error, data } = useQuery(GET_PROFILE, {
+  const {loading, error, data , refetch} = useQuery(GET_PROFILE, {
     variables: { user: username},
 
   });
@@ -120,8 +120,8 @@ export function Profile(){
 
   useEffect(() => {
     // Update the document title using the browser API
-    
-  },[dummyPost]);
+    refetch(); 
+  });
   
   function a11yProps(index) {
     return {
@@ -137,6 +137,7 @@ export function Profile(){
     <div>
     <NavBar/>
     <Box sx={backgroundBoxStyle}>
+      {console.log(data)}
         <Paper sx={{width: "75vw" , padding: '2vh'}}>
           <Box sx={mainBoxStyle}>
             <Box id="about-picture" sx={pictureStyle}>

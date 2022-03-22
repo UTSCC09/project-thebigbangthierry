@@ -6,7 +6,7 @@ import {useRef, useState} from "react";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useNavigate , Link } from 'react-router-dom'
-import AuthService from "../services/auth.service";
+import useAuth from "../services/auth.service";
 
 /*** SOURCES THAT NEEDED TO BE CREDITED ***/
 /***
@@ -21,10 +21,11 @@ const signUpPaper={padding: 20, height: '75%' , width: '40vw', margin:"20px auto
 
 export function Signup() {
   const { register ,handleSubmit, control, watch } = useForm();
+  const {signup} = useAuth(); 
   //setError
   const navigate = useNavigate(); 
   const onSubmit = (data) => {
-    AuthService.register(data)
+    signup(data)
     .then (async (res)=> {
       //console.log(res.body); 
       if (!res.ok) {

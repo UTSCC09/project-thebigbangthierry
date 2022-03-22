@@ -7,10 +7,10 @@ import {Home} from "./components/home";
 import {EditProfile} from "./components/editProfile";
 import {AddFollowers} from "./components/addFollowers";
 import { ApolloProvider } from "@apollo/react-hooks";
-// import ApolloClient from "apollo-boost";
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import PrivateRoute from "./services/privateRoute"; 
+import {UserContext} from "./services/userContext"; 
 // import { WebSocketLink } from "apollo-link-ws";
 // import { InMemoryCache } from "apollo-cache-inmemory";
 import {
@@ -19,6 +19,7 @@ import {
   Route,
   
 } from 'react-router-dom';
+import useFindUser from './services/findUser';
 
 const httpLink = createHttpLink({
   uri: '/graphql',
@@ -65,22 +66,25 @@ const client = new ApolloClient({
 ***/
 
 function App() {
+  const { user, setUser, isLoading } = useFindUser();
   return (
     <ApolloProvider client={client}>
+      <UserContext.Provider value={{ user, setUser, isLoading }}>
       <BrowserRouter>
         <Routes>
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />}/>
           {/* <Route path="/" element={ <Home/>}/> */}
           {/* <Route path="/profile" element={<ProtectedRoute auth={auth}><Profile/> </ProtectedRoute> }/> */}
-          {/* <Route exact path='/' element={<PrivateRoute/>}> */}
+          <Route exact path='/' element={<PrivateRoute/>}>
             <Route exact path='/' element={<Home/>}/>
-          {/* </Route> */}
+          </Route>
           <Route path="/profile" element={<Profile/>}/> 
           <Route path="/profile/edit" element={<EditProfile/>}/>
           <Route path="/add/followers" element={<AddFollowers/>} /> 
         </Routes>
       </BrowserRouter>
+      </UserContext.Provider>
     </ApolloProvider>
     
   );
