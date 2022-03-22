@@ -1,6 +1,6 @@
 import {Box, Paper, Avatar , Button, Tab, Tabs, TextField, InputAdornment} from "@mui/material"; 
 import { useNavigate } from "react-router-dom";
-import { useState} from "react"; 
+import { useState, useEffect} from "react"; 
 import { useQuery } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
 import Cookies from 'js-cookie'; 
@@ -8,6 +8,7 @@ import {TabPanel} from "./tabPanel";
 import { ProfileName } from "./profileName";
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import SendIcon from '@mui/icons-material/Send';
+import {NavBar} from "./navbar"
 
 const GET_PROFILE = gql`
   query($user: String!) {
@@ -56,17 +57,19 @@ const aboutStyle ={
 export function Profile(){
   const navigate = useNavigate(); 
   const [value, setValue] = useState(0);
+  const [post, setPost] = useState(""); 
   const username = Cookies.get("username"); 
   const { loading, error, data } = useQuery(GET_PROFILE, {
     variables: { user: username},
 
   });
 
-  const submitPost = (e) => {
-    console.log(e.target.value); 
+ 
+  const handleChange = (e) => {
+    setPost(e.target.value); 
   };
 
-  const dummyPost = [
+  const [dummyPost, setDummyPost] = useState([
     {
       username: username, 
       profilePicture: "", 
@@ -100,7 +103,26 @@ export function Profile(){
       ]
     },
 
-  ]
+  ]); 
+
+  const submitPost = () => {
+    const newDummy = dummyPost; 
+    const newPost = {
+      username: username, 
+      profilePicture: "", 
+      content: post, 
+      timePosted: "03/22/2022", 
+      comments: [], 
+    }
+    newDummy.push(newPost); 
+    setDummyPost(newDummy); 
+  };
+
+  useEffect(() => {
+    // Update the document title using the browser API
+    
+  },[dummyPost]);
+  
   function a11yProps(index) {
     return {
       id: `simple-tab-${index}`,
@@ -112,13 +134,15 @@ export function Profile(){
   if (error) return <div>Error!</div>
 
   return (
-    <Box sx={backgroundBoxStyle}>  
+    <div>
+    <NavBar/>
+    <Box sx={backgroundBoxStyle}>
         <Paper sx={{width: "75vw" , padding: '2vh'}}>
           <Box sx={mainBoxStyle}>
             <Box id="about-picture" sx={pictureStyle}>
               <div>
                 <Avatar sx={{width: '15vh', height: '15vh'}} src={data.user.profilePicture}/> 
-                <Button sx={{fontSize: "2vmin"}} onClick={() => navigate("/profile/edit")}> Edit Profile</Button>          
+                {/* <Button sx={{fontSize: "2vmin"}} onClick={() => navigate("/profile/edit")}> Edit Profile</Button>           */}
               </div>
               <div  style={{padding: "0vh 2vw",}}>
               <p style={{ fontSize: "2vmin"}}><b> About Me </b></p>
@@ -143,9 +167,10 @@ export function Profile(){
               <TabPanel id="post" value={value} index={1}>
                 <TextField
                   id="post-form"
+                  onChange={handleChange}
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position="start">
+                      <InputAdornment position="start" >
                         <PostAddIcon/> 
                       </InputAdornment>
                     ),
@@ -176,10 +201,13 @@ export function Profile(){
               <TabPanel id="follow" value={value} index={2}>
                 <Box sx={{display:'flex'}}> 
                   <Box sx={{width: '35vw',borderRight: "2px grey solid",  minHeight: "45vh"}}>
-                    <p style={{fontSize: "3vmin"}}> <b> Following </b> </p>
+                    <Box sx={{display: 'flex'}}> 
+                      <p style={{fontSize: "3vmin", width: "20vw"}}> <b> Following </b> </p> 
+                      <Button variant="contained" sx={{height: '5vh'}} onClick={() => navigate("/add/followers")}> Search </Button>
+                    </Box>
                     {data.user.followingList.map((follow) => {
                       return (
-                        <ProfileName key={follow.username} user={follow} fontSize="2vmin"/> 
+                        <div key={follow.username} style={{paddingTop: "0.5vh"}}> <ProfileName  user={follow} fontSize="2vmin"/>  </div>
                       );
                     })}
                   </Box>
@@ -198,5 +226,6 @@ export function Profile(){
           </Box>
         </Paper>
     </Box>
+    </div>
   );
 }

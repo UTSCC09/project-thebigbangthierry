@@ -6,6 +6,8 @@ import { useMutation } from "@apollo/react-hooks";
 import Cookies from "js-cookie";
 import { gql } from "apollo-boost";
 import { ProfileName } from "./profileName";
+import {NavBar} from "./navbar"
+
 
 const ADD_FOLLOWER = gql`
   mutation AddFollower($username1: String!, $username2: String!, $profilePicture: String!) {
@@ -14,6 +16,11 @@ const ADD_FOLLOWER = gql`
     }
   }
   `;
+const BoxStyle = {
+  backgroundColor: '#002f65',
+  height: '100vh',
+  paddingTop: '20px', 
+}; 
 
 export function AddFollowers() {
   const [addNotif, setAddNotif] = useState(false); 
@@ -53,11 +60,17 @@ export function AddFollowers() {
   }
   ,
   {
-    username: 'test2'
-  }]; 
+    username: 'test6'
+  },
+  {
+    username: 'test7'
+  }
+]; 
   
   return (
-    <Box>
+    <div>
+      <NavBar/> 
+    <Box sx={BoxStyle}>
       <Container maxWidth="sm">
         <Paper>
         <TextField
@@ -86,5 +99,6 @@ export function AddFollowers() {
       </Container>
       <Snackbar open={addNotif} onClose={closeNotif} autoHideDuration={2000} message={notifMsg} />
     </Box>
+    </div>
   );
 }
