@@ -1,21 +1,16 @@
-import {Button} from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import AuthService from "../services/auth.service";
+import { Container } from "@mui/material";
+import {NavBar} from "./navbar"
+import PostForm from "./postForm";
 
 //LINKS TO AUTH: https://ui.dev/react-router-protected-routes-authentication
 export function Home(props) {
-  const navigate = useNavigate(); 
-  const logout = () => {
-    AuthService.logout(); 
-    // props.handleLogout(); 
-    navigate("/login");
-  }
+  
   return(
     <div> 
-      Hello , we finally made it here
-      <Button onClick={logout}>Logout</Button>
-      <Button onClick={() => navigate("/profile")}> View Profile </Button>
-      <Button onClick={() => navigate("/add/followers")}> Add Follower </Button>
+      <NavBar/> 
+      <Container sx={{paddingTop: '2vh'}}>
+        <PostForm/>        
+      </Container>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useState} from "react"; 
+import { useAuthDispatch } from "../services/auth";
 import AuthService from "../services/auth.service";
 
 const loginBoxStyle = {
@@ -21,13 +22,16 @@ const loginPaper={
 export function Login(props) {
   const {register, handleSubmit} = useForm();
   const [loginError, setLoginError] = useState(false);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const dispatch = useAuthDispatch(); 
   const onSubmit = data =>{
     // console.log(data); 
     // props.handleLogin(data); 
     AuthService.login(data)
-    .then ((res)=> {
-      if (res) {
+    .then ((data)=> {
+      if (data) {
+        // console.log(data);
+        dispatch({type: 'LOGIN', payload: data}); 
         navigate("/"); 
       }
       else {

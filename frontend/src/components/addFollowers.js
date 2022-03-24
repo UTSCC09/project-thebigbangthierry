@@ -1,4 +1,4 @@
-import {Container, InputAdornment, Paper, TextField, Box, IconButton, Snackbar} from "@mui/material"; 
+import {InputAdornment,  TextField, Box, IconButton, Snackbar} from "@mui/material"; 
 import SearchIcon from '@mui/icons-material/Search';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useState } from "react";
@@ -14,8 +14,11 @@ const ADD_FOLLOWER = gql`
     }
   }
   `;
+const BoxStyle = {
+  width: '40vw',
+};  
 
-export function AddFollowers() {
+export default function AddFollowers(props) {
   const [addNotif, setAddNotif] = useState(false); 
   const [notifMsg, setNotifMsg] = useState(" "); 
 
@@ -34,6 +37,7 @@ export function AddFollowers() {
     onCompleted: () => {
       changeMsg("Followed successfully");
       displayNotif(); 
+      props.loadProfile();
     },
     onError: (error) => {
       changeMsg(error.message); 
@@ -49,42 +53,44 @@ export function AddFollowers() {
   } 
   const users = [
   {
-    username: 'test'
+    username: 'testing'
   }
   ,
   {
-    username: 'test2'
-  }]; 
+    username: 'user2'
+  },
+  {
+    username: 'test8'
+  }
+]; 
+
   
   return (
-    <Box>
-      <Container maxWidth="sm">
-        <Paper>
-        <TextField
-          id="search bar"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-          variant="standard"
-          fullWidth
-        />
-        </Paper>
-        <Paper>
-          {users.map((user, index)=> {
-            return (
-              <Box key={index} sx={{display: 'flex', padding: "10px"}}>
-                  <Box sx={{width: 500}}><ProfileName user={user} picSize="10vh"/> </Box>
-                  <IconButton onClick={() => handleSubmit(user.username)} sx={{width: '10vh' , height: '10vh' }}> <PersonAddIcon/> </IconButton>        
-              </Box>
-            );
-          })}
-        </Paper>
-      </Container>
-      <Snackbar open={addNotif} onClose={closeNotif} autoHideDuration={2000} message={notifMsg} />
+    <div>
+    <Box sx={BoxStyle}>
+      <TextField
+        id="search bar"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
+        variant="outlined"
+        fullWidth
+      />
+
+        {users.map((user, index)=> {
+          return (
+            <Box key={index} sx={{display: 'flex', padding: "10px"}}>
+                <Box sx={{width: 500}}><ProfileName user={user} picSize="10vh"/> </Box>
+                <IconButton onClick={() => handleSubmit(user.username)} sx={{width: '10vh' , height: '10vh' }}> <PersonAddIcon/> </IconButton>        
+            </Box>
+          );
+        })}
+    <Snackbar open={addNotif} onClose={closeNotif} autoHideDuration={2000} message={notifMsg} />
     </Box>
+    </div>
   );
 }

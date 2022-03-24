@@ -1,3 +1,4 @@
+
 const register = (data) => {
   const formData = new FormData(); 
   // console.log(data);
@@ -23,6 +24,7 @@ const register = (data) => {
 };
 const login = (data) => {
    // console.log(data);
+  // const { setUser } = useContext(UserContext);
   return fetch("/login", {
     method: "POST",
     headers: {
@@ -35,10 +37,11 @@ const login = (data) => {
     // console.log(data);
     if (data.token) {
       localStorage.setItem("user", JSON.stringify(data)); 
-    }  
-    return true; 
+      return data;
+    }
+    return null;   
   })
-  .catch( err=> {return false;})
+  .catch( err=> {return null;})
 };
 
 const logout = () => {
