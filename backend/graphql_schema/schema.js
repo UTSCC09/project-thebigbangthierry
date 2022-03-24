@@ -26,6 +26,14 @@ const UserInputType = new GraphQLObjectType({
   })
 });
 
+const AboutInputType = new GraphQLObjectType({
+  name: 'About',
+  fields: () => ({
+    username: { type: new GraphQLNonNull(GraphQLString) },
+    about: {type: GraphQLString}
+  })
+});
+
 const UserType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
@@ -48,7 +56,6 @@ const RootQuery = new GraphQLObjectType({
       type: new GraphQLNonNull(UserType),
       args: { username: { type: new GraphQLNonNull(GraphQLString) } },
       async resolve(parent, args, req) {
-        console.log(req);
         if(!req.isAuth)
         {
           throw new Error("Unauthenticated user");
@@ -92,13 +99,14 @@ const Mutation = new GraphQLObjectType({
             // update full name of the given username
             return Users.updateOne({username: args.username}, {fullName: args.fullName})
               .exec()
-              .then(() => {
+              .then((data) => {
+                //console.log(data);
                 const users = User.findOne({username: args.username});
                 return users;
               })
               .catch(err => {
                 console.log(err);
-                throw new err;
+                throw err;
               })
           }
           else
@@ -109,7 +117,44 @@ const Mutation = new GraphQLObjectType({
         catch(err) 
         {
           console.log(err);
-          throw new err;
+          throw err;
+        }
+      }
+    },
+    editAbout: {
+      type: AboutInputType,
+      args: {
+        username: { type: new GraphQLNonNull(GraphQLString) },
+        about: { type: GraphQLString }
+      },
+      // Edit About section for a user
+      async resolve(parent, args, req) 
+      {
+        if(!req.isAuth)
+        {
+          throw new Error("Unauthenticated user");
+        }
+        try 
+        {
+          if(args.about != null && args.about != undefined)
+          {
+            // update full name of the given username
+            return Users.updateOne({username: args.username}, {about: args.about})
+              .exec()
+              .then(() => {
+                const users = {username: args.username, about: args.about};
+                return users;
+              })
+              .catch(err => {
+                console.log(err);
+                throw err;
+              })
+          }
+        } 
+        catch (error) 
+        {
+          console.log(error);
+          throw error;
         }
       }
     },
@@ -169,28 +214,28 @@ const Mutation = new GraphQLObjectType({
                         })
                         .catch((err) => {
                           console.log(err);
-                          throw new err;
+                          throw err;
                         });
                       })
                     .catch((err) => {
                       console.log(err);
-                      throw new err;
+                      throw err;
                     });
                 })
                 .catch((err) => {
                   console.log(err);
-                  throw new err;
+                  throw err;
                 });
             })
             .catch((err) => {
               console.log(err);
-              throw new err;
+              throw err;
             });
         } 
         catch (error) 
         {
           console.log(error);
-          throw new error;
+          throw error;
         }
       }
     }
