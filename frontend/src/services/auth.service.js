@@ -37,10 +37,11 @@ const login = (data) => {
     // console.log(data);
     if (data.token) {
       localStorage.setItem("user", JSON.stringify(data)); 
-    }  
-    return true; 
+      return data;
+    }
+    return null;   
   })
-  .catch( err=> {return false;})
+  .catch( err=> {return null;})
 };
 
 const logout = () => {

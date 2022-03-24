@@ -9,8 +9,7 @@ export function Home(props) {
     <div> 
       <NavBar/> 
       <Container sx={{paddingTop: '2vh'}}>
-        <PostForm/>
-        
+        <PostForm/>        
       </Container>
     </div>
   );

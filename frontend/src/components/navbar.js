@@ -13,8 +13,13 @@ import { Link , useNavigate} from "react-router-dom";
 import AuthService from "../services/auth.service";
 import UofTSocialLogo from "../media/UofTSocials_logo.png"
 import { ThemeProvider, createTheme } from '@mui/material/styles';
- 
+import { useAuthDispatch } from '../services/auth'; 
+import {Notification} from "./notifications"; 
 const pages = [
+  {
+    name: 'Home', 
+    link: '/'
+  }, 
   {
     name: 'Chatting', 
     link: 'chatting',
@@ -22,14 +27,18 @@ const pages = [
   {
     name: 'Profile',
     link: '/profile'
-  }
+  }, 
+  
 ];
 
 export const NavBar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const dispatch = useAuthDispatch();
+   
   const navigate = useNavigate(); 
   const logout = () => {
     AuthService.logout(); 
+    dispatch({type: 'LOGOUT'}); 
     // props.handleLogout(); 
     navigate("/login");
   }
@@ -78,6 +87,7 @@ export const NavBar = () => {
                 </Button>
               ))}
             </Box>
+            <Notification/>  
             <IconButton
                 size="large"
                 aria-label="account of current user"

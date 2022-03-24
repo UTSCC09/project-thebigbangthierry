@@ -8,6 +8,9 @@ import {EditProfile} from "./components/editProfile";
 import { ApolloProvider } from "@apollo/react-hooks";
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
+import {AuthProvider} from './services/auth'; 
+import DynamicRoute from './utils/dynamicRoute'; 
+
 // import { WebSocketLink } from "apollo-link-ws";
 import {
   BrowserRouter,
@@ -62,15 +65,21 @@ const client = new ApolloClient({
 function App() {
   return (
     <ApolloProvider client={client}>
+      <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />}/>
-          <Route exact path='/' element={<Home/>}/>
-          <Route path="/profile" element={<Profile/>}/> 
-          <Route path="/profile/edit" element={<EditProfile/>}/>
+          <Route element={<DynamicRoute authenticated/>}>
+                <Route exact path='/' element={<Home/>}/>
+                <Route path="/profile" element={<Profile/>}/> 
+                <Route path="/profile/edit" element={<EditProfile/>}/>
+          </Route>
+          <Route element={<DynamicRoute guest/>}>
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/login" element={<Login />}/>
+          </Route>
         </Routes>
       </BrowserRouter>
+      </AuthProvider>
     </ApolloProvider>
     
   );

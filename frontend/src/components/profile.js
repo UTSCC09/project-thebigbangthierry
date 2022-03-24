@@ -1,4 +1,4 @@
-import {Box, Paper, Avatar , Tab, Tabs,} from "@mui/material"; 
+import {Box, Paper, Avatar , Tab, Tabs, Button} from "@mui/material"; 
 import { useState} from "react"; 
 import { useLazyQuery } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
@@ -9,6 +9,7 @@ import PostForm from "./postForm";
 import {NavBar} from "./navbar"; 
 import Post from "./post";
 import AddFollowers from "./addFollowers"; 
+import {useNavigate} from "react-router-dom";
 
 const GET_PROFILE = gql`
   query($user: String!) {
@@ -57,6 +58,7 @@ const aboutStyle ={
 export function Profile(){
   const [value, setValue] = useState(0);
   const username = Cookies.get("username"); 
+  const navigate = useNavigate(); 
   const [loadProfile, { called, loading, data , error}]= useLazyQuery(GET_PROFILE, {
     variables: { user: username},
     // pollInterval: 1000,
@@ -120,7 +122,7 @@ export function Profile(){
           <Box id="about-picture" sx={pictureStyle}>
             <div>
               <Avatar sx={{width: '15vh', height: '15vh'}} src={data.user.profilePicture}/> 
-              {/* <Button sx={{fontSize: "2vmin"}} onClick={() => navigate("/profile/edit")}> Edit Profile</Button>           */}
+              <Button sx={{fontSize: "2vmin"}} onClick={() => navigate("/profile/edit")}> Edit Profile</Button>          
             </div>
             <div  style={{padding: "0vh 2vw",}}>
             <p style={{ fontSize: "2vmin"}}><b> About Me </b></p>
