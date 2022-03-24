@@ -84,7 +84,7 @@ const checkPassword = function(req, res, next) {
     {
         return res.status(400).end("Password should be atleast 1 uppercase and atleast 1 lowercase alphabet, atleast 1 number and atleast 1 of !@#$&*");   
     }
-    if(password.length <= 7) return res.status(400).end(" Password should atleast be 8 characters long")
+    if(password.length <= 7) return res.status(400).end(" Password should atleast be 8 characters long");
     next();
 };
 
