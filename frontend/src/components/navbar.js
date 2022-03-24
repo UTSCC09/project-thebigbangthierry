@@ -14,7 +14,7 @@ import AuthService from "../services/auth.service";
 import UofTSocialLogo from "../media/UofTSocials_logo.png"
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useAuthDispatch } from '../services/auth'; 
-import {Notification} from "./notifications"; 
+import Notification from "./notifications"; 
 const pages = [
   {
     name: 'Home', 
