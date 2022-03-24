@@ -2,7 +2,6 @@ const {graphqlHTTP} = require('express-graphql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const https = require('https');
 const fs = require('fs');
 const path = require("path");
 const session = require('express-session');
@@ -84,7 +83,7 @@ const checkPassword = function(req, res, next) {
     {
         return res.status(400).end("Password should be atleast 1 uppercase and atleast 1 lowercase alphabet, atleast 1 number and atleast 1 of !@#$&*");   
     }
-    if(password.length <= 7) return res.status(400).end(" Password should atleast be 8 characters long")
+    if(password.length <= 7) return res.status(400).end(" Password should atleast be 8 characters long");
     next();
 };
 
@@ -124,7 +123,7 @@ app.post('/api/signup', upload.single('profilePicture'), checkUsername, checkPas
                                                     public_id: req.body.username,
                                                     eager: [{ width: 180, height: 180, crop: "scale", quality: "100" }]
                                                 });
-                                                profilePicUrl = picture.eager[0].secure_url
+                                                profilePicUrl = picture.eager[0].secure_url;
                                             }
                                         }
                                         

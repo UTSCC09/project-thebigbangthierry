@@ -1,11 +1,14 @@
 /*** SOURCES THAT NEED TO BE CREDITED ***/
 /*** 
  * Idea for structure of graphql apis from https://atheros.ai/blog/graphql-list-how-to-use-arrays-in-graphql-schema
+ * CRUD functions for mongodb database https://www.mongodb.com/docs/manual/crud/
 ***/
 
 // package imports
 const graphql = require('graphql');
 const Users = require('../database/Model/Users');
+const Messages = require('../database/Model/Messages');
+const mongoose = require('mongoose');
 const {
   GraphQLObjectType,
   GraphQLList,
@@ -16,10 +19,8 @@ const {
   GraphQLInt
 } = graphql;
 
-const User = require('../database/Model/Users');
-
 const UserInputType = new GraphQLObjectType({
-  name: 'Users',
+  name: 'UsersInput',
   fields: () => ({
     username: { type: new GraphQLNonNull(GraphQLString) },
     profilePicture: {type: GraphQLString}
@@ -27,7 +28,7 @@ const UserInputType = new GraphQLObjectType({
 });
 
 const AboutInputType = new GraphQLObjectType({
-  name: 'About',
+  name: 'AboutInput',
   fields: () => ({
     username: { type: new GraphQLNonNull(GraphQLString) },
     about: {type: GraphQLString}
@@ -49,9 +50,21 @@ const UserType = new GraphQLObjectType({
   })
 });
 
+const MessageType = new GraphQLObjectType({
+  name: 'Message',
+  fields: () => ({
+    uuid: { type: new GraphQLNonNull(GraphQLString) },
+    fromUsername: { type: new GraphQLNonNull(GraphQLString) },
+    toUsername: { type: new GraphQLNonNull(GraphQLString) },
+    content: { type: GraphQLString },
+    createdAt: { type: GraphQLString }
+  })
+});
+
 const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: {
+    // Get Users
     user: {
       type: new GraphQLNonNull(UserType),
       args: { username: { type: new GraphQLNonNull(GraphQLString) } },
@@ -62,7 +75,7 @@ const RootQuery = new GraphQLObjectType({
         }
         try 
         {
-          const users = await User.findOne({username: args.username});
+          const users = await Users.findOne({username: args.username});
 
           console.log(users);
           return users;
@@ -70,7 +83,42 @@ const RootQuery = new GraphQLObjectType({
         catch (err) 
         {
           console.log(err);
-          throw new err;
+          throw err;
+        }
+      }
+    },
+
+    // Get messages for the chat between 2 usernames
+    getMessages: {
+      type: new GraphQLList(new GraphQLNonNull(MessageType)),
+      args: { 
+        fromUsername: { type: new GraphQLNonNull(GraphQLString) },
+        toUsername: { type: new GraphQLNonNull(GraphQLString) } 
+      },
+      async resolve(parent, args, req)
+      {
+        try {
+          if(!req.isAuth)
+          {
+            throw new Error("Unauthenticated user");
+          }
+          const user1 = await Users.findOne({username: args.fromUsername});
+          if (!user1) return new Error("Username " + args.fromUsername + " does not exist");
+          const user2 = await Users.findOne({username: args.toUsername});
+          if (!user2) return new Error("Username " + args.toUsername + " does not exist");
+
+          const messages = await Messages.find({ 
+            $or: [ 
+              { $and: [{fromUser: user1.username}, {toUser: user2.username}] }, 
+              { $and: [{fromUser: user2.username}, {toUser: user1.username}] } 
+            ] }).sort({createdAt: -1});
+
+          console.log(messages);
+          return messages;
+        } 
+        catch (error) {
+          console.log(error)
+          throw error;
         }
       }
     }
@@ -80,6 +128,9 @@ const RootQuery = new GraphQLObjectType({
 const Mutation = new GraphQLObjectType({
   name: 'Mutation',
   fields: {
+    // All APIs related to Edit
+
+    // Editing full name for a given username
     editFullName: {
       type: UserType,
       args: { 
@@ -99,15 +150,14 @@ const Mutation = new GraphQLObjectType({
             // update full name of the given username
             return Users.updateOne({username: args.username}, {fullName: args.fullName})
               .exec()
-              .then((data) => {
-                //console.log(data);
-                const users = User.findOne({username: args.username});
+              .then(() => {
+                const users = Users.findOne({username: args.username});
                 return users;
               })
               .catch(err => {
                 console.log(err);
                 throw err;
-              })
+              });
           }
           else
           {
@@ -121,6 +171,8 @@ const Mutation = new GraphQLObjectType({
         }
       }
     },
+
+    // Edit about field for given username
     editAbout: {
       type: AboutInputType,
       args: {
@@ -138,7 +190,7 @@ const Mutation = new GraphQLObjectType({
         {
           if(args.about != null && args.about != undefined)
           {
-            // update full name of the given username
+            // update about section of the given username
             return Users.updateOne({username: args.username}, {about: args.about})
               .exec()
               .then(() => {
@@ -158,6 +210,10 @@ const Mutation = new GraphQLObjectType({
         }
       }
     },
+
+    // APIs related follower and following below
+
+    // Add a user (A) to the follower list of another user (B). And add B to following list of A
     addToFollowerList: {
       type: UserType,
       args: {
@@ -167,12 +223,12 @@ const Mutation = new GraphQLObjectType({
       },
       // Username1 gets followed by Username2. Profile picture of username2
       async resolve(parent, args, req) {
-        if(!req.isAuth)
-        {
-          throw new Error("Unauthenticated user");
-        }
         try 
         {
+          if(!req.isAuth)
+          {
+            throw new Error("Unauthenticated user");
+          }
           let user1 = args.username1;
           let user2 = args.username2;
           let pic = args.profilePicture;
@@ -202,7 +258,7 @@ const Mutation = new GraphQLObjectType({
                     }
                   }
                   followerList.push({"username": user2, "profilePicture": pic});
-                  followingList.push({"username": user1, "profilePicture": user1.profilePicture})
+                  followingList.push({"username": user1, "profilePicture": user1.profilePicture});
                   return Users.updateOne({username: user1}, {followerList: followerList})
                     .exec()
                     .then(() => {
@@ -234,6 +290,63 @@ const Mutation = new GraphQLObjectType({
         } 
         catch (error) 
         {
+          console.log(error);
+          throw error;
+        }
+      }
+    },
+
+    // All APIs related to messages in chatting
+
+    // Send a message to the user you are chatting to
+    sendMessage: {
+      type: new GraphQLNonNull(MessageType),
+      args: {
+        username: {type: new GraphQLNonNull(GraphQLString)},
+        toUsername: {type: new GraphQLNonNull(GraphQLString)},
+        content: {type: new GraphQLNonNull(GraphQLString)}
+      },
+      async resolve(parent, args, req)
+      {
+        try {
+          if(!req.isAuth)
+          {
+            throw new Error("Unauthenticated user");
+          }
+
+          const senderUser = await Users.findOne({username: args.username});
+          const receiverUser = await Users.findOne({username: args.toUsername});
+
+          if(!receiverUser)
+          {
+            throw new Error("Username " + args.toUsername + " does not exist");
+          }
+          else if(!senderUser)
+          {
+            throw new Error("Username " + args.username + " does not exist");
+          }
+          else if(receiverUser.username === senderUser.username)
+          {
+            throw new Error("You cannot message to yourself");
+          }
+
+          if(args.content.trim() === '')
+          {
+            throw new Error("Message is empty. You cannot send an empty message.");
+          }
+
+          const message = new Messages({
+            uuid: "ehwbduebjkwnksxnqkjs",
+            content: args.content,
+            fromUsername: args.username,
+            toUsername: args.toUsername
+          });
+
+          const save = await message.save();
+          console.log(save);
+          return save;
+        } 
+        catch (error) {
           console.log(error);
           throw error;
         }
