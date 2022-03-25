@@ -1,7 +1,9 @@
 // import {useEffect , useState} from "react"; 
 // import { useLazyQuery } from "@apollo/react-hooks";
 // import { gql } from "apollo-boost";
-import Cookies from 'js-cookie'; 
+// import Cookies from 'js-cookie'; 
+
+import { useMessageDispatch, useMessageState } from '../services/message'
 
 const messages = [
   {
@@ -127,13 +129,36 @@ const receivedMessageStyle={
   borderRadius: 15,
   marginRight: 'auto', 
 }
-export function Message(props) {
+export function Message() {
+  // const { users } = useMessageState()
+  // const dispatch = useMessageDispatch()
+
+  // const user = users?.find((u) => u.selected === true)
+
+  // const messages = user?.messages
   const user = 'john';
+  // const [
+  //   getMessages,
+  //   {called ,loading, data: messagesData , error},
+  // ] = useLazyQuery(GET_MESSAGES)
   // const user = Cookies.get("user");
-  // const [loadMessages, { called, loading ,data, error}]= useLazyQuery(GET_MESSAGES);
-  // useEffect(()=>{
-  //   loadMessages({variables : {from: props.selected}}); 
-  // }, [props.selected])
+  // useEffect(() => {
+  //   if (user && !user.messages) {
+  //     getMessages({ variables: { from: user.username } })
+  //   }
+  // }, [user])
+
+  // useEffect(() => {
+  //   if (messagesData) {
+  //     dispatch({
+  //       type: 'SET_USER_MESSAGES',
+  //       payload: {
+  //         username: user.username,
+  //         messages: messagesData.getMessages,
+  //       },
+  //     })
+  //   }
+  // }, [messagesData])
   // if (called && loading) return <p>Loading ...</p>
   // if (!called) {
   //   return loadMessages();
@@ -141,7 +166,7 @@ export function Message(props) {
   // if (error) return <div>Error!</div>
 
   //SET AS data.messages
-  if (!props.selected) return <p> Select a user</p>
+  if (user) return <p> Select a user</p>
   return (
     <div style={{display: 'flex', flexDirection: 'column'}}>
       {messages.map((message)=>{ 

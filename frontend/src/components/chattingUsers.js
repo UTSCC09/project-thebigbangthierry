@@ -1,5 +1,10 @@
 import {Box, Avatar, IconButton } from "@mui/material"; 
-import {useWindowSize} from "../utils/windowSize"
+import {useWindowSize} from "../utils/windowSize";
+// import { useMessageDispatch, useMessageState } from '../services/message';
+// import { useQuery } from "@apollo/react-hooks";
+// import { gql } from "apollo-boost";
+
+
 
 const users = [
   {
@@ -37,20 +42,44 @@ const selectedStyle={
 }; 
 
 // const GET_USERS = gql`
-//   query getUsers($username: String!) {
+//   query getUsers {
+//     getUsers {
+//       username
+//       createdAt
+//       imageUrl
+//       latestMessage {
+//         uuid
+//         from
+//         to
+//         content
+//         createdAt
+//       }
+//     }
+//   }`; 
 
-//   }
-// `;
-
-export function ChattingUsers(props) {
+export function ChattingUsers() {
   const size = useWindowSize();
+  // const dispatch = useMessageDispatch()
+  // const { users } = useMessageState()
+  // const selected = users?.find((u) => u.selected === true)?.username;
+  
+  // const { loading } = useQuery(GET_USERS, {
+  //   onCompleted: (data) =>
+  //     dispatch({ type: 'SET_USERS', payload: data.getUsers }),
+  //   onError: (err) => console.log(err),
+  // })
 
+
+  const selected = "john"; 
+  function setSelected(user) {
+    console.log(user); 
+  }
   return (
     <div>
       {users.map((user)=> {
         return (
-          <Box key={user.username} sx={props.selected === user.username? selectedStyle : unselectedStyle}>
-            <IconButton onClick={()=> props.setSelected(user.username)}> <Avatar src={user.profilePicture} sx={{width:'8vh', height: '8vh', cursor: 'pointer'}} />  </IconButton>
+          <Box key={user.username} sx={selected === user.username? selectedStyle : unselectedStyle}>
+            <IconButton onClick={()=> setSelected(user.username)}> <Avatar src={user.profilePicture} sx={{width:'8vh', height: '8vh', cursor: 'pointer'}} />  </IconButton>
             {size.width > 700?  
               <div style={{fontSize: '2vmin', paddingLeft: 5}}>
               <p> <b> {user.username}</b>  </p>

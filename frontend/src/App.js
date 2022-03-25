@@ -10,6 +10,7 @@ import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import {AuthProvider} from './services/auth'; 
 import DynamicRoute from './utils/dynamicRoute'; 
+import { MessageProvider } from './services/message'
 
 // import { WebSocketLink } from "apollo-link-ws";
 import {
@@ -60,25 +61,28 @@ const client = new ApolloClient({
 /*** SOURCES THAT NEEDED TO BE CREDITED ***/
 /***
  * JWT Authetication: https://www.bezkoder.com/react-hooks-jwt-auth/ 
+ * Contexts : https://github.com/hidjou/node-graphql-react-chat-app/blob/ 
 ***/
 
 function App() {
   return (
     <ApolloProvider client={client}>
       <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route element={<DynamicRoute authenticated/>}>
-                <Route exact path='/' element={<Home/>}/>
-                <Route path="/profile" element={<Profile/>}/> 
-                <Route path="/chatting" element={<Chatting/>}/> 
-          </Route>
-          <Route element={<DynamicRoute guest/>}>
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/login" element={<Login />}/>
-          </Route>
-        </Routes>
-      </BrowserRouter>
+        <MessageProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<DynamicRoute authenticated/>}>
+                    <Route exact path='/' element={<Home/>}/>
+                    <Route path="/profile" element={<Profile/>}/> 
+                    <Route path="/chatting" element={<Chatting/>}/> 
+              </Route>
+              <Route element={<DynamicRoute guest/>}>
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/login" element={<Login />}/>
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </MessageProvider>
       </AuthProvider>
     </ApolloProvider>
     
