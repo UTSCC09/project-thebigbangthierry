@@ -62,6 +62,7 @@ const client = new ApolloClient({
 /***
  * JWT Authetication: https://www.bezkoder.com/react-hooks-jwt-auth/ 
  * Contexts : https://github.com/hidjou/node-graphql-react-chat-app/blob/ 
+ * Dynamic Routes: https://www.youtube.com/watch?v=NTU-vLYNTJQ&list=PLMhAeHCz8S3_VYiYxpcXtMz96vePOuOX3&index=8&ab_channel=Classsed
 ***/
 
 function App() {

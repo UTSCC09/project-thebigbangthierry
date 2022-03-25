@@ -65,23 +65,23 @@ export const NavBar = () => {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+          <Box sx={{ display:'flex', flexGrow: 1 }}>
             
             <Typography
               variant="h6"
               noWrap
               component="div"
-              sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}
+              sx={{ flexGrow: 1 }}
             >
               UofTSocials
               <img style={{width: '5vh', height: '5vh'}} src={UofTSocialLogo} alt=""></img>
             </Typography>
-            <Box sx={{ flexGrow: 1, alignSelf: 'center',display: { xs: 'none', md: 'flex' } }}>
+            <Box sx={{ flexGrow: 1, alignSelf: 'center' }}>
               {pages.map((page) => (
                 <Button
                   key={page.name}
                   onClick={handleCloseNavMenu}
-                  sx={{ my: 2, color: 'white', display: 'block' }}
+                  sx={{ my: 2, color: 'white', display: 'none' }}
                 >
                   {page.name}
                 </Button>
@@ -112,9 +112,6 @@ export const NavBar = () => {
                 }}
                 open={Boolean(anchorElNav)}
                 onClose={handleCloseNavMenu}
-                sx={{
-                  display: { xs: 'block', md: 'none' },
-                }}
               >
                 {pages.map((page) => (
                   <MenuItem key={page.name} onClick={handleCloseNavMenu}>

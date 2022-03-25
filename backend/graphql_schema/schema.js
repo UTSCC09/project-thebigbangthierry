@@ -6,6 +6,7 @@
 
 // package imports
 const graphql = require('graphql');
+const bcrypt = require('bcrypt');
 const Users = require('../database/Model/Users');
 const Messages = require('../database/Model/Messages');
 const mongoose = require('mongoose');
@@ -32,6 +33,14 @@ const AboutInputType = new GraphQLObjectType({
   fields: () => ({
     username: { type: new GraphQLNonNull(GraphQLString) },
     about: {type: GraphQLString}
+  })
+});
+
+const PasswordInputType = new GraphQLObjectType({
+  name: 'Password',
+  fields: () => ({
+    username: { type: new GraphQLNonNull(GraphQLString) },
+    password: {type: new GraphQLNonNull(GraphQLString) }
   })
 });
 
@@ -211,6 +220,76 @@ const Mutation = new GraphQLObjectType({
       }
     },
 
+    editPassword: {
+      type: PasswordInputType,
+      args: {
+        username: { type: new GraphQLNonNull(GraphQLString) },
+        password: { type: GraphQLString }
+      },
+      async resolve (parent, args, req) {
+        if(!req.isAuth)
+        {
+          throw new Error("Unauthenticated user");
+        }
+        try 
+        {
+          let pass = args.password;
+          if(args.password != null && args.password != undefined && args.password != "")
+          {
+            // update full name of the given username
+            return Users.findOne({username: args.username})
+              .exec()
+              .then((user) => {
+                if (!user) return new Error(args.username + " not a user");
+
+                const regex = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$");
+                if (!regex.test(pass))
+                {
+                  return new Error("Password should be atleast 8 characters and contain atleast 1 uppercase and atleast 1 lowercase alphabet, atleast 1 number and atleast 1 of !@#$&*");   
+                }
+
+                return bcrypt.genSalt(10)
+                  .then(salt => {
+                    return bcrypt.hash(pass, salt)
+                      .then(hashPass => {
+                        return User.updateOne({username: args.username}, {password: hashPass})
+                          .then(() => {
+                            const users = {username: args.username, password: hashPass}
+                            return users;
+                          })
+                          .catch(err => {
+                            console.log(err);
+                            throw err;
+                          });
+                      })
+                      .catch(err => {
+                        console.log(err);
+                        throw err;
+                      });
+                  })
+                  .catch(err => {
+                    console.log(err);
+                    throw err;
+                  });
+              })
+              .catch((err) => {
+                console.log(err);
+                throw err;
+              });
+          }
+          else
+          {
+            return new Error(args.password + " not defined or null or empty. Please send a legitimate password.");
+          }
+        } 
+        catch(err) 
+        {
+          console.log(err);
+          throw err;
+        }
+      }
+    },
+    
     // APIs related follower and following below
 
     // Add a user (A) to the follower list of another user (B). And add B to following list of A
