@@ -4,7 +4,7 @@ import {Signup} from "./components/signup";
 import {Login} from "./components/login";
 import {Profile} from "./components/profile";
 import {Home} from "./components/home";
-import {EditProfile} from "./components/editProfile";
+import {Chatting} from "./components/chatting"; 
 import { ApolloProvider } from "@apollo/react-hooks";
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
@@ -71,7 +71,7 @@ function App() {
           <Route element={<DynamicRoute authenticated/>}>
                 <Route exact path='/' element={<Home/>}/>
                 <Route path="/profile" element={<Profile/>}/> 
-                <Route path="/profile/edit" element={<EditProfile/>}/>
+                <Route path="/chatting" element={<Chatting/>}/> 
           </Route>
           <Route element={<DynamicRoute guest/>}>
                 <Route path="/signup" element={<Signup />} />

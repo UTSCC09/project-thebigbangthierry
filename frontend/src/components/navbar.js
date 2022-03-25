@@ -22,7 +22,7 @@ const pages = [
   }, 
   {
     name: 'Chatting', 
-    link: 'chatting',
+    link: '/chatting',
   }, 
   {
     name: 'Profile',
