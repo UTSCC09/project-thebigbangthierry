@@ -64,13 +64,13 @@ const RootQuery = new GraphQLObjectType({
     user: {
       type: new GraphQLNonNull(UserType),
       args: { username: { type: new GraphQLNonNull(GraphQLString) } },
-      async resolve(parent, args, req) {
-        if(!req.isAuth)
-        {
-          throw new Error("Unauthenticated user");
-        }
+      async resolve(parent, args, {authUser}) {
         try 
         {
+          if(!authUser)
+          {
+            throw new Error("Unauthenticated user");
+          }
           const users = await User.findOne({username: args.username});
 
           console.log(users);
@@ -95,9 +95,9 @@ const Mutation = new GraphQLObjectType({
         username: { type: new GraphQLNonNull(GraphQLString) } ,
         fullName: { type: new GraphQLNonNull(GraphQLString) }
       },
-      async resolve(parent, args, req)
+      async resolve(parent, args, {authUser})
       {
-        if(!req.isAuth)
+        if(!authUser)
         {
           throw new Error("Unauthenticated user");
         }
@@ -137,9 +137,9 @@ const Mutation = new GraphQLObjectType({
         about: { type: GraphQLString }
       },
       // Edit About section for a user
-      async resolve(parent, args, req) 
+      async resolve(parent, args, {authUser}) 
       {
-        if(!req.isAuth)
+        if(!authUser)
         {
           throw new Error("Unauthenticated user");
         }
@@ -173,8 +173,8 @@ const Mutation = new GraphQLObjectType({
         username: { type: new GraphQLNonNull(GraphQLString) },
         password: { type: GraphQLString }
       },
-      async resolve (parent, args, req) {
-        if(!req.isAuth)
+      async resolve (parent, args, {authUser}) {
+        if(!authUser)
         {
           throw new Error("Unauthenticated user");
         }
@@ -244,8 +244,8 @@ const Mutation = new GraphQLObjectType({
         profilePicture: { type: GraphQLString }
       },
       // Username1 gets followed by Username2. Profile picture of username2
-      async resolve(parent, args, req) {
-        if(!req.isAuth)
+      async resolve(parent, args, {authUser}) {
+        if(!authUser)
         {
           throw new Error("Unauthenticated user");
         }
