@@ -2,7 +2,6 @@ const {graphqlHTTP} = require('express-graphql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const fs = require('fs');
 const path = require("path");
 const session = require('express-session');
 const cookie = require('cookie');
@@ -12,20 +11,21 @@ const enforce = require("express-sslify");
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config({path: __dirname + '/./../.env'});
+const {WebSocketServer} = require('ws');
+const {useServer} = require('graphql-ws/lib/use/ws');
+const { createServer } = require('http');
+const {ApolloServer} = require('apollo-server-express');
 
 const db = require('./config/keys').mongoURI;
 const Users = require('./database/Model/Users');
 const schema = require('./graphql_schema/schema');
 const cloudinary = require('./config/cloudinary');
 const upload = require('./config/multer');
-const auth = require('./auth/authJwt');
+const context = require('./auth/contextMiddleware');
 
 // Calling express server
 const app = express();
 app.use(bodyParser.json());
-
-// Jwt auth
-app.use(auth);
 
 // Add cors
 app.use(cors());
@@ -53,12 +53,14 @@ mongoose
     });
 
 // GraphQL APIs
-app.use('/graphql', graphqlHTTP({
-    schema: schema,
-    graphiql: true
-}));
+// app.use('/graphql', graphqlHTTP({
+//     schema: schema,
+//     context: contextSub,
+//     graphiql: true,
+//     subscriptionsEndpoint: subscriptionsEndpoint
+// }));
 
-// Display the HTTPS request requested on console
+// Display the HTTP request requested on console
 app.use(function (req, res, next){
     let username = (req.session.user)? req.session.user.username : '';
     res.setHeader('Set-Cookie', cookie.serialize('username', username, {
@@ -209,8 +211,8 @@ app.post('/login', checkUsername, checkPassword, (req, res, err) => {
                         secure: true,
                         sameSite: 'strict'
                    }));
-                   const token = jwt.sign({username}, process.env.JSON_SECRET, {expiresIn: 3 * 24 * 60 * 60});
-                   return res.status(200).json({username: username, token: token, tokenExpiration: 3});
+                   const token = jwt.sign({username}, process.env.JSON_SECRET, {expiresIn: 24 * 60 * 60});
+                   return res.status(200).json({username: username, token: token, tokenExpiration: 1});
                 })
                 .catch(error => {
                     console.log(error);
@@ -248,9 +250,33 @@ if (process.env.NODE_ENV === "production") {
     );
 }
 
+const httpServer = createServer(app);
+const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: '/graphql'
+});
+
+useServer({ schema }, wsServer);
+
+let server
+async function startServer()
+{
+    server = new ApolloServer({
+        schema,
+        context: context
+    });
+    await server.start();
+    server.applyMiddleware({app});
+}
+startServer();
+
 // Listen localhost server at port 4000
 const PORT = 4000;
-app.listen(PORT, function(err){
+httpServer.listen(PORT, (err) => {
     if (err) console.log(err);
-    else console.log("HTTP server on http://localhost:%s", PORT);
+    else 
+    {
+        console.log(server.graphqlPath);
+        console.log("HTTP server on http://localhost:%s%s", PORT, server.graphqlPath);
+    }
 });

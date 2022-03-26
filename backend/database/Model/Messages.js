@@ -2,10 +2,6 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const MessageSchema = new Schema({
-    uuid: {
-        type: String,
-        required: true
-    },
     content: {
         type: String,
         required: true,

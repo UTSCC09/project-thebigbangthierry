@@ -9,7 +9,9 @@ const graphql = require('graphql');
 const bcrypt = require('bcrypt');
 const Users = require('../database/Model/Users');
 const Messages = require('../database/Model/Messages');
-const mongoose = require('mongoose');
+const {PubSub, withFilter} = require('graphql-subscriptions');
+const pubsub = new PubSub();
+
 const {
   GraphQLObjectType,
   GraphQLList,
@@ -17,7 +19,7 @@ const {
   GraphQLNonNull,
   GraphQLString,
   GraphQLID,
-  GraphQLInt
+  GraphQLInt,
 } = graphql;
 
 const UserInputType = new GraphQLObjectType({
@@ -62,7 +64,7 @@ const UserType = new GraphQLObjectType({
 const MessageType = new GraphQLObjectType({
   name: 'Message',
   fields: () => ({
-    uuid: { type: new GraphQLNonNull(GraphQLString) },
+    uuid: { type: new GraphQLNonNull(GraphQLID) },
     fromUsername: { type: new GraphQLNonNull(GraphQLString) },
     toUsername: { type: new GraphQLNonNull(GraphQLString) },
     content: { type: GraphQLString },
@@ -77,13 +79,14 @@ const RootQuery = new GraphQLObjectType({
     user: {
       type: new GraphQLNonNull(UserType),
       args: { username: { type: new GraphQLNonNull(GraphQLString) } },
-      async resolve(parent, args, req) {
-        if(!req.isAuth)
-        {
-          throw new Error("Unauthenticated user");
-        }
+      async resolve(parent, args, {authUser}) {
+        console.log(authUser);
         try 
         {
+          if(!authUser)
+          {
+            throw new Error("Unauthenticated user");
+          }
           const users = await Users.findOne({username: args.username});
 
           console.log(users);
@@ -104,10 +107,10 @@ const RootQuery = new GraphQLObjectType({
         fromUsername: { type: new GraphQLNonNull(GraphQLString) },
         toUsername: { type: new GraphQLNonNull(GraphQLString) } 
       },
-      async resolve(parent, args, req)
+      async resolve(parent, args, {authUser})
       {
         try {
-          if(!req.isAuth)
+          if(!authUser)
           {
             throw new Error("Unauthenticated user");
           }
@@ -146,9 +149,9 @@ const Mutation = new GraphQLObjectType({
         username: { type: new GraphQLNonNull(GraphQLString) } ,
         fullName: { type: new GraphQLNonNull(GraphQLString) }
       },
-      async resolve(parent, args, req)
+      async resolve(parent, args, {authUser})
       {
-        if(!req.isAuth)
+        if(!authUser)
         {
           throw new Error("Unauthenticated user");
         }
@@ -189,9 +192,9 @@ const Mutation = new GraphQLObjectType({
         about: { type: GraphQLString }
       },
       // Edit About section for a user
-      async resolve(parent, args, req) 
+      async resolve(parent, args, {authUser}) 
       {
-        if(!req.isAuth)
+        if(!authUser)
         {
           throw new Error("Unauthenticated user");
         }
@@ -226,8 +229,8 @@ const Mutation = new GraphQLObjectType({
         username: { type: new GraphQLNonNull(GraphQLString) },
         password: { type: GraphQLString }
       },
-      async resolve (parent, args, req) {
-        if(!req.isAuth)
+      async resolve (parent, args, {authUser}) {
+        if(!authUser)
         {
           throw new Error("Unauthenticated user");
         }
@@ -301,10 +304,10 @@ const Mutation = new GraphQLObjectType({
         profilePicture: { type: GraphQLString }
       },
       // Username1 gets followed by Username2. Profile picture of username2
-      async resolve(parent, args, req) {
+      async resolve(parent, args, {authUser}) {
         try 
         {
-          if(!req.isAuth)
+          if(!authUser)
           {
             throw new Error("Unauthenticated user");
           }
@@ -385,10 +388,10 @@ const Mutation = new GraphQLObjectType({
         toUsername: {type: new GraphQLNonNull(GraphQLString)},
         content: {type: new GraphQLNonNull(GraphQLString)}
       },
-      async resolve(parent, args, req)
+      async resolve(parent, args, {authUser})
       {
         try {
-          if(!req.isAuth)
+          if(!authUser)
           {
             throw new Error("Unauthenticated user");
           }
@@ -415,7 +418,6 @@ const Mutation = new GraphQLObjectType({
           }
 
           const message = new Messages({
-            uuid: "ehwbduebjkwnksxnqkjs",
             content: args.content,
             fromUsername: args.username,
             toUsername: args.toUsername
@@ -423,6 +425,7 @@ const Mutation = new GraphQLObjectType({
 
           const save = await message.save();
           console.log(save);
+          pubsub.publish('NEW_MESSAGE_ARRIVED', { newMessage: save });
           return save;
         } 
         catch (error) {
@@ -434,7 +437,43 @@ const Mutation = new GraphQLObjectType({
   }
 });
 
+const Subscription = new GraphQLObjectType({
+  name: 'Subscription',
+  fields: {
+    // Subscription APIs for text chat
+
+    // Receive new message from users you are chatting to
+    newMessage: {
+      type: new GraphQLNonNull(MessageType),
+      args: {username: {type: new GraphQLNonNull(GraphQLString)}},
+      subscribe: withFilter((parent, args, context) => {
+        //console.log(context.authUser);
+        try 
+        {
+          // if(!authUser)
+          // {
+          //   throw new Error("Unauthenticated user");
+          // }
+          return pubsub.asyncIterator('NEW_MESSAGE_ARRIVED');
+        } 
+        catch (error) 
+        {
+          console.log(error);
+          throw error;
+        }
+      }, ({newMessage}, args, context) => {
+        if(newMessage.fromUsername == args.username || newMessage.toUsername == args.username)
+        {
+          return true;
+        }
+        return false;
+      }) 
+    }
+  }
+});
+
 module.exports = new GraphQLSchema({
     query: RootQuery,
-    mutation: Mutation
+    mutation: Mutation,
+    subscription: Subscription
 });
