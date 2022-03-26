@@ -33,30 +33,32 @@ export default function EditProfile(props) {
   const { register ,handleSubmit, control, watch, setError } = useForm();
   const data = props.data; 
   const username = Cookies.get("username"); 
-  const [success, setSuccess] = useState(false); 
   const [editAbout] = useMutation(EDIT_ABOUT, {
     onCompleted: () => {
       props.changeMsg("Updated successfully");
       props.displayNotif(); 
       props.loadProfile();
+      props.closeEditMode(); 
     },
-    onError: () => setSuccess(false), 
+    onError: (err) => console.log(err), 
   });
   const [editFullName] = useMutation(EDIT_FULLNAME, {
     onCompleted: () => {
       props.changeMsg("Updated successfully");
       props.displayNotif(); 
       props.loadProfile();
+      props.closeEditMode(); 
     },
-    onError: () => setSuccess(false), 
+    onError: (err) => console.log(err), 
   });
   const [editPassword] = useMutation(EDIT_PASSWORD, {
     onCompleted: () => {
       props.changeMsg("Updated successfully");
       props.displayNotif(); 
       props.loadProfile();
+      props.closeEditMode(); 
     },
-    onError: () => setSuccess(false), 
+    onError: (err) => console.log(err), 
   });
   const onSubmit = (newData) => {
     
@@ -65,7 +67,6 @@ export default function EditProfile(props) {
       if (/^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9]).{8}/.test(password.current)) {
         if (password.current === confirmPass.current) {
           editPassword({variables: {username: username , password: (password.current)}}); 
-          setSuccess(true);
         } 
         else {
           setError("password", {type: "manual", message: "Password does not match"});       
@@ -78,14 +79,11 @@ export default function EditProfile(props) {
     
     if (newData.about !== data.about) {
       editAbout({variables: {username: username , about: (newData.about)}}); 
-      setSuccess(true);
     }
     
     if (newData.fullName !== data.fullName) {
       editFullName({variables: {username: username , fullName: (newData.fullName)}}); 
-      setSuccess(true);
-    }
-    if (success) props.closeEditMode(); 
+    } 
   } 
 
   const [uploaded, setUploaded] = useState(false);
