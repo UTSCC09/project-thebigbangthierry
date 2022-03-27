@@ -17,6 +17,10 @@ const MessageSchema = new Schema({
         required: true,
         trim: true
     },
+    reaction: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Reactions'
+    }]
     
 }, {timestamps: true});
 

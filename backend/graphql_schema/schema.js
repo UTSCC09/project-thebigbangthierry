@@ -65,6 +65,14 @@ const UserType = new GraphQLObjectType({
   })
 });
 
+const ReactionInputType = new GraphQLObjectType({
+  name: 'ReactionInput',
+  fields: () => ({
+    _id: {type: new GraphQLNonNull(GraphQLID)},
+    reactEmoji: {type: new GraphQLNonNull(GraphQLString)}
+  })
+});
+
 const MessageType = new GraphQLObjectType({
   name: 'Message',
   fields: () => ({
@@ -72,7 +80,8 @@ const MessageType = new GraphQLObjectType({
     fromUsername: { type: new GraphQLNonNull(GraphQLString) },
     toUsername: { type: new GraphQLNonNull(GraphQLString) },
     content: { type: GraphQLString },
-    createdAt: { type: GraphQLString }
+    createdAt: { type: GraphQLString },
+    reaction: {type: new GraphQLList(ReactionInputType)}
   })
 });
 
@@ -135,12 +144,26 @@ const RootQuery = new GraphQLObjectType({
 
           const messages = await Messages.find({ 
             $or: [ 
-              { $and: [{fromUser: user1.username}, {toUser: user2.username}] }, 
-              { $and: [{fromUser: user2.username}, {toUser: user1.username}] } 
+              { $and: [{fromUsername: user1.username}, {toUsername: user2.username}] }, 
+              { $and: [{fromUsername: user2.username}, {toUsername: user1.username}] } 
             ] }).sort({createdAt: -1});
-
-          console.log(messages);
-          return messages;
+          let modifiedMessage = [];
+          for(let i = 0; i < messages.length; i++)
+          {
+            let reactArr = [];
+            let reactionId = messages[i].reaction[0];
+            let reactionData = await Reactions.findOne({_id: reactionId});
+            if(reactionData) 
+            {
+              reactArr.push({_id: reactionId, reactEmoji: reactionData.reactEmoji})
+              messages[i].reaction = reactArr;
+            }
+            modifiedMessage.push({_id: messages[i]._id, content: messages[i].content, fromUsername: messages[i].fromUsername, 
+              toUsername: messages[i].toUsername, createdAt: messages[i].createdAt, reaction: reactArr});
+          }
+          
+          console.log(modifiedMessage);
+          return modifiedMessage;
         } 
         catch (error) {
           console.log(error)
@@ -489,7 +512,7 @@ const Mutation = new GraphQLObjectType({
           let reaction = await Reactions.findOne({$and: [{messageId: args.messageId}, {userId: user._id}]});
           if(reaction)
           {
-            await Reactions.findOneAndUpdate({_id: reaction._id}, {reactEmoji: args.reactEmoji});
+            reaction = await Reactions.findOneAndUpdate({_id: reaction._id}, {reactEmoji: args.reactEmoji});
           }
           else
           {
@@ -499,8 +522,10 @@ const Mutation = new GraphQLObjectType({
               userId: user._id
             });
             console.log(storeReaction);
-            await storeReaction.save();
+            reaction = await storeReaction.save();
           }
+          await Messages.updateOne({_id: args.messageId}, {reaction: reaction._id});
+
           let emojiReact = {reactEmoji: args.reactEmoji, userId: user, messageId: message};
           pubsub.publish('NEW_REACTION_ARRIVED', { newReactions: emojiReact });
           return emojiReact;
