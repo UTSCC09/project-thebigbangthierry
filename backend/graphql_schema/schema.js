@@ -2,6 +2,7 @@
 /*** 
  * Idea for structure of graphql apis from https://atheros.ai/blog/graphql-list-how-to-use-arrays-in-graphql-schema
  * CRUD functions for mongodb database https://www.mongodb.com/docs/manual/crud/
+ * Subscription code from https://www.apollographql.com/docs/apollo-server/data/subscriptions/
 ***/
 
 // package imports
@@ -9,6 +10,7 @@ const graphql = require('graphql');
 const bcrypt = require('bcrypt');
 const Users = require('../database/Model/Users');
 const Messages = require('../database/Model/Messages');
+const Reactions = require('../database/Model/Reactions');
 const {PubSub, withFilter} = require('graphql-subscriptions');
 const pubsub = new PubSub();
 
@@ -21,6 +23,8 @@ const {
   GraphQLID,
   GraphQLInt,
 } = graphql;
+
+const reactionEmojis = ["❤️", "😂", "🥺", "😡", "👍", "👎", "😮"];
 
 const UserInputType = new GraphQLObjectType({
   name: 'UsersInput',
@@ -64,11 +68,21 @@ const UserType = new GraphQLObjectType({
 const MessageType = new GraphQLObjectType({
   name: 'Message',
   fields: () => ({
-    uuid: { type: new GraphQLNonNull(GraphQLID) },
+    _id: { type: new GraphQLNonNull(GraphQLID) },
     fromUsername: { type: new GraphQLNonNull(GraphQLString) },
     toUsername: { type: new GraphQLNonNull(GraphQLString) },
     content: { type: GraphQLString },
     createdAt: { type: GraphQLString }
+  })
+});
+
+const ReactionType = new GraphQLObjectType({
+  name: 'Reaction',
+  fields: () => ({
+    _id: { type: new GraphQLNonNull(GraphQLID) },
+    reactEmoji: {type: new GraphQLNonNull(GraphQLString)},
+    messageId: {type: new GraphQLNonNull(MessageType)},
+    userId: {type: new GraphQLNonNull(UserType)}
   })
 });
 
@@ -255,7 +269,7 @@ const Mutation = new GraphQLObjectType({
                   .then(salt => {
                     return bcrypt.hash(pass, salt)
                       .then(hashPass => {
-                        return User.updateOne({username: args.username}, {password: hashPass})
+                        return Users.updateOne({username: args.username}, {password: hashPass})
                           .then(() => {
                             const users = {username: args.username, password: hashPass}
                             return users;
@@ -433,6 +447,70 @@ const Mutation = new GraphQLObjectType({
           throw error;
         }
       }
+    },
+
+    // React to a message
+    reactMessage: {
+      type: new GraphQLNonNull(ReactionType),
+      args: {
+        messageId: {type: new GraphQLNonNull(GraphQLID) },
+        reactEmoji: {type: new GraphQLNonNull(GraphQLString)}
+      },
+      async resolve(parent, args, {authUser})
+      {
+        try 
+        {
+          // Check whether user inputted valid reaction emoji
+          if(!reactionEmojis.includes(args.reactEmoji))
+          {
+            throw new Error('Invalid emoji input');
+          }
+
+          // check user
+          if(!authUser)
+          {
+            throw new Error('Unauthenticated user');
+          }
+          // Check whether the user reacting exist in DB or not
+          let username = authUser.username ? authUser.username : '';
+          let user = await Users.findOne({username: username});
+          if(!user) throw new Error("User " + username + " does not exist");
+
+          // Check whether the message getting reacted exist in DB or not
+          let message = await Messages.findOne({_id: args.messageId});
+          if(!message)  throw new Error("Message does not exist");
+
+          // Check whether the user is authorized to react to the given message
+          if (message.fromUsername !== username && message.toUsername !== username) 
+          {
+            throw new Error("User " + username + " is not authorized to react to this message");
+          }
+
+          let reaction = await Reactions.findOne({$and: [{messageId: args.messageId}, {userId: user._id}]});
+          if(reaction)
+          {
+            await Reactions.findOneAndUpdate({_id: reaction._id}, {reactEmoji: args.reactEmoji});
+          }
+          else
+          {
+            const storeReaction = new Reactions({
+              reactEmoji: args.reactEmoji,
+              messageId: args.messageId,
+              userId: user._id
+            });
+            console.log(storeReaction);
+            await storeReaction.save();
+          }
+          let emojiReact = {reactEmoji: args.reactEmoji, userId: user, messageId: message};
+          pubsub.publish('NEW_REACTION_ARRIVED', { newReactions: emojiReact });
+          return emojiReact;
+        } 
+        catch (error) 
+        {
+          console.log(error);
+          throw error;
+        }
+      }
     }
   }
 });
@@ -468,6 +546,33 @@ const Subscription = new GraphQLObjectType({
         }
         return false;
       }) 
+    },
+
+    // Reactions on messages
+    newReactions: {
+      type: new GraphQLNonNull(ReactionType),
+      args: {username: {type: new GraphQLNonNull(GraphQLString)}},
+      subscribe: withFilter((parent, args, context) => {
+        try 
+        {
+          // if(!authUser)
+          // {
+          //   throw new Error("Unauthenticated user");
+          // }
+          return pubsub.asyncIterator('NEW_REACTION_ARRIVED');
+        } 
+        catch (error) 
+        {
+          console.log(error);
+          throw error;
+        }
+      }, ({newReactions}, args, context) => {
+        if(newReactions.messageId.fromUsername == args.username || newReactions.messageId.toUsername == args.username)
+        {
+          return true;
+        }
+        return false;
+      })
     }
   }
 });
