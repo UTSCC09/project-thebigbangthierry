@@ -4,7 +4,7 @@ import {useRef, useState} from "react";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useMutation } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
-import Cookies from 'js-cookie'; 
+import AuthService from "../services/auth.service";
 
 const editProfilePaper={padding: 20, height: '75%' , width: '40vw', margin:"20px auto"};
 
@@ -32,7 +32,7 @@ const EDIT_PASSWORD = gql`
 export default function EditProfile(props) {
   const { register ,handleSubmit, control, watch, setError } = useForm();
   const data = props.data; 
-  const username = Cookies.get("username"); 
+  const username = AuthService.getCurrentUser(); 
   const [editAbout] = useMutation(EDIT_ABOUT, {
     onCompleted: () => {
       props.changeMsg("Updated successfully");

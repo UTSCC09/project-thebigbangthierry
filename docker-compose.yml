@@ -1,0 +1,23 @@
+version: '3'
+services:
+  frontend:
+    build: ./frontend 
+    image: "frontend"
+    restart: always
+    networks:
+      - sub-etha
+  backend:
+    build: ./backend
+    image: "backend"
+    restart: always 
+    networks:
+      - sub-etha
+  revproxy:
+    build: ./nginx
+    image: "reverseproxy:1.0.0"
+    networks:
+      - sub-etha
+    ports:
+      - "80:80"
+networks:
+  sub-etha:

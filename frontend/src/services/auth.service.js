@@ -1,4 +1,4 @@
-
+import {api_base} from "../config"; 
 const register = (data) => {
   const formData = new FormData(); 
   // console.log(data);
@@ -17,7 +17,7 @@ const register = (data) => {
     }
   }
   // console.log(formData); 
-  return fetch("/api/signup", {
+  return fetch(api_base + "/signup", {
     method: "POST",
     body: formData
   })
@@ -25,7 +25,7 @@ const register = (data) => {
 const login = (data) => {
    // console.log(data);
   // const { setUser } = useContext(UserContext);
-  return fetch("/login", {
+  return fetch(api_base + "/login", {
     method: "POST",
     headers: {
       'Content-type' : " application/json", 
@@ -46,7 +46,7 @@ const login = (data) => {
 
 const logout = () => {
   localStorage.removeItem("user");
-  fetch("/signout", {
+  fetch(api_base + "/signout", {
     method: "GET",
     headers: {
       'Content-type' : " application/json", 
@@ -55,7 +55,8 @@ const logout = () => {
 };
 
 const getCurrentUser = () => {
-  return JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user"));
+  return user.username; 
 };
 
 const AuthService = {

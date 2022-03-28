@@ -3,9 +3,10 @@ import SearchIcon from '@mui/icons-material/Search';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
-import Cookies from "js-cookie";
+import AuthService from "../services/auth.service";
 import { gql } from "apollo-boost";
 import { ProfileName } from "./profileName";
+
 
 const ADD_FOLLOWER = gql`
   mutation AddFollower($username1: String!, $username2: String!, $profilePicture: String!) {
@@ -45,7 +46,7 @@ export default function AddFollowers(props) {
     }
   });
   const handleSubmit = (targetUser) => {
-    const curr_user = Cookies.get("username"); 
+    const curr_user = AuthService.getCurrentUser(); 
     const profilePic = ""; 
     if (curr_user) {
       addFollower({ variables: { username1: targetUser, username2: curr_user, profilePicture: profilePic } }); 
@@ -53,14 +54,14 @@ export default function AddFollowers(props) {
   } 
   const users = [
   {
-    username: 'testing'
+    username: 'test100'
   }
   ,
   {
-    username: 'user2'
+    username: 'test101'
   },
   {
-    username: 'test8'
+    username: 'test9'
   }
 ]; 
 
