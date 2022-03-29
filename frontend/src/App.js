@@ -9,6 +9,7 @@ import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import {AuthProvider} from './services/auth'; 
 import DynamicRoute from './utils/dynamicRoute'; 
+import {api_base} from "./config"; 
 
 // import { WebSocketLink } from "apollo-link-ws";
 import {
@@ -19,7 +20,7 @@ import {
 } from 'react-router-dom';
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4000/graphql',
+  uri: api_base + '/graphql',
 });
 
 const authLink = setContext((_, { headers }) => {

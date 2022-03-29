@@ -12,23 +12,25 @@ const bcrypt = require('bcrypt');
 const enforce = require("express-sslify");
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-require('dotenv').config({path: __dirname + '/./../.env'});
+require('dotenv').config({path: __dirname + '/./.env'});
 const {ApolloServer} = require('apollo-server-express');
 const { createServer } = require('http');
-
 const db = require('./config/keys').mongoURI;
 const Users = require('./database/Model/Users');
 const schema = require('./graphql_schema/schema');
 const cloudinary = require('./config/cloudinary');
 const upload = require('./config/multer');
 const context = require('./auth/contextMiddleware');
+const config = require('./config/config'); 
 
 // Calling express server
 const app = express();
 app.use(bodyParser.json());
 
 // Add cors
-app.use(cors());
+app.use(cors({ 
+    origin: config.app.origin, 
+}));
 
 // Add cookie session
 app.use(session({
@@ -88,7 +90,7 @@ const checkPassword = function(req, res, next) {
 };
 
 // Signup rest api
-app.post('/api/signup', upload.single('profilePicture'), checkUsername, checkPassword, (req, res, err) => {
+app.post('/signup', upload.single('profilePicture'), checkUsername, checkPassword, (req, res, err) => {
     // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).end('username is missing');
     if (!('password' in req.body)) return res.status(400).end('password is missing');
@@ -262,10 +264,10 @@ async function startServer() {
 startServer();
 // Listen localhost server at port 4000
 const PORT = 4000;
-httpServer.listen(PORT, function(err){
+httpServer.listen(config.server.port, function(err){
     if (err) console.log(err);
     else 
     {
-        console.log("HTTP server on http://localhost:%s%s", PORT, server.graphqlPath);
+        console.log("HTTP server on http://localhost:%s%s", config.server.port, server.graphqlPath);
     }
 });
