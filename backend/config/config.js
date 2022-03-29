@@ -1,5 +1,5 @@
-console.log( process.env["NODE_ENV"] );
-const port = process.env["NODE_ENV"] === ("development") ? 4000 : 80;
+console.log( process.env.NODE_ENV );
+const port = process.env.NODE_ENV === ("development") ? 4000 : 80;
 const config = {
   server: {
     port: port 
