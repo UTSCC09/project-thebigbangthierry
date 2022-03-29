@@ -1,9 +1,9 @@
-// import {useEffect , useState} from "react"; 
+import {useEffect , useState} from "react"; 
 // import { useLazyQuery } from "@apollo/react-hooks";
 // import { gql } from "apollo-boost";
-// import Cookies from 'js-cookie'; 
-
-import { useMessageDispatch, useMessageState } from '../services/message'
+import { TextField , Button, Input } from "@mui/material";
+import { useForm } from "react-hook-form";
+import SendIcon from '@mui/icons-material/Send';
 
 const messages = [
   {
@@ -129,51 +129,70 @@ const receivedMessageStyle={
   borderRadius: 15,
   marginRight: 'auto', 
 }
-export function Message() {
-  // const { users } = useMessageState()
-  // const dispatch = useMessageDispatch()
+const messagesStyle= {
+  display: 'flex', 
+  flexDirection: 'column',
+}
+export function ChattingMessages(props) {
 
-  // const user = users?.find((u) => u.selected === true)
+  // const user = props.selected;
+  const user = props.selected;
+  const { register ,handleSubmit } = useForm();
+  const submitMessage = (message) => {
+    console.log(message);
+  }
 
-  // const messages = user?.messages
-  const user = 'john';
   // const [
   //   getMessages,
-  //   {called ,loading, data: messagesData , error},
+  //   {called ,loading, data , error},
   // ] = useLazyQuery(GET_MESSAGES)
   // const user = Cookies.get("user");
   // useEffect(() => {
   //   if (user && !user.messages) {
   //     getMessages({ variables: { from: user.username } })
   //   }
-  // }, [user])
+  // }, [props.selected])
 
-  // useEffect(() => {
-  //   if (messagesData) {
-  //     dispatch({
-  //       type: 'SET_USER_MESSAGES',
-  //       payload: {
-  //         username: user.username,
-  //         messages: messagesData.getMessages,
-  //       },
-  //     })
-  //   }
-  // }, [messagesData])
   // if (called && loading) return <p>Loading ...</p>
   // if (!called) {
   //   return loadMessages();
   // }
   // if (error) return <div>Error!</div>
-
-  //SET AS data.messages
-  if (user) return <p> Select a user</p>
-  return (
-    <div style={{display: 'flex', flexDirection: 'column'}}>
-      {messages.map((message)=>{ 
+  let messageDisplay; 
+  if (!user) {
+    messageDisplay = <p> Select a user</p>; 
+  }
+  else if (messages.length == 0 ) {
+    messageDisplay = <p> Send a message ! </p>
+  }
+  else if (messages.length > 0 ) {
+    messageDisplay = messages.map((message)=>{ 
       return (
         <p style={message.from === user ? sentMessageStyle : receivedMessageStyle}> {message.content} </p>
-      );
-    })}
+        );
+      })
+  }
+  return (
+    <div>
+      <div style={messagesStyle}>
+        {messageDisplay}
+        <div style={{display:'flex', padding: '5vh 0vh', justifyContent: 'center', alignItems: 'center'}}>
+          <form onSubmit={handleSubmit(submitMessage)}>
+            <TextField
+              id="post-form"
+              placeholder="Send a message"
+              variant="outlined"
+              sx={{width: '33vw'}}
+              {...register("message")}
+            />
+            <label htmlFor="submit-message">
+            <Input value="Signup" type="submit" id="submit-message" sx={{ display: 'none'}}/>
+            <Button component="span"> <SendIcon/> </Button>
+          </label>
+          </form>
+        </div>
+      </div>
     </div>
+    
   );
 }

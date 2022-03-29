@@ -10,7 +10,6 @@ import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import {AuthProvider} from './services/auth'; 
 import DynamicRoute from './utils/dynamicRoute'; 
-import { MessageProvider } from './services/message'
 
 // import { WebSocketLink } from "apollo-link-ws";
 import {
@@ -69,7 +68,6 @@ function App() {
   return (
     <ApolloProvider client={client}>
       <AuthProvider>
-        <MessageProvider>
           <BrowserRouter>
             <Routes>
               <Route element={<DynamicRoute authenticated/>}>
@@ -83,7 +81,6 @@ function App() {
               </Route>
             </Routes>
           </BrowserRouter>
-        </MessageProvider>
       </AuthProvider>
     </ApolloProvider>
     

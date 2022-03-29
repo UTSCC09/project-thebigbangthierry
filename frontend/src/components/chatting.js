@@ -1,7 +1,8 @@
 import {Box, Paper } from "@mui/material"; 
 import {NavBar} from "./navbar"; 
 import {ChattingUsers} from "./chattingUsers";
-import {Message} from "./messages";  
+import {ChattingMessages} from "./chattingMessages"; 
+import { useState } from "react";
 
 
 const mainStyle= {
@@ -35,16 +36,17 @@ const messageSectionStyle={
   top: 0,
 };
 export function Chatting() {
+  const [selected, setSelected] = useState(''); 
   return (
       <Box >
         <NavBar/> 
         <Box sx={mainStyle}>
           <Paper elevation={10} style={chattingPaper}>
             <Box id="users-section" sx={userSectionStyle}> 
-              <ChattingUsers/> 
+              <ChattingUsers selected={selected} setSelected={setSelected} /> 
             </Box>
             <Box id="message-section" sx={messageSectionStyle}>
-              <Message/>
+              <ChattingMessages selected={selected} />
             </Box>
           </Paper>
         </Box>
