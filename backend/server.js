@@ -261,6 +261,23 @@ const wsServer = new WebSocketServer({
     path: '/graphql'
 });
 
+const socketIO = require('socket.io')(httpServer, {cors: {origin: "http://localhost:3000"}});
+socketIO.on("connection", (socket) => {
+    socket.emit("me", socket.id);
+
+    socket.on("disconnect", () => {
+		socket.broadcast.emit("callDisconnected")
+	});
+
+	socket.on("callUser", (data) => {
+		io.to(data.userToCall).emit("userCalled", { signal: data.signalData, from: data.from, name: data.name })
+	});
+
+	socket.on("answerCall", (data) => {
+		io.to(data.to).emit("callAnswered", data.signal)
+	});
+});
+
 useServer({ schema }, wsServer);
 
 let server
