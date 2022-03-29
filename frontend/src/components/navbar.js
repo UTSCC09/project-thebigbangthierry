@@ -28,6 +28,10 @@ const pages = [
     name: 'Profile',
     link: '/profile'
   }, 
+  {
+    name: 'Video', 
+    link: '/video'
+  }
   
 ];
 

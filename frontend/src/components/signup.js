@@ -5,7 +5,6 @@ import {useRef, useState} from "react";
 //setState 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import PersonAddAltSharpIcon from '@mui/icons-material/PersonAddAltSharp';
 import { useNavigate , Link } from 'react-router-dom'
 import AuthService from "../services/auth.service";
 
@@ -97,7 +96,7 @@ export function Signup() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <label htmlFor="upload-photo">
             <Input  {...register("profilePicture", { onChange: (e) => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
-            <IconButton size="large" component="span"> <PersonAddAltSharpIcon color="grey" fontSize="large"/> </IconButton>
+            <IconButton size="large" component="span"> <PersonAddIcon color="grey" fontSize="large"/> </IconButton>
             {uploaded? <label> Uploaded </label> : null }
           </label>
 

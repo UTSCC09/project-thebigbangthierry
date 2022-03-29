@@ -1,5 +1,5 @@
 import {useEffect , useState} from "react"; 
-// import { useLazyQuery } from "@apollo/react-hooks";
+// import { useLazyQuery, useMutation } from "@apollo/react-hooks";
 // import { gql } from "apollo-boost";
 import { TextField , Button, Input } from "@mui/material";
 import { useForm } from "react-hook-form";
@@ -132,8 +132,25 @@ const receivedMessageStyle={
 const messagesStyle= {
   display: 'flex', 
   flexDirection: 'column',
+  width: '65%', 
+  height: '80%',
+  position: 'absolute',
+  overflowY:'scroll',
+  left: '32%',
+  top: 0,
 }
+
+const inputStyle = {
+  display:'flex', 
+  position: 'absolute',
+  padding: '5vh 0vh', 
+  justifyContent: 'center', 
+  alignItems: 'center',
+  left: '32%',
+  bottom: 0,
+}; 
 export function ChattingMessages(props) {
+  
 
   // const user = props.selected;
   const user = props.selected;
@@ -162,27 +179,29 @@ export function ChattingMessages(props) {
   if (!user) {
     messageDisplay = <p> Select a user</p>; 
   }
-  else if (messages.length == 0 ) {
+  else if (messages.length === 0 ) {
     messageDisplay = <p> Send a message ! </p>
   }
   else if (messages.length > 0 ) {
-    messageDisplay = messages.map((message)=>{ 
+    messageDisplay = messages.map((message, index)=>{ 
       return (
-        <p style={message.from === user ? sentMessageStyle : receivedMessageStyle}> {message.content} </p>
+        <p key={index} style={message.from === user ? sentMessageStyle : receivedMessageStyle}> {message.content} </p>
         );
       })
   }
   return (
     <div>
-      <div style={messagesStyle}>
-        {messageDisplay}
-        <div style={{display:'flex', padding: '5vh 0vh', justifyContent: 'center', alignItems: 'center'}}>
-          <form onSubmit={handleSubmit(submitMessage)}>
+      <div>
+        <div style={messagesStyle}>
+          {messageDisplay}
+        </div>
+        <div style={inputStyle}>
+          <form  onSubmit={handleSubmit(submitMessage)}>
             <TextField
               id="post-form"
               placeholder="Send a message"
               variant="outlined"
-              sx={{width: '33vw'}}
+              sx={{width: '31vw'}}
               {...register("message")}
             />
             <label htmlFor="submit-message">

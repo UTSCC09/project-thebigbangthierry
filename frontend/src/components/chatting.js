@@ -26,15 +26,7 @@ const userSectionStyle= {
   left: 0,
   top: 0,
 }; 
-const messageSectionStyle={
-  width: '65%', 
-  height: '100%',
-  position: 'absolute',
-  overflowY:'scroll', 
-  '&::-webkit-scrollbar': { display: 'none', },
-  left: '32%',
-  top: 0,
-};
+
 export function Chatting() {
   const [selected, setSelected] = useState(''); 
   return (
@@ -45,7 +37,7 @@ export function Chatting() {
             <Box id="users-section" sx={userSectionStyle}> 
               <ChattingUsers selected={selected} setSelected={setSelected} /> 
             </Box>
-            <Box id="message-section" sx={messageSectionStyle}>
+            <Box id="message-section">
               <ChattingMessages selected={selected} />
             </Box>
           </Paper>

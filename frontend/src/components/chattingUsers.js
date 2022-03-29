@@ -1,30 +1,30 @@
 import {Box, Avatar, IconButton } from "@mui/material"; 
 import {useWindowSize} from "../utils/windowSize";
-// import { useQuery } from "@apollo/react-hooks";
-// import { gql } from "apollo-boost";
+import { useQuery } from "@apollo/react-hooks";
+import { gql } from "apollo-boost";
+import { useUserDispatch, useUserState } from "../services/user";
+import AuthService from "../services/auth.service";
 
-
-
-const users = [
-  {
-    username: 'john',
-    email: 'john@email.com',
-    profilePicture:
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1700&q=80',
-  },
-  {
-    username: 'jane',
-    email: 'jane@email.com',
-    profilePicture:
-      'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2190&q=80',
-  },
-  {
-    username: 'boss',
-    email: 'boss@email.com',
-    profilePicture:
-      'https://images.unsplash.com/photo-1566753323558-f4e0952af115?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2122&q=80',
-  },
-];
+// const dummyUsers = [
+//   {
+//     username: 'john',
+//     email: 'john@email.com',
+//     profilePicture:
+//       'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1700&q=80',
+//   },
+//   {
+//     username: 'jane',
+//     email: 'jane@email.com',
+//     profilePicture:
+//       'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2190&q=80',
+//   },
+//   {
+//     username: 'boss',
+//     email: 'boss@email.com',
+//     profilePicture:
+//       'https://images.unsplash.com/photo-1566753323558-f4e0952af115?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2122&q=80',
+//   },
+// ];
 
 const unselectedStyle={ 
   display: 'flex', 
@@ -40,29 +40,33 @@ const selectedStyle={
   justifyContent: 'center'
 }; 
 
-// const GET_USERS = gql`
-//   query getUsers {
-//     getUsers {
-//       username
-//       createdAt
-//       imageUrl
-//       latestMessage {
-//         uuid
-//         from
-//         to
-//         content
-//         createdAt
-//       }
-//     }
-//   }`; 
+const GET_USERS = gql`
+query($user: String!) {
+  user(username: $user){
+    followingList {
+      username
+      profilePicture
+    }
+  }
+}
+`;
 
 export function ChattingUsers(props) {
   const size = useWindowSize();
   const selected = props.selected; 
-  
-  // const { loading, data, error } = useQuery(GET_USERS);
+  const { users } = useUserState();
+  const dispatch = useUserDispatch(); 
+  const username = AuthService.getCurrentUser(); 
 
+  const { loading } = useQuery(GET_USERS, {
+    variables: {user: username}, 
+    onCompleted: (data) => 
+      console.log(data),
+      // dispatch({type: 'SET_USERS', payload: data.followingList}), 
+    onError: (err) => console.log(err),
+  });
 
+  if (loading) return <p> Loading ... </p>
   return (
     <div>
       {users.map((user)=> {
@@ -72,7 +76,7 @@ export function ChattingUsers(props) {
             {size.width > 700?  
               <div style={{fontSize: '2vmin', paddingLeft: 5}}>
               <p> <b> {user.username}</b>  </p>
-              <p> {user.latestMessage? user.latestMessage.content : 'You are now connected!'} </p>
+              <p> {user.latestMessage? user.latestMessage.content : 'You are connected!'} </p>
             </div> 
             : null }
           </Box>      
