@@ -2,15 +2,15 @@ const jwt = require('jsonwebtoken')
 
 module.exports = (context) => {
     let token;
-    console.log(context.connection);
+    console.log(context.connectionParams);
     if(context.req && context.req.headers.authorization)
     {
         token = context.req.headers.authorization.split('Bearer ')[1];
     }
-    // else if(context.connectionParams.authentication)
-    // {
-    //     token = context.connectionParams.authentication.split(' ')[1];
-    // }
+    else if(context.connectionParams.authentication)
+    {
+        token = context.connectionParams.authorization.split('Bearer ')[1];
+    }
     let decodedToken;
     if(token)
     {

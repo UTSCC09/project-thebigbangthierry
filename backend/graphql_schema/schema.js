@@ -549,14 +549,14 @@ const Subscription = new GraphQLObjectType({
     newMessage: {
       type: new GraphQLNonNull(MessageType),
       args: {username: {type: new GraphQLNonNull(GraphQLString)}},
-      subscribe: withFilter((parent, args, context) => {
-        //console.log(context.authUser);
+      subscribe: withFilter((parent, args, {authUser}) => {
+        console.log(authUser);
         try 
         {
-          // if(!authUser)
-          // {
-          //   throw new Error("Unauthenticated user");
-          // }
+          if(!authUser)
+          {
+            throw new Error("Unauthenticated user");
+          }
           return pubsub.asyncIterator('NEW_MESSAGE_ARRIVED');
         } 
         catch (error) 
@@ -577,13 +577,13 @@ const Subscription = new GraphQLObjectType({
     newReactions: {
       type: new GraphQLNonNull(ReactionType),
       args: {username: {type: new GraphQLNonNull(GraphQLString)}},
-      subscribe: withFilter((parent, args, context) => {
+      subscribe: withFilter((parent, args, {authUser}) => {
         try 
         {
-          // if(!authUser)
-          // {
-          //   throw new Error("Unauthenticated user");
-          // }
+          if(!authUser)
+          {
+            throw new Error("Unauthenticated user");
+          }
           return pubsub.asyncIterator('NEW_REACTION_ARRIVED');
         } 
         catch (error) 
