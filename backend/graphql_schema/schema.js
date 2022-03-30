@@ -550,7 +550,6 @@ const Subscription = new GraphQLObjectType({
       type: new GraphQLNonNull(MessageType),
       args: {username: {type: new GraphQLNonNull(GraphQLString)}},
       subscribe: withFilter((parent, args, {authUser}) => {
-        console.log(authUser);
         try 
         {
           if(!authUser)
@@ -564,7 +563,7 @@ const Subscription = new GraphQLObjectType({
           console.log(error);
           throw error;
         }
-      }, ({newMessage}, args, context) => {
+      }, ({newMessage}, args) => {
         if(newMessage.fromUsername == args.username || newMessage.toUsername == args.username)
         {
           return true;
@@ -591,7 +590,7 @@ const Subscription = new GraphQLObjectType({
           console.log(error);
           throw error;
         }
-      }, ({newReactions}, args, context) => {
+      }, ({newReactions}, args) => {
         if(newReactions.messageId.fromUsername == args.username || newReactions.messageId.toUsername == args.username)
         {
           return true;
