@@ -27,6 +27,7 @@ const schema = require('./graphql_schema/schema');
 const cloudinary = require('./config/cloudinary');
 const upload = require('./config/multer');
 const context = require('./auth/contextMiddleware');
+const { ApolloServerPluginDrainHttpServer } = require('apollo-server-core');
 
 // Calling express server
 const app = express();
@@ -263,14 +264,14 @@ const wsServer = new WebSocketServer({
 
 const socketIO = require('socket.io')(httpServer, {cors: {origin: "http://localhost:3000"}});
 socketIO.on("connection", (socket) => {
-    socket.emit("me", socket.id);
+    socket.emit("myself", socket.id);
 
     socket.on("disconnect", () => {
 		socket.broadcast.emit("callDisconnected")
 	});
 
-	socket.on("callUser", (data) => {
-		io.to(data.userToCall).emit("userCalled", { signal: data.signalData, from: data.from, name: data.name })
+	socket.on("userCall", (data) => {
+		io.to(data.userToCall).emit("userCall", { signal: data.signalData, from: data.from, name: data.name })
 	});
 
 	socket.on("answerCall", (data) => {
@@ -278,14 +279,29 @@ socketIO.on("connection", (socket) => {
 	});
 });
 
-useServer({ schema }, wsServer);
+const serverCleanup = useServer({ schema }, wsServer);
 
 let server
 async function startServer()
 {
     server = new ApolloServer({
         schema,
-        context: context
+        context: context,
+        plugins: [
+            // Shutdown http server
+            ApolloServerPluginDrainHttpServer({httpServer}),
+            // Shutdown web socket server
+            {
+                async serverWillStart()
+                {
+                    return {
+                        async drainServer() {
+                            await serverCleanup.dispose();
+                        },
+                    };
+                },
+            },
+        ]
     });
     await server.start();
     server.applyMiddleware({app});
