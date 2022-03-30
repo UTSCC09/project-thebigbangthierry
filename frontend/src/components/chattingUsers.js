@@ -2,7 +2,7 @@ import {Box, Avatar, IconButton } from "@mui/material";
 import {useWindowSize} from "../utils/windowSize";
 import { useQuery } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
-import { useUserDispatch, useUserState } from "../services/user";
+import { useMessageDispatch, useMessageState } from "../services/message";
 import AuthService from "../services/auth.service";
 
 // const dummyUsers = [
@@ -54,34 +54,42 @@ query($user: String!) {
 export function ChattingUsers(props) {
   const size = useWindowSize();
   const selected = props.selected; 
-  const { users } = useUserState();
-  const dispatch = useUserDispatch(); 
-  const username = AuthService.getCurrentUser(); 
-
+  const dispatch = useMessageDispatch(); 
+  const username = AuthService.getCurrentUser().username;
+  const { users } = useMessageState(); 
+  
   const { loading } = useQuery(GET_USERS, {
     variables: {user: username}, 
     onCompleted: (data) => 
-      console.log(data),
-      // dispatch({type: 'SET_USERS', payload: data.followingList}), 
+      dispatch({type: 'SET_USERS', payload: data.user.followingList}), 
     onError: (err) => console.log(err),
   });
 
-  if (loading) return <p> Loading ... </p>
+  let usersList; 
+  if (!users || loading) {
+   usersList = <p> Loading ... </p>
+  }
+  else if (users.length === 0) {
+    usersList = <p> no users have been followed </p>
+  }
+  else if (users.length > 0 ) {
+    usersList = users.map((user)=> {
+      return (
+        <Box key={user.username} sx={selected === user.username? selectedStyle : unselectedStyle}>
+          <IconButton onClick={()=> props.setSelected(user.username)}> <Avatar src={user.profilePicture} sx={{width:'8vh', height: '8vh', cursor: 'pointer'}} />  </IconButton>
+          {size.width > 700?  
+            <div style={{fontSize: '2vmin', paddingLeft: 5}}>
+            <p> <b> {user.username}</b>  </p>
+            <p> {user.latestMessage? user.latestMessage.content : 'You are connected!'} </p>
+          </div> 
+          : null }
+        </Box>      
+      );
+    })
+  }
   return (
     <div>
-      {users.map((user)=> {
-        return (
-          <Box key={user.username} sx={selected === user.username? selectedStyle : unselectedStyle}>
-            <IconButton onClick={()=> props.setSelected(user.username)}> <Avatar src={user.profilePicture} sx={{width:'8vh', height: '8vh', cursor: 'pointer'}} />  </IconButton>
-            {size.width > 700?  
-              <div style={{fontSize: '2vmin', paddingLeft: 5}}>
-              <p> <b> {user.username}</b>  </p>
-              <p> {user.latestMessage? user.latestMessage.content : 'You are connected!'} </p>
-            </div> 
-            : null }
-          </Box>      
-        );
-      })}
+      {usersList}
     </div>
   );
 }

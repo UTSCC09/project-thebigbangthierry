@@ -37,6 +37,7 @@ const login = (data) => {
     // console.log(data);
     if (data.token) {
       localStorage.setItem("user", JSON.stringify(data)); 
+      localStorage.setItem("token", data.token);  
       return data;
     }
     return null;   
@@ -46,6 +47,7 @@ const login = (data) => {
 
 const logout = () => {
   localStorage.removeItem("user");
+  localStorage.removeItem("token"); 
   fetch("/signout", {
     method: "GET",
     headers: {
@@ -57,6 +59,7 @@ const logout = () => {
 const getCurrentUser = () => {
   return JSON.parse(localStorage.getItem("user"));
 };
+
 
 const AuthService = {
   register,

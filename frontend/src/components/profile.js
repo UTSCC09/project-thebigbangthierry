@@ -7,7 +7,7 @@ import DisplayProfile from "./displayProfile";
 import {useState} from "react"; 
 import EditProfile from "./editProfile"; 
 import {Snackbar} from "@mui/material"; 
-import { useUserDispatch } from "../services/user";
+import { useMessageDispatch } from "../services/message";
 
 const GET_PROFILE = gql`
   query($user: String!) {
@@ -34,7 +34,7 @@ export function Profile(){
   const [notif, setNotif] = useState(false);  
   const [notifMsg, setNotifMsg] = useState(" ");   
   const username = Cookies.get("username"); 
-  const dispatch = useUserDispatch(); 
+  const dispatch = useMessageDispatch(); 
   // const [data, setData] = useState(null); 
   const [loadProfile, { called, loading , data , error}]= useLazyQuery(GET_PROFILE, {
     variables: { user: username},

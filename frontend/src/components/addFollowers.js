@@ -53,11 +53,11 @@ export default function AddFollowers(props) {
   } 
   const users = [
   {
-    username: 'testing'
+    username: 'test11'
   }
   ,
   {
-    username: 'user2'
+    username: 'test10'
   },
   {
     username: 'test8'
