@@ -1,11 +1,12 @@
 import {useEffect } from "react"; 
 import { useLazyQuery, useMutation , useSubscription} from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
-import { TextField , Button, Input } from "@mui/material";
+import { TextField , Button, Input , IconButton} from "@mui/material";
 import { useForm } from "react-hook-form";
 import SendIcon from '@mui/icons-material/Send';
 import AuthService from "../services/auth.service";
 import { useMessageDispatch, useMessageState } from "../services/message";
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 
 // const messages = [
 //   {
@@ -131,18 +132,17 @@ const NEW_MESSAGE = gql`
 `;
 const sentMessageStyle={
   backgroundColor: '#002f65',  
+  display: 'flex', 
   color: 'white', 
   padding: 7, 
   borderRadius: 15,
-  marginLeft: 'auto',  
-  
 }
 const receivedMessageStyle={
   backgroundColor: '#d9d8d4',  
+  display: 'flex', 
   color: 'black', 
   padding: 7, 
   borderRadius: 15,
-  marginRight: 'auto', 
 }
 const messagesStyle= {
   display: 'flex', 
@@ -164,6 +164,12 @@ const inputStyle = {
   left: '32%',
   bottom: 0,
 }; 
+
+const reactButton = (
+  <IconButton>
+    <EmojiEmotionsIcon/> 
+  </IconButton>
+); 
 export function ChattingMessages(props) {
   const {users} = useMessageState(); 
   const dispatch = useMessageDispatch();
@@ -233,11 +239,15 @@ export function ChattingMessages(props) {
   else if (messages.length > 0 ) {
     messageDisplay = messages.map((message, index)=>{ 
       return (
-        <p key={index} style={message.toUsername === props.selected ? sentMessageStyle : receivedMessageStyle}> {message.content} </p>
+        <div style={message.toUsername === props.selected ? {display: 'flex', marginLeft: 'auto',  } : {display: 'flex', marginRight: 'auto',  } } key={index} >
+          {message.toUsername === props.selected && reactButton} 
+          <p key={index} style={message.toUsername === props.selected ? sentMessageStyle : receivedMessageStyle}> {message.content} </p>  
+          {message.fromUsername === props.selected && reactButton} 
+        </div>
         );
       })
   }
-  
+
   return (
     <div>
       <div>

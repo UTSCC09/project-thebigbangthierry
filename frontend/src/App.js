@@ -47,10 +47,10 @@ const wsLink =new GraphQLWsLink(createClient({
   url: `ws://localhost:4000/graphql`, 
   options: {
     reconnect: true , 
-    connectionParams: {
-      authorization: `Bearer ${localStorage.getItem("token")}`,
-    }, 
-  }
+  }, 
+  connectionParams: {
+    authorization: `Bearer ${localStorage.getItem("token")}`,
+  }, 
 })); 
 
 const splitLink = split(
