@@ -1,4 +1,4 @@
-import {Box, Avatar, IconButton } from "@mui/material"; 
+import {Box, Avatar } from "@mui/material"; 
 import {useWindowSize} from "../utils/windowSize";
 import { useQuery } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
@@ -30,14 +30,16 @@ const unselectedStyle={
   display: 'flex', 
   alignItems: 'center', 
   padding: '5px 5px', 
-  justifyContent: 'center'
+  justifyContent: 'center',
+  cursor: 'pointer'
 }; 
 const selectedStyle={ 
   backgroundColor: 'white', 
   display: 'flex', 
   alignItems: 'center', 
   padding: '5px 5px', 
-  justifyContent: 'center'
+  justifyContent: 'center',
+  cursor: 'pointer'
 }; 
 
 const GET_USERS = gql`
@@ -75,8 +77,8 @@ export function ChattingUsers(props) {
   else if (users.length > 0 ) {
     usersList = users.map((user)=> {
       return (
-        <Box key={user.username} sx={selected === user.username? selectedStyle : unselectedStyle}>
-          <IconButton onClick={()=> props.setSelected(user.username)}> <Avatar src={user.profilePicture} sx={{width:'8vh', height: '8vh', cursor: 'pointer'}} />  </IconButton>
+        <Box  onClick={()=> props.setSelected(user.username)} key={user.username} sx={selected === user.username? selectedStyle : unselectedStyle}>
+          <Avatar src={user.profilePicture} sx={{width:'8vh', height: '8vh'}} /> 
           {size.width > 700?  
             <div style={{fontSize: '2vmin', paddingLeft: 5}}>
             <p> <b> {user.username}</b>  </p>

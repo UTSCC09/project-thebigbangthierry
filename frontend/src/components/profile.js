@@ -39,7 +39,7 @@ export function Profile(){
   const [loadProfile, { called, loading , data , error}]= useLazyQuery(GET_PROFILE, {
     variables: { user: username},
     onCompleted: (data) => {
-      dispatch({type: 'SET_USERS', payload: data.user.followingList});  
+      dispatch({type: 'ADD_USER', payload: data.user.followingList});  
     }, 
     // pollInterval: 1000,
   });

@@ -1,12 +1,12 @@
-import {useEffect } from "react"; 
+import React, {useEffect } from "react"; 
 import { useLazyQuery, useMutation , useSubscription} from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
-import { TextField , Button, Input , IconButton} from "@mui/material";
+import { TextField , Button, Input } from "@mui/material";
 import { useForm } from "react-hook-form";
 import SendIcon from '@mui/icons-material/Send';
 import AuthService from "../services/auth.service";
 import { useMessageDispatch, useMessageState } from "../services/message";
-import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
+import ReactBar from './reactBar'; 
 
 // const messages = [
 //   {
@@ -106,6 +106,9 @@ const GET_MESSAGES = gql`
       fromUsername
       toUsername
       createdAt
+      reaction {
+        reactEmoji
+      }
     }
   }
 `;
@@ -130,6 +133,25 @@ const NEW_MESSAGE = gql`
     } 
   }
 `;
+
+const NEW_REACTION = gql`
+  subscription newReactions ($username: String!) {
+    newReactions(username: $username){
+      reactEmoji 
+      messageId {
+        _id
+        toUsername
+        fromUsername
+        content
+      }
+      userId {
+        fullName
+        about
+      }
+    } 
+  }
+`;
+
 const sentMessageStyle={
   backgroundColor: '#002f65',  
   display: 'flex', 
@@ -165,17 +187,24 @@ const inputStyle = {
   bottom: 0,
 }; 
 
-const reactButton = (
-  <IconButton>
-    <EmojiEmotionsIcon/> 
-  </IconButton>
-); 
+const reactStyle = {
+  display: 'flex', 
+  borderRadius: 15, 
+  position: 'absolute',
+  height: '4vh', 
+  alignItems: 'center', 
+  fontSize: '2vmin',
+  right: 0, 
+  bottom: 0, 
+}
+
 export function ChattingMessages(props) {
   const {users} = useMessageState(); 
   const dispatch = useMessageDispatch();
   const currentUser = AuthService.getCurrentUser().username; 
   
   const selectedUser = users?.find((u) => u.username === props.selected); 
+  // console.log(users);
   const messages = selectedUser?.messages; 
 
   const { register ,handleSubmit , reset} = useForm();
@@ -184,7 +213,10 @@ export function ChattingMessages(props) {
   const {data: newData, error: newError} = useSubscription(NEW_MESSAGE ,{
     variables: {username: currentUser} , 
   });
-   
+  const {data: newReactData, error: newReactError} = useSubscription(NEW_REACTION ,{
+    variables: {username: currentUser} , 
+  });
+
   const submitMessage = (message) => {
     sendMessage({ variables: { from: currentUser , to: props.selected, content: message.message } });
     reset({message: ''}); 
@@ -194,6 +226,7 @@ export function ChattingMessages(props) {
     if (selectedUser && !selectedUser.messages) {
       getMessages({ variables: { from: currentUser , to: props.selected } })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedUser])
 
   useEffect(() => {
@@ -206,6 +239,7 @@ export function ChattingMessages(props) {
         },
       })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
   
@@ -221,7 +255,24 @@ export function ChattingMessages(props) {
         },
       })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newError, newData]);
+
+  useEffect(() => {
+    if (newReactError) console.log(newReactError); 
+    if (newReactData) { 
+      // console.log(newReactData.newReactions); 
+      dispatch({
+        type: 'ADD_REACTION',
+        payload: {
+          username: props.selected,
+          reaction: newReactData.newReactions,
+        },
+      })
+      console.log(users); 
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newReactData, newReactError]);
 
   let messageDisplay;
   if (loading) {
@@ -239,10 +290,21 @@ export function ChattingMessages(props) {
   else if (messages.length > 0 ) {
     messageDisplay = messages.map((message, index)=>{ 
       return (
-        <div style={message.toUsername === props.selected ? {display: 'flex', marginLeft: 'auto',  } : {display: 'flex', marginRight: 'auto',  } } key={index} >
-          {message.toUsername === props.selected && reactButton} 
-          <p key={index} style={message.toUsername === props.selected ? sentMessageStyle : receivedMessageStyle}> {message.content} </p>  
-          {message.fromUsername === props.selected && reactButton} 
+        <div style={message.toUsername === props.selected ? {display: 'flex', marginLeft: 'auto'} : {display: 'flex', marginRight: 'auto'} } key={index} >
+          {message.toUsername === props.selected ? <ReactBar message={message} /> : null } 
+          <div style={{position: 'relative'}}>
+            {message.reaction.length > 0 ? 
+            <div style={reactStyle}> 
+              {message.reaction.map((react, index) => { 
+                return (
+                  // <div> {console.log(react)} helo </div>
+                    <p key={index}> {react.reactEmoji} </p>
+                );
+              })}
+            </div> : null }
+            <p key={index} style={message.toUsername === props.selected ? sentMessageStyle : receivedMessageStyle} > {message.content} </p>  
+          </div>
+          {message.fromUsername === props.selected ? <ReactBar message={message}/> : null} 
         </div>
         );
       })
