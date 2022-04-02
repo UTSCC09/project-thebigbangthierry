@@ -16,10 +16,10 @@ const PostSchema = new Schema({
         type: String
     },
     likes: [{
-        liker: {type: Schema.Types.ObjectId, ref: 'Profile'},
+        liker: {type: String},
     }],
     dislikes: [{
-        disliker: {type: Schema.Types.ObjectId, ref: 'Profile'}
+        disliker: {type: String}
     }],
     comments: [{
         commentContent: {type: String, required: true},

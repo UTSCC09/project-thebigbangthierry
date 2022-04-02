@@ -64,6 +64,14 @@ const CommentsInputType = new GraphQLObjectType({
   })
 });
 
+const LikeDislikeInputType = new GraphQLObjectType({
+  name: 'LikeDislikeInput',
+  fields: () => ({
+    likeCount: {type: GraphQLInt},
+    dislikeCount: {type: GraphQLInt}
+  })
+});
+
 const UserType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
@@ -522,6 +530,61 @@ const Mutation = new GraphQLObjectType({
 
     // All APIs related to posts are below
     
+    // Add user who likes the post
+    updatePostLikesDislikes: {
+      type: LikeDislikeInputType,
+      args: {
+        username: { type: new GraphQLNonNull(GraphQLString) },
+        postId: { type: new GraphQLNonNull(GraphQLID) },
+        action: {type: new GraphQLNonNull(GraphQLString) }
+      },
+      async resolve(parent, args, {authUser})
+      {
+        if(authUser.username !== args.username)
+        {
+          return new Error("Unauthenticated user");
+        }
+
+        try 
+        {
+          return Post.findById({_id: args.postId})
+            .exec()
+            .then((post) => {
+              if(!post) return new Error("Post doesn't exist");
+
+              if(args.action === "like")
+              {
+                if(post.likes.map(a=>a.liker).includes(args.username))
+                {
+                  return new Error("User " + args.username + " has already liked this post");
+                }
+                post.likes.push({liker: args.username});
+                post.save();
+                return {likeCount: post.likes.length, dislikeCount: post.dislikes.length};
+              }
+              else if(args.action === "dislike")
+              {
+                if(post.dislikes.map(a=>a.disliker).includes(args.username))
+                {
+                  return new Error("User " + args.username + " has already disliked this post");
+                }
+                post.dislikes.push({disliker: args.username});
+                post.save();
+                return {likeCount: post.likes.length, dislikeCount: post.dislikes.length};
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+              throw err;
+            })
+        } 
+        catch (error) 
+        {
+          console.log(error);
+          throw new error;
+        }
+      }
+    }
   }
 });
 
