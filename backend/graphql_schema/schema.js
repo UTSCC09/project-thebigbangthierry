@@ -3,6 +3,7 @@
  * Idea for structure of graphql apis from https://atheros.ai/blog/graphql-list-how-to-use-arrays-in-graphql-schema
  * CRUD functions for mongodb database https://www.mongodb.com/docs/manual/crud/
  * Subscription code from https://www.apollographql.com/docs/apollo-server/data/subscriptions/
+ * Video call code from https://www.twilio.com/docs/video/tutorials/get-started-with-twilio-video-node-express-server
 ***/
 
 // package imports
@@ -13,7 +14,8 @@ const Messages = require('../database/Model/Messages');
 const Reactions = require('../database/Model/Reactions');
 const {PubSub, withFilter} = require('graphql-subscriptions');
 const pubsub = new PubSub();
-
+const AccessToken = require('twilio').jwt.AccessToken;
+const VideoGrant = AccessToken.VideoGrant;
 const {
   GraphQLObjectType,
   GraphQLList,
@@ -25,6 +27,67 @@ const {
 } = graphql;
 
 const reactionEmojis = ["❤️", "😂", "🥺", "😡", "👍", "👎", "😮"];
+
+// Twilio Helper Code Starts
+const twilioServer = require('twilio')(
+  process.env.TWILIO_API_KEY_SID,
+  process.env.TWILIO_API_KEY_SECRET,
+  {accountSid: process.env.TWILIO_ACCOUNT_SID}
+);
+
+const createFindVideoRoom = async(videoRoomName) => {
+  try 
+  {
+    // see if the room exists already. If it doesn't, this will throw
+    // error 20404.
+    await twilioServer.video.rooms(videoRoomName).fetch();
+  } 
+  catch (error) 
+  {
+    if(error.code === 20404)
+    {
+      // the room was not found, so create it
+      await twilioServer.video.rooms.create({
+        uniqueName: videoRoomName,
+        type: "go"
+      });
+    }
+    else
+    {
+      console.log(error);
+      throw error;
+    }
+  }
+};
+
+const generateAccessToken = async (videoRoomName, username) => {
+  // create an access token
+  const token = new AccessToken(
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_API_KEY_SID,
+    process.env.TWILIO_API_KEY_SECRET,
+    // generate a random unique identity for this participant
+    { identity: username }
+  );
+
+  // create a video grant for this specific room
+  const videoGrant = new VideoGrant({
+    room: videoRoomName,
+  });
+
+  // add the video grant
+  token.addGrant(videoGrant);
+  // serialize the token and return it
+  return token.toJwt();
+};
+// Twilio Helper Code Ends
+
+const VideoCallType = new GraphQLObjectType({
+  name: 'VideoCall',
+  fields: () => ({
+    token: { type: new GraphQLNonNull(GraphQLString) }
+  })
+});
 
 const UserInputType = new GraphQLObjectType({
   name: 'UsersInput',
@@ -103,12 +166,11 @@ const RootQuery = new GraphQLObjectType({
       type: new GraphQLNonNull(UserType),
       args: { username: { type: new GraphQLNonNull(GraphQLString) } },
       async resolve(parent, args, {authUser}) {
-        console.log(authUser);
         try 
         {
-          if(!authUser)
+          if(authUser.username !== args.username)
           {
-            throw new Error("Unauthenticated user");
+            return new Error("Unauthenticated user");
           }
           const users = await Users.findOne({username: args.username});
 
@@ -133,9 +195,9 @@ const RootQuery = new GraphQLObjectType({
       async resolve(parent, args, {authUser})
       {
         try {
-          if(!authUser)
+          if(authUser.username !== args.username)
           {
-            throw new Error("Unauthenticated user");
+            return new Error("Unauthenticated user");
           }
           const user1 = await Users.findOne({username: args.fromUsername});
           if (!user1) return new Error("Username " + args.fromUsername + " does not exist");
@@ -188,9 +250,9 @@ const Mutation = new GraphQLObjectType({
       },
       async resolve(parent, args, {authUser})
       {
-        if(!authUser)
+        if(authUser.username !== args.username)
         {
-          throw new Error("Unauthenticated user");
+          return new Error("Unauthenticated user");
         }
         try 
         {
@@ -231,9 +293,9 @@ const Mutation = new GraphQLObjectType({
       // Edit About section for a user
       async resolve(parent, args, {authUser}) 
       {
-        if(!authUser)
+        if(authUser.username !== args.username)
         {
-          throw new Error("Unauthenticated user");
+          return new Error("Unauthenticated user");
         }
         try 
         {
@@ -267,9 +329,9 @@ const Mutation = new GraphQLObjectType({
         password: { type: GraphQLString }
       },
       async resolve (parent, args, {authUser}) {
-        if(!authUser)
+        if(authUser.username !== args.username)
         {
-          throw new Error("Unauthenticated user");
+          return new Error("Unauthenticated user");
         }
         try 
         {
@@ -344,9 +406,9 @@ const Mutation = new GraphQLObjectType({
       async resolve(parent, args, {authUser}) {
         try 
         {
-          if(!authUser)
+          if(authUser.username !== args.username)
           {
-            throw new Error("Unauthenticated user");
+            return new Error("Unauthenticated user");
           }
           let user1 = args.username1;
           let user2 = args.username2;
@@ -428,9 +490,9 @@ const Mutation = new GraphQLObjectType({
       async resolve(parent, args, {authUser})
       {
         try {
-          if(!authUser)
+          if(authUser.username !== args.username)
           {
-            throw new Error("Unauthenticated user");
+            return new Error("Unauthenticated user");
           }
 
           const senderUser = await Users.findOne({username: args.username});
@@ -438,20 +500,20 @@ const Mutation = new GraphQLObjectType({
 
           if(!receiverUser)
           {
-            throw new Error("Username " + args.toUsername + " does not exist");
+            return new Error("Username " + args.toUsername + " does not exist");
           }
           else if(!senderUser)
           {
-            throw new Error("Username " + args.username + " does not exist");
+            return new Error("Username " + args.username + " does not exist");
           }
           else if(receiverUser.username === senderUser.username)
           {
-            throw new Error("You cannot message to yourself");
+            return new Error("You cannot message to yourself");
           }
 
           if(args.content.trim() === '')
           {
-            throw new Error("Message is empty. You cannot send an empty message.");
+            return new Error("Message is empty. You cannot send an empty message.");
           }
 
           const message = new Messages({
@@ -486,27 +548,27 @@ const Mutation = new GraphQLObjectType({
           // Check whether user inputted valid reaction emoji
           if(!reactionEmojis.includes(args.reactEmoji))
           {
-            throw new Error('Invalid emoji input');
+            return new Error('Invalid emoji input');
           }
 
           // check user
-          if(!authUser)
+          if(authUser.username !== args.username)
           {
-            throw new Error('Unauthenticated user');
+            return new Error('Unauthenticated user');
           }
           // Check whether the user reacting exist in DB or not
           let username = authUser.username ? authUser.username : '';
           let user = await Users.findOne({username: username});
-          if(!user) throw new Error("User " + username + " does not exist");
+          if(!user) return new Error("User " + username + " does not exist");
 
           // Check whether the message getting reacted exist in DB or not
           let message = await Messages.findOne({_id: args.messageId});
-          if(!message)  throw new Error("Message does not exist");
+          if(!message)  return new Error("Message does not exist");
 
           // Check whether the user is authorized to react to the given message
           if (message.fromUsername !== username && message.toUsername !== username) 
           {
-            throw new Error("User " + username + " is not authorized to react to this message");
+            return new Error("User " + username + " is not authorized to react to this message");
           }
 
           let reaction = await Reactions.findOne({$and: [{messageId: args.messageId}, {userId: user._id}]});
@@ -536,6 +598,37 @@ const Mutation = new GraphQLObjectType({
           throw error;
         }
       }
+    },
+
+    // Video call api for joining room
+    joinVideoCallRoom: {
+      type: new GraphQLNonNull(VideoCallType),
+      args: {
+        username: {type: new GraphQLNonNull(GraphQLString)},
+        videoRoomName: {type: new GraphQLNonNull(GraphQLString)}
+      },
+      async resolve(parent, args, {authUser})
+      {
+        try {
+          // check user
+          if(authUser.username !== args.username)
+          {
+            return new Error('Unauthenticated user');
+          }
+
+          // find or create a room with the given roomName
+          createFindVideoRoom(args.videoRoomName);
+
+          // generate an Access Token for a participant in this room
+          const token = generateAccessToken(args.videoRoomName, args.username);
+          let returnToken = {token: token};
+          return returnToken;
+        } 
+        catch (error) {
+          console.log(error);
+          throw error;
+        }
+      }
     }
   }
 });
@@ -552,9 +645,9 @@ const Subscription = new GraphQLObjectType({
       subscribe: withFilter((parent, args, {authUser}) => {
         try 
         {
-          if(!authUser)
+          if(authUser.username !== args.username)
           {
-            throw new Error("Unauthenticated user");
+            return new Error("Unauthenticated user");
           }
           return pubsub.asyncIterator('NEW_MESSAGE_ARRIVED');
         } 
@@ -579,9 +672,9 @@ const Subscription = new GraphQLObjectType({
       subscribe: withFilter((parent, args, {authUser}) => {
         try 
         {
-          if(!authUser)
+          if(authUser.username !== args.username)
           {
-            throw new Error("Unauthenticated user");
+            return new Error("Unauthenticated user");
           }
           return pubsub.asyncIterator('NEW_REACTION_ARRIVED');
         } 

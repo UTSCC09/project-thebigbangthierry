@@ -125,7 +125,7 @@ app.post('/api/signup', upload.single('profilePicture'), checkUsername, checkPas
                                         if (req.file != undefined)
                                         {
                                             let pathFile = req.file.path;
-                                            if (pathFile != undefined && pathFile != null && pathFile != "")
+                                            if (pathFile !== undefined && pathFile !== null && pathFile !== "")
                                             {
                                                 const picture = await cloudinary.uploader.upload(pathFile, {
                                                     public_id: req.body.username,
@@ -222,7 +222,9 @@ app.post('/login', checkUsername, checkPassword, (req, res, err) => {
                 })
                 .catch(error => {
                     console.log(error);
-                    throw error;
+                    res.status(500).json({
+                        error: error
+                    });
                 });
         })
         .catch(error => {
@@ -260,23 +262,6 @@ const httpServer = createServer(app);
 const wsServer = new WebSocketServer({
     server: httpServer,
     path: '/graphql'
-});
-
-const socketIO = require('socket.io')(httpServer, {cors: {origin: "http://localhost:3000"}});
-socketIO.on("connection", (socket) => {
-    socket.emit("myself", socket.id);
-
-    socket.on("disconnect", () => {
-		socket.broadcast.emit("callDisconnected")
-	});
-
-	socket.on("userCall", (data) => {
-		io.to(data.userToCall).emit("userCall", { signal: data.signalData, from: data.from, name: data.name })
-	});
-
-	socket.on("answerCall", (data) => {
-		io.to(data.to).emit("callAnswered", data.signal)
-	});
 });
 
 const serverCleanup = useServer({ 
