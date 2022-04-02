@@ -7,17 +7,17 @@
 const graphql = require('graphql');
 const bcrypt = require('bcrypt');
 const Users = require('../database/Model/Users');
+const Post = require('../database/Model/Post');
 const {
   GraphQLObjectType,
   GraphQLList,
   GraphQLSchema,
   GraphQLNonNull,
+  GraphQLScalarType,
   GraphQLString,
   GraphQLID,
   GraphQLInt
 } = graphql;
-
-const User = require('../database/Model/Users');
 
 const UserInputType = new GraphQLObjectType({
   name: 'Users',
@@ -43,6 +43,27 @@ const PasswordInputType = new GraphQLObjectType({
   })
 });
 
+const DateInputType = new GraphQLScalarType({
+  name: 'Date',
+  parseValue(value)
+  {
+    return new Date(value);
+  },
+  serialize(value)
+  {
+    return value.toISOString();
+  }
+});
+
+const CommentsInputType = new GraphQLObjectType({
+  name: 'Comment',
+  fields: () => ({
+    commentContent: { type: GraphQLString },
+    commentDate: { type: DateInputType },
+    commenter: { type: new GraphQLNonNull(GraphQLString) }
+  })
+});
+
 const UserType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
@@ -58,6 +79,21 @@ const UserType = new GraphQLObjectType({
   })
 });
 
+const PostType = new GraphQLObjectType({
+  name: 'Posts',
+  fields: () => ({
+    _id: { type: GraphQLID },
+    poster: { type: new GraphQLNonNull(GraphQLID) },
+    posterUsername: {type: new GraphQLNonNull(GraphQLString)},
+    content: { type: GraphQLString },
+    image: { type: GraphQLString },
+    likes: { type: new GraphQLList(GraphQLString) },
+    dislikes: { type: new GraphQLList(GraphQLString) },
+    comments: { type: new GraphQLList(CommentsInputType) },
+    createdAt: { type: GraphQLString }
+  })
+});
+
 const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: {
@@ -67,11 +103,11 @@ const RootQuery = new GraphQLObjectType({
       async resolve(parent, args, {authUser}) {
         try 
         {
-          if(!authUser)
+          if(authUser.username !== args.username)
           {
-            throw new Error("Unauthenticated user");
+            return new Error("Unauthenticated user");
           }
-          const users = await User.findOne({username: args.username});
+          const users = await Users.findOne({username: args.username});
 
           console.log(users);
           return users;
@@ -82,7 +118,169 @@ const RootQuery = new GraphQLObjectType({
           throw new err;
         }
       }
-    }
+    },
+
+    // Get the posts posted by the user
+    getMyPosts: {
+      type: new GraphQLList(new GraphQLNonNull(PostType)),
+      args: { username: {type: new GraphQLNonNull(GraphQLString)}, pageIndex: {type: GraphQLInt}},
+      async resolve(parent, args, {authUser})
+      {
+        try 
+        {
+          if(authUser.username !== args.username)
+          {
+            return new Error("Unauthenticated user");
+          }
+          if(args.pageIndex <= 0)
+          {
+            return new Error("Invalid Page Index")
+          }
+          let skipPages = (args.pageIndex * 10) - 10;
+          return Post.find({posterUsername: args.username})
+            .skip(skipPages)
+            .limit(10)
+            .sort({createdAt: -1})
+            .then((posts) => {
+              if(!posts) return new Error("No posts found for the user " + args.username);
+              if(posts.length == 0) return new Error("No posts found for the user " + args.username);
+
+              console.log(posts);
+              return posts;
+            })
+            .catch(err => {
+              console.log(err);
+              throw err;
+            });
+        } 
+        catch (error) 
+        {
+          console.log(error);
+          throw error;
+        }
+      }
+    },
+
+    // The posts of the users in the following list for current users
+    getFollowingPosts: {
+      type: new GraphQLList(new GraphQLNonNull(PostType)),
+      args: { username: {type: new GraphQLNonNull(GraphQLString)}, pageIndex: {type: GraphQLInt}},
+      async resolve(parent, args, {authUser})
+      {
+        try 
+        {
+          if(authUser.username !== args.username)
+          {
+            return new Error("Unauthenticated user");
+          }
+
+          if(args.pageIndex <= 0)
+          {
+            return new Error("Invalid Page Index")
+          }
+          let skipPages = (args.pageIndex * 20) - 20;
+
+          return Users.findOne({username: args.username})
+            .then((user) => {
+              if (!user) return new Error("Username " + args.username + " does not exist");
+              let followingList = user.followingList;
+              let followingUsers = [];
+              for(let i = 0; i < followingList.length; i++)
+              {
+                followingUsers.push((followingList[i].username));
+              }
+              
+              return Post.find({posterUsername: followingUsers})
+                .skip(skipPages)
+                .limit(20)
+                .sort({createdAt: -1})
+                .then((posts) => {
+                  if(!posts) return new Error("No posts found in the following list for the user " + args.username);
+                  if(posts.length == 0) return new Error("No more posts found in the following list for the user " + args.username);
+
+                  console.log(posts);
+                  return posts;
+                })
+                .catch(err => {
+                  console.log(err);
+                  throw err;
+                })
+            })
+            .catch(err => {
+              console.log(err);
+              throw err;
+            })
+        } 
+        catch (error) 
+        {
+          console.log(error);
+          throw error;
+        }
+      }
+    },
+
+    // Search the user to add to following list
+    searchListUsers: {
+      type: new GraphQLNonNull(new GraphQLList(UserType)),
+      args: {
+        username: { type: new GraphQLNonNull(GraphQLString) },
+        searchContent: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      async resolve(parent, args, {authUser})
+      {
+        if(authUser.username !== args.username)
+        {
+          return new Error("Unauthenticated user");
+        }
+
+        try 
+        {
+          if(args.searchContent.length < 3)
+          {
+            return new Error("Type atleast 3 characters for correct searches.")
+          }
+
+          return Users.find({username: {$regex: args.searchContent, $options: 'i'}})
+            .exec()
+            .then((data) => {
+              return data;
+            })
+            .catch((err) => {
+              console.log(err);
+              throw err;
+            });
+        } 
+        catch (error) 
+        {
+          console.log(error);
+          throw error;
+        }
+      }
+    },
+
+    // // Get comments for the given post id
+    // getComments: {
+    //   type: new GraphQLList(CommentsInputType),
+    //   args: {
+    //     username: { type: new GraphQLNonNull(GraphQLString) },
+    //     postId: { type: new GraphQLNonNull(GraphQLID) }
+    //   },
+    //   async resolve(parent, args, {authUser})
+    //   {
+    //     if(!authUser)
+    //     {
+    //       throw new Error("Unauthenticated user");
+    //     }
+    //     try 
+    //     {
+    //       return Post.findOne({_id: args.postId})
+    //     } 
+    //     catch (error) {
+    //       console.log(error);
+    //       throw error;
+    //     }
+    //   }
+    // }
   }
 });
 
@@ -97,9 +295,9 @@ const Mutation = new GraphQLObjectType({
       },
       async resolve(parent, args, {authUser})
       {
-        if(!authUser)
+        if(authUser.username !== args.username)
         {
-          throw new Error("Unauthenticated user");
+          return new Error("Unauthenticated user");
         }
         try 
         {
@@ -110,7 +308,7 @@ const Mutation = new GraphQLObjectType({
               .exec()
               .then((data) => {
                 //console.log(data);
-                const users = User.findOne({username: args.username});
+                const users = Users.findOne({username: args.username});
                 return users;
               })
               .catch(err => {
@@ -139,9 +337,9 @@ const Mutation = new GraphQLObjectType({
       // Edit About section for a user
       async resolve(parent, args, {authUser}) 
       {
-        if(!authUser)
+        if(authUser.username !== args.username)
         {
-          throw new Error("Unauthenticated user");
+          return new Error("Unauthenticated user");
         }
         try 
         {
@@ -174,9 +372,9 @@ const Mutation = new GraphQLObjectType({
         password: { type: GraphQLString }
       },
       async resolve (parent, args, {authUser}) {
-        if(!authUser)
+        if(authUser.username !== args.username)
         {
-          throw new Error("Unauthenticated user");
+          return new Error("Unauthenticated user");
         }
         try 
         {
@@ -199,7 +397,7 @@ const Mutation = new GraphQLObjectType({
                   .then(salt => {
                     return bcrypt.hash(pass, salt)
                       .then(hashPass => {
-                        return User.updateOne({username: args.username}, {password: hashPass})
+                        return Users.updateOne({username: args.username}, {password: hashPass})
                           .then(() => {
                             const users = {username: args.username, password: hashPass}
                             return users;
@@ -245,9 +443,13 @@ const Mutation = new GraphQLObjectType({
       },
       // Username1 gets followed by Username2. Profile picture of username2
       async resolve(parent, args, {authUser}) {
-        if(!authUser)
+        if(authUser.username !== args.username1)
         {
-          throw new Error("Unauthenticated user");
+          return new Error("Unauthenticated user");
+        }
+        if(args.username1 === args.username2)
+        {
+          return new Error("You cannot follow yourself");
         }
         try 
         {
@@ -316,7 +518,10 @@ const Mutation = new GraphQLObjectType({
           throw error;
         }
       }
-    }
+    },
+
+    // All APIs related to posts are below
+    
   }
 });
 
