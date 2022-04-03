@@ -486,7 +486,7 @@ const Mutation = new GraphQLObjectType({
       },
       // Username1 gets followed by Username2. Profile picture of username2
       async resolve(parent, args, {authUser}) {
-        if(authUser.username !== args.username1)
+        if(authUser.username !== args.username2)
         {
           return new Error("Unauthenticated user");
         }
