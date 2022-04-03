@@ -8,6 +8,7 @@ const graphql = require('graphql');
 const bcrypt = require('bcrypt');
 const Users = require('../database/Model/Users');
 const Post = require('../database/Model/Post');
+const cloudinary = require('../config/cloudinary');
 const {
   GraphQLObjectType,
   GraphQLList,
@@ -131,7 +132,10 @@ const RootQuery = new GraphQLObjectType({
     // Get the posts posted by the user
     getMyPosts: {
       type: new GraphQLList(new GraphQLNonNull(PostType)),
-      args: { username: {type: new GraphQLNonNull(GraphQLString)}, pageIndex: {type: GraphQLInt}},
+      args: { 
+        username: {type: new GraphQLNonNull(GraphQLString)}, 
+        pageIndex: {type:  new GraphQLNonNull(GraphQLInt)}
+      },
       async resolve(parent, args, {authUser})
       {
         try 
@@ -172,7 +176,10 @@ const RootQuery = new GraphQLObjectType({
     // The posts of the users in the following list for current users
     getFollowingPosts: {
       type: new GraphQLList(new GraphQLNonNull(PostType)),
-      args: { username: {type: new GraphQLNonNull(GraphQLString)}, pageIndex: {type: GraphQLInt}},
+      args: { 
+        username: {type: new GraphQLNonNull(GraphQLString)},
+         pageIndex: {type:  new GraphQLNonNull(GraphQLInt)}
+        },
       async resolve(parent, args, {authUser})
       {
         try 
@@ -249,7 +256,7 @@ const RootQuery = new GraphQLObjectType({
           }
 
           return Users.find({username: {$regex: args.searchContent, $options: 'i'}})
-            .exec()
+            .limit(10)
             .then((data) => {
               return data;
             })
@@ -266,29 +273,57 @@ const RootQuery = new GraphQLObjectType({
       }
     },
 
-    // // Get comments for the given post id
-    // getComments: {
-    //   type: new GraphQLList(CommentsInputType),
-    //   args: {
-    //     username: { type: new GraphQLNonNull(GraphQLString) },
-    //     postId: { type: new GraphQLNonNull(GraphQLID) }
-    //   },
-    //   async resolve(parent, args, {authUser})
-    //   {
-    //     if(!authUser)
-    //     {
-    //       throw new Error("Unauthenticated user");
-    //     }
-    //     try 
-    //     {
-    //       return Post.findOne({_id: args.postId})
-    //     } 
-    //     catch (error) {
-    //       console.log(error);
-    //       throw error;
-    //     }
-    //   }
-    // }
+    // Get comments for the given post id
+    //page index starts from 0
+    getComments: {
+      type: new GraphQLList(CommentsInputType),
+      args: {
+        username: { type: new GraphQLNonNull(GraphQLString) },
+        postId: { type: new GraphQLNonNull(GraphQLID) },
+        pageIndex: { type:  new GraphQLNonNull(GraphQLInt) }
+      },
+      async resolve(parent, args, {authUser})
+      {
+        if(authUser.username !== args.username)
+        {
+          throw new Error("Unauthenticated user");
+        }
+        if(args.pageIndex <= 0)
+        {
+          return new Error("Invalid Page Index")
+        }
+        try 
+        {
+          return Users.findOne({username: args.username})
+            .then((user) => {
+              if(!user) return new Error("User does not exist");
+
+              return Post.findOne({_id: args.postId})
+                .then((post) => {
+                  if (!post) return new Error("Post doesn't exist");
+
+                  let comments = post.comments.sort(function(a, b){
+                    return DateInputType.parseValue(b.commentDate) - DateInputType.parseValue(a.commentDate);
+                  });
+                  let startComment = (args.pageIndex * 5)
+                  return comments.slice(startComment, startComment + 5);
+                })
+                .catch((err) => {
+                  console.log(err);
+                  throw err;
+                });
+            })
+            .catch((err) => {
+              console.log(err);
+              throw err;
+            });
+        } 
+        catch (error) {
+          console.log(error);
+          throw error;
+        }
+      }
+    }
   }
 });
 
@@ -547,41 +582,186 @@ const Mutation = new GraphQLObjectType({
 
         try 
         {
-          return Post.findById({_id: args.postId})
-            .exec()
-            .then((post) => {
-              if(!post) return new Error("Post doesn't exist");
+          return Users.findOne({username: args.username})
+            .then((user) => {
+              if(!user) return new Error("User does not exist");
 
-              if(args.action === "like")
-              {
-                if(post.likes.map(a=>a.liker).includes(args.username))
-                {
-                  return new Error("User " + args.username + " has already liked this post");
-                }
-                post.likes.push({liker: args.username});
-                post.save();
-                return {likeCount: post.likes.length, dislikeCount: post.dislikes.length};
-              }
-              else if(args.action === "dislike")
-              {
-                if(post.dislikes.map(a=>a.disliker).includes(args.username))
-                {
-                  return new Error("User " + args.username + " has already disliked this post");
-                }
-                post.dislikes.push({disliker: args.username});
-                post.save();
-                return {likeCount: post.likes.length, dislikeCount: post.dislikes.length};
-              }
+              return Post.findById({_id: args.postId})
+                .exec()
+                .then((post) => {
+                  if(!post) return new Error("Post doesn't exist");
+
+                  if(args.action === "like")
+                  {
+                    if(post.likes.map(a=>a.liker).includes(args.username))
+                    {
+                      return new Error("User " + args.username + " has already liked this post");
+                    }
+                    post.likes.push({liker: args.username});
+                    post.save();
+                    return {likeCount: post.likes.length, dislikeCount: post.dislikes.length};
+                  }
+                  else if(args.action === "dislike")
+                  {
+                    if(post.dislikes.map(a=>a.disliker).includes(args.username))
+                    {
+                      return new Error("User " + args.username + " has already disliked this post");
+                    }
+                    post.dislikes.push({disliker: args.username});
+                    post.save();
+                    return {likeCount: post.likes.length, dislikeCount: post.dislikes.length};
+                  }
+                })
+                .catch((err) => {
+                  console.log(err);
+                  throw err;
+                });
             })
             .catch((err) => {
               console.log(err);
               throw err;
-            })
+            });
         } 
         catch (error) 
         {
           console.log(error);
-          throw new error;
+          throw error;
+        }
+      }
+    },
+
+    // Delete the post
+    deletePost: {
+      type: GraphQLString,
+      args: {
+        username: { type: new GraphQLNonNull(GraphQLString) },
+        postId: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      async resolve(parent, args, {authUser})
+      {
+        if(authUser.username !== args.username)
+        {
+          return new Error("Unauthenticated user");
+        }
+
+        try 
+        {
+          return Users.findOne({username: args.username})
+            .then((user) => {
+              if(!user) return new Error("User does not exist");
+
+              return Post.findById({_id: args.postId})
+                .then((post) => {
+                  if (!post) return new Error("Post doesn't exist");
+
+                  if(post.posterUsername !== args.username)
+                  {
+                    return new Error("You are unauthorized to delete this post");
+                  }
+                  let imageUrl = post.image;
+                  let publicId;
+                  if(imageUrl !== "")
+                  {
+                    let splitImage = imageUrl.split('/');
+                    let imageFile = splitImage[splitImage.length - 1];
+                    publicId = imageFile.slice(0, imageFile.indexOf('.'));
+                  }
+                  
+                  
+                  return Post.deleteOne({_id: args.postId})
+                    .then(async () => {
+                      try 
+                      {
+                        if(publicId !== null && publicId !== undefined && imageUrl !== "")
+                        {
+                          await cloudinary.uploader.destroy(publicId, function(result) {console.log(result)});
+                        }
+                        return "Post deleted successfully";
+                      } 
+                      catch (error) 
+                      {
+                        console.log(error);
+                        throw error;
+                      }
+                      
+                    })
+                    .catch((err) => {
+                      console.log(err);
+                      throw err;
+                    });
+                })
+                .catch((err) => {
+                  console.log(err);
+                  throw err;
+                });
+            })
+            .catch((err) => {
+              console.log(err);
+              throw err;
+            });
+        } 
+        catch (error) 
+        {
+          console.log(error);
+          throw error;
+        }
+      }
+    },
+
+    // All APIs related to comments are below
+
+    // Add comments to a particular post
+    addComments: {
+      type: CommentsInputType,
+      args: {
+        username: { type: new GraphQLNonNull(GraphQLString) },
+        postId: { type: new GraphQLNonNull(GraphQLID) },
+        commentContent: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      async resolve(parent, args, {authUser})
+      {
+        if(authUser.username !== args.username)
+        {
+          return new Error("Unauthenticated user");
+        }
+
+        if(args.commentContent === "")
+        {
+          return new Error("Comment cannot be empty");
+        }
+
+        try 
+        {
+          return Users.findOne({username: args.username})
+          .then((user) => {
+            if(!user) return new Error("User does not exist");
+
+            return Post.findById({_id: args.postId})
+              .then((post) => {
+                if (!post) return new Error("Post doesn't exist");
+
+                let newComment = {commenter: args.username, commentContent: args.commentContent};
+                post.comments.push(newComment);
+                post.save();
+                let date = post.comments[post.comments.length - 1].commentDate;
+                let returnComment = {commenter: args.username, commentContent: args.commentContent, 
+                  commentDate: date};
+                return returnComment;
+              })
+              .catch((err) => {
+                console.log(err);
+                throw err;
+              });
+          })
+          .catch((err) => {
+            console.log(err);
+            throw err;
+          });
+        } 
+        catch (error) 
+        {
+          console.log(error);
+          throw error;
         }
       }
     }
