@@ -132,7 +132,10 @@ const RootQuery = new GraphQLObjectType({
     // Get the posts posted by the user
     getMyPosts: {
       type: new GraphQLList(new GraphQLNonNull(PostType)),
-      args: { username: {type: new GraphQLNonNull(GraphQLString)}, pageIndex: {type: GraphQLInt}},
+      args: { 
+        username: {type: new GraphQLNonNull(GraphQLString)}, 
+        pageIndex: {type:  new GraphQLNonNull(GraphQLInt)}
+      },
       async resolve(parent, args, {authUser})
       {
         try 
@@ -173,7 +176,10 @@ const RootQuery = new GraphQLObjectType({
     // The posts of the users in the following list for current users
     getFollowingPosts: {
       type: new GraphQLList(new GraphQLNonNull(PostType)),
-      args: { username: {type: new GraphQLNonNull(GraphQLString)}, pageIndex: {type: GraphQLInt}},
+      args: { 
+        username: {type: new GraphQLNonNull(GraphQLString)},
+         pageIndex: {type:  new GraphQLNonNull(GraphQLInt)}
+        },
       async resolve(parent, args, {authUser})
       {
         try 
@@ -267,29 +273,57 @@ const RootQuery = new GraphQLObjectType({
       }
     },
 
-    // // Get comments for the given post id
-    // getComments: {
-    //   type: new GraphQLList(CommentsInputType),
-    //   args: {
-    //     username: { type: new GraphQLNonNull(GraphQLString) },
-    //     postId: { type: new GraphQLNonNull(GraphQLID) }
-    //   },
-    //   async resolve(parent, args, {authUser})
-    //   {
-    //     if(authUser.username !== args.username)
-    //     {
-    //       throw new Error("Unauthenticated user");
-    //     }
-    //     try 
-    //     {
-    //       return Post.findOne({_id: args.postId})
-    //     } 
-    //     catch (error) {
-    //       console.log(error);
-    //       throw error;
-    //     }
-    //   }
-    // }
+    // Get comments for the given post id
+    //page index starts from 0
+    getComments: {
+      type: new GraphQLList(CommentsInputType),
+      args: {
+        username: { type: new GraphQLNonNull(GraphQLString) },
+        postId: { type: new GraphQLNonNull(GraphQLID) },
+        pageIndex: { type:  new GraphQLNonNull(GraphQLInt) }
+      },
+      async resolve(parent, args, {authUser})
+      {
+        if(authUser.username !== args.username)
+        {
+          throw new Error("Unauthenticated user");
+        }
+        if(args.pageIndex <= 0)
+        {
+          return new Error("Invalid Page Index")
+        }
+        try 
+        {
+          return Users.findOne({username: args.username})
+            .then((user) => {
+              if(!user) return new Error("User does not exist");
+
+              return Post.findOne({_id: args.postId})
+                .then((post) => {
+                  if (!post) return new Error("Post doesn't exist");
+
+                  let comments = post.comments.sort(function(a, b){
+                    return DateInputType.parseValue(b.commentDate) - DateInputType.parseValue(a.commentDate);
+                  });
+                  let startComment = (args.pageIndex * 5)
+                  return comments.slice(startComment, startComment + 5);
+                })
+                .catch((err) => {
+                  console.log(err);
+                  throw err;
+                });
+            })
+            .catch((err) => {
+              console.log(err);
+              throw err;
+            });
+        } 
+        catch (error) {
+          console.log(error);
+          throw error;
+        }
+      }
+    }
   }
 });
 
