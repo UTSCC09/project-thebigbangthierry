@@ -1,8 +1,10 @@
+import { Button } from '@mui/material';
 import React, { useState, useEffect, useRef } from 'react';
 
-const VideoParticipant = ({ participant }) => {
+const VideoParticipant = ({ participant , self }) => {
   const [videoTracks, setVideoTracks] = useState([]);
   const [audioTracks, setAudioTracks] = useState([]);
+  const [mute, setMute] = useState(true); 
   
   const videoRef = useRef(); 
   const audioRef= useRef(); 
@@ -13,11 +15,19 @@ const VideoParticipant = ({ participant }) => {
 
   useEffect(() => {
     const trackSubscribed = track => {
-      // implementation
+      if (track.kind === 'video') {
+        setVideoTracks(videoTracks => [...videoTracks, track]);
+      } else {
+        setAudioTracks(audioTracks => [...audioTracks, track]);
+      }
     };
 
     const trackUnsubscribed = track => {
-      // implementation
+      if (track.kind === 'video') {
+        setVideoTracks(videoTracks => videoTracks.filter(v => v !== track));
+      } else {
+        setAudioTracks(audioTracks => audioTracks.filter(a => a !== track));
+      }
     };
 
     setVideoTracks(trackpubsToTracks(participant.videoTracks));
@@ -32,7 +42,7 @@ const VideoParticipant = ({ participant }) => {
       participant.removeAllListeners();
     };
   }, [participant]);
-  
+
   useEffect(() => {
     const videoTrack = videoTracks[0];
     if (videoTrack) {
@@ -52,11 +62,20 @@ const VideoParticipant = ({ participant }) => {
       };
     }
   }, [audioTracks]);
+
   return (
-    <div className="participant">
-      <h3>{participant.identity}</h3>
-      <video ref={videoRef} autoPlay={true} />
-      <audio ref={audioRef} autoPlay={true} muted={true} />
+    <div style={{ display: 'flex' , justifyContent: 'center', flexDirection: 'column'}}>
+      <div style={{ display: 'flex' }}>
+        <h3>{participant.identity}</h3>
+        {self ? 
+          <div style={{paddingLeft: '30vw', alignSelf: 'flex-end'}}>
+            <Button sx={{color: 'white'}} onClick={() => setMute(!mute)}> {mute? 'Unmute' : 'Mute'}  </Button>
+          </div>
+          : null }
+      </div>
+      
+      <video style={{height: '30vw', width: 'auto', paddingRight: '5vw'}} muted ref={videoRef} autoPlay={true}/> 
+      <audio ref={audioRef} autoPlay={true} muted={mute} />
     </div>
   );
 };
