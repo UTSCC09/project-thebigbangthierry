@@ -8,6 +8,7 @@ const graphql = require('graphql');
 const bcrypt = require('bcrypt');
 const Users = require('../database/Model/Users');
 const Post = require('../database/Model/Post');
+const cloudinary = require('../config/cloudinary');
 const {
   GraphQLObjectType,
   GraphQLList,
@@ -581,7 +582,76 @@ const Mutation = new GraphQLObjectType({
         catch (error) 
         {
           console.log(error);
-          throw new error;
+          throw error;
+        }
+      }
+    },
+
+    // Delete the post
+    deletePost: {
+      type: GraphQLString,
+      args: {
+        username: { type: new GraphQLNonNull(GraphQLString) },
+        postId: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      async resolve(parent, args, {authUser})
+      {
+        if(authUser.username !== args.username)
+        {
+          return new Error("Unauthenticated user");
+        }
+
+        try 
+        {
+          return Post.findById({_id: args.postId})
+            .then((post) => {
+              if (!post) return new Error("Post doesn't exist");
+
+              if(post.posterUsername !== args.username)
+              {
+                return new Error("You are unauthorized to delete this post");
+              }
+              let imageUrl = post.image;
+              let publicId;
+              if(imageUrl !== "")
+              {
+                let splitImage = imageUrl.split('/');
+                let imageFile = splitImage[splitImage.length - 1];
+                publicId = imageFile.slice(0, imageFile.indexOf('.'));
+              }
+              
+              
+              return Post.deleteOne({_id: args.postId})
+                .then(async () => {
+                  try 
+                  {
+                    if(publicId !== null && publicId !== undefined && imageUrl !== "")
+                    {
+                      await cloudinary.uploader.destroy(publicId, function(result) {console.log(result)});
+                    }
+                    return "Post deleted successfully";
+                  } 
+                  catch (error) 
+                  {
+                    console.log(error);
+                    throw error;
+                  }
+                  
+                })
+                .catch((err) => {
+                  console.log(err);
+                  throw err;
+                });
+            })
+            .catch((err) => {
+              console.log(err);
+              throw err;
+            });
+        } 
+        catch (error) 
+        {
+          console.log(error);
+          throw error;
         }
       }
     }
