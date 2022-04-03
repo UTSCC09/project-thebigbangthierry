@@ -1,7 +1,7 @@
 import {InputAdornment,  TextField, Box, IconButton, Snackbar, Button} from "@mui/material"; 
 import SearchIcon from '@mui/icons-material/Search';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useLazyQuery } from "@apollo/react-hooks";
 import AuthService from "../services/auth.service";
 import { gql } from "apollo-boost";
