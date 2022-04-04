@@ -5,7 +5,6 @@ import AuthService from "../services/auth.service";
 import { gql } from "apollo-boost";
 import {useEffect, useState} from "react"; 
 import { Button } from "@mui/material";
-// import {  useMessageState } from "../services/message";
 
 const GET_PROFILE_POSTS = gql`
   query getPost($username: String! , $pageIndex: Int!) {
@@ -104,10 +103,6 @@ export default function PostForum({profile}){
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  // const {users} = useMessageState(); 
-  // useEffect(() => {
-  //   if (!profile) getFollowingPost({variables: {username: username, pageIndex: page}}); 
-  // }, [users])
   return ( 
     <div>
       {profile ? <PostForm getPost={profile? getProfilePosts: getFollowingPost }  resetPage={resetPage} page={page}/> : null}
