@@ -26,6 +26,7 @@ import {
 
 const httpLink = new HttpLink({
   uri: api_base + '/graphql',
+  
 });
 
 const authLink = setContext((_, { headers }) => {

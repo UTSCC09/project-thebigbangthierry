@@ -23,6 +23,7 @@ const {ApolloServer} = require('apollo-server-express');
 
 const db = require('./config/keys').mongoURI;
 const Users = require('./database/Model/Users');
+const Post = require('./database/Model/Post');
 const schema = require('./graphql_schema/schema');
 const cloudinary = require('./config/cloudinary');
 const upload = require('./config/multer');
@@ -100,7 +101,7 @@ const checkPassword = function(req, res, next) {
 };
 
 // Signup rest api
-app.post('/signup', upload.single('profilePicture'), checkUsername, checkPassword, (req, res, err) => {
+app.post('/signup', upload.single('profilePicture'), checkUsername, checkPassword, (req, res, next) => {
     // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).end('username is missing');
     if (!('password' in req.body)) return res.status(400).end('password is missing');
@@ -195,7 +196,7 @@ app.post('/signup', upload.single('profilePicture'), checkUsername, checkPasswor
 });
 
 // Login rest api
-app.post('/login', checkUsername, checkPassword, (req, res, err) => {
+app.post('/login', checkUsername, checkPassword, (req, res, next) => {
     // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).end('username is missing');
     if (!('password' in req.body)) return res.status(400).end('password is missing');
@@ -250,6 +251,185 @@ app.get('/signout', function (req, res, next) {
       }));
       return res.json("Signout successful");
     }); 
+});
+
+// Rest api for create post (doing it in rest because of multer and cloudinary so that it is consistent)
+// Request body - username, textContent, image; Request header - authorization
+app.post('/createPost', upload.single('image'), function (req, res, next) {
+    if (!('username' in req.body)) return res.status(400).end('username is missing');
+    if (!('textContent' in req.body) && !('image' in req.body)) 
+    {
+        return res.status(400).end('Text and Image are missing');
+    }
+
+    let token;
+    if(req.headers.authorization)
+    {
+        token = req.headers.authorization.split('Bearer ')[1];
+    }
+    let decodedToken
+    if(token)
+    {
+        try 
+        {
+            decodedToken = jwt.verify(token, process.env.JSON_SECRET);
+        } 
+        catch (error) 
+        {
+            console.log(error);
+            return res.status(500).json({error: error});
+        }
+    }
+
+    if(decodedToken.username !== req.body.username)
+    {
+        return res.status(401).end('Unauthenticated user');
+    }
+
+    let username = req.body.username;
+    let content = req.body.textContent;
+
+    if(content === "" && (req.file === undefined || req.file === null))
+    {
+        return res.status(400).end("Post needs to have some text or upload an image");
+    }
+
+    // Find the user 
+    Users.findOne({username: username})
+        .then(async (user) => {
+            if (!user) return res.status(401).end("Username does not exist in the db");
+
+            try 
+            {
+                let profilePicUrl = "";
+
+                if(req.file !== undefined && req.file !== null)
+                {
+                    let pathFile = req.file.path;
+                    if(pathFile !== undefined && pathFile !== null && pathFile !== "")
+                    {
+                        const picture = await cloudinary.uploader.upload(pathFile, {
+                            eager: [{width: 400, height: 400, crop: "scale", quality: "100"}]
+                        });
+                        profilePicUrl = picture.eager[0].secure_url;
+                    }
+                }
+
+                const postDetails = new Post({
+                    poster: user._id,
+                    posterUsername: username,
+                    posterProfilePic: user.profilePicture,
+                    textContent: content,
+                    image: profilePicUrl
+                });
+                console.log(postDetails);
+                postDetails.save()
+                    .then((data) => {
+                        return res.json(data)
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        return res.status(500).json({
+                            error: error
+                        });
+                    });
+            } 
+            catch (error) 
+            {
+                console.log(error);
+                return res.status(500).json({
+                    error: error
+                });
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+            return res.status(500).json({
+                error: err
+            });
+        });
+});
+
+// Rest api for updating profile picture (doing it in rest because of multer and cloudinary so that it is consistent)
+// Request body - username, profile picture file; Request header - authorization
+app.put('/editProfilePicture',upload.single('profilePicture'), function (req, res, next) {
+    if (!('username' in req.body)) return res.status(400).end('username field is missing');
+
+    let token;
+    if(req.headers.authorization)
+    {
+        token = req.headers.authorization.split('Bearer ')[1];
+    }
+    let decodedToken
+    if(token)
+    {
+        try 
+        {
+            decodedToken = jwt.verify(token, process.env.JSON_SECRET);
+        } 
+        catch (error) 
+        {
+            console.log(error);
+            return res.status(500).json({error: error});
+        }
+    }
+
+    if(decodedToken.username !== req.body.username)
+    {
+        return res.status(401).end('Unauthenticated user');
+    }
+
+    let username = req.body.username;
+
+    if(req.file === undefined || req.file === null)
+    {
+        return res.status(400).end("User needs to upload an image");
+    }
+
+    // Find the user
+    Users.findOne({username: username})
+        .then(async (user) => {
+            if (!user) return res.status(401).end("Username does not exist in the db");
+
+            try 
+            {
+                let profilePicUrl = "";
+
+                if(req.file !== undefined && req.file !== null)
+                {
+                    let pathFile = req.file.path;
+                    if(pathFile !== undefined && pathFile !== null && pathFile !== "")
+                    {
+                        const picture = await cloudinary.uploader.upload(pathFile, {
+                            public_id: username,
+                            eager: [{width: 180, height: 180, crop: "scale", quality: "100"}]
+                        });
+                        profilePicUrl = picture.eager[0].secure_url;
+                    }
+                }
+
+                Users.updateOne({username: username}, {profilePicture: profilePicUrl})
+                    .exec()
+                    .then(() => res.json({message: "Profile picture updated successfully!"}))
+                    .catch((error) => {
+                        console.log(error);
+                        return res.status(500).json({error: error});
+                    });
+            } 
+            catch (error) 
+            {
+                console.log(error);
+                return res.status(500).json({
+                    error: error
+                });
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+            return res.status(500).json({
+                error: err
+            });
+        });
 });
 
 // Frontend connect for deployment

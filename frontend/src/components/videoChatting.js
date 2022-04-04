@@ -16,7 +16,7 @@ const GET_ROOM = gql`
 export function VideoChatting () {
   const [roomName, setRoomName] = useState(null);
   const [token, setToken] = useState('');
-  const username = AuthService.getCurrentUser()?.username; 
+  const username = AuthService.getCurrentUser(); 
   const [fullRoom, setFullRoom] = useState(false); 
 
   const [getRoom] = useMutation(GET_ROOM, {
