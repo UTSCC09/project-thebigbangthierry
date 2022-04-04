@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 
 module.exports = (context) => {
     let token;
@@ -6,10 +6,6 @@ module.exports = (context) => {
     {
         token = context.req.headers.authorization.split('Bearer ')[1];
     }
-    // else if(context.connectionParams.authentication)
-    // {
-    //     token = context.connectionParams.authentication.split(' ')[1];
-    // }
     let decodedToken;
     if(token)
     {

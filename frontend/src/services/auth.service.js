@@ -37,6 +37,7 @@ const login = (data) => {
     // console.log(data);
     if (data.token) {
       localStorage.setItem("user", JSON.stringify(data)); 
+      localStorage.setItem("token", data.token);  
       return data;
     }
     return null;   

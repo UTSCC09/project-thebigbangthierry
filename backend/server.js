@@ -1,9 +1,12 @@
-const {graphqlHTTP} = require('express-graphql');
+/*** SOURCES THAT NEED TO BE CREDITED ***/
+/*** 
+ * Web socket code from https://www.apollographql.com/docs/apollo-server/data/subscriptions/
+***/
+
+// const {graphqlHTTP} = require('express-graphql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const https = require('https');
-const fs = require('fs');
 const path = require("path");
 const session = require('express-session');
 const cookie = require('cookie');
@@ -13,8 +16,11 @@ const enforce = require("express-sslify");
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config({path: __dirname + '/./.env'});
-const {ApolloServer} = require('apollo-server-express');
+const {WebSocketServer} = require('ws');
+const {useServer} = require('graphql-ws/lib/use/ws');
 const { createServer } = require('http');
+const {ApolloServer} = require('apollo-server-express');
+
 const db = require('./config/keys').mongoURI;
 const Users = require('./database/Model/Users');
 const Post = require('./database/Model/Post');
@@ -22,6 +28,7 @@ const schema = require('./graphql_schema/schema');
 const cloudinary = require('./config/cloudinary');
 const upload = require('./config/multer');
 const context = require('./auth/contextMiddleware');
+const { ApolloServerPluginDrainHttpServer } = require('apollo-server-core');
 const config = require('./config/config'); 
 
 // Calling express server
@@ -58,10 +65,13 @@ mongoose
 // GraphQL APIs
 // app.use('/graphql', graphqlHTTP({
 //     schema: schema,
+//     context: contextSub,
+//     graphiql: true,
+//     subscriptionsEndpoint: subscriptionsEndpoint
 //     graphiql: true
 // }));
 
-// Display the HTTPS request requested on console
+// Display the HTTP request requested on console
 app.use(function (req, res, next){
     let username = (req.session.user)? req.session.user.username : '';
     res.setHeader('Set-Cookie', cookie.serialize('username', username, {
@@ -433,11 +443,57 @@ if (process.env.NODE_ENV === "production") {
 }
 
 const httpServer = createServer(app);
-let server;
-async function startServer() {
+const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: '/graphql'
+});
+
+const serverCleanup = useServer({ 
+        schema,
+        context: (ctx) => {
+            let token;
+            if(ctx.connectionParams.authorization)
+            {
+                token = ctx.connectionParams.authorization.split('Bearer ')[1];
+            }
+            let decodeToken;
+            if(token)
+            {
+                try {
+                    decodeToken = jwt.verify(token, process.env.JSON_SECRET);
+                    ctx.authUser = decodeToken;
+                } 
+                catch (error) {
+                    console.log(error);
+                    throw error;
+                }
+            }
+            return ctx;
+        }
+    }, 
+    wsServer);
+
+let server
+async function startServer()
+{
     server = new ApolloServer({
         schema,
-        context: context
+        context: context,
+        plugins: [
+            // Shutdown http server
+            ApolloServerPluginDrainHttpServer({httpServer}),
+            // Shutdown web socket server
+            {
+                async serverWillStart()
+                {
+                    return {
+                        async drainServer() {
+                            await serverCleanup.dispose();
+                        },
+                    };
+                },
+            },
+        ]
     });
     await server.start();
     server.applyMiddleware({app});

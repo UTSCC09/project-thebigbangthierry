@@ -22,12 +22,16 @@ const pages = [
   }, 
   {
     name: 'Chatting', 
-    link: 'chatting',
+    link: '/chatting',
   }, 
   {
     name: 'Profile',
     link: '/profile'
   }, 
+  {
+    name: 'Video', 
+    link: '/video'
+  }
   
 ];
 
