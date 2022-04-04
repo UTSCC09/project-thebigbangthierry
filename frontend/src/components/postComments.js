@@ -9,6 +9,7 @@ import Comment from "./comment";
 const GET_COMMENT = gql`
   query ($username: String! , $postId: ID!, $pageIndex: Int!) {
     getComments (username: $username, postId: $postId, pageIndex: $pageIndex) {
+      _id 
       commentContent 
       commentDate
       commenter 

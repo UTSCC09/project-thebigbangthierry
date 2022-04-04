@@ -131,6 +131,7 @@ const DateInputType = new GraphQLScalarType({
 const CommentsInputType = new GraphQLObjectType({
   name: 'Comment',
   fields: () => ({
+    _id: { type: GraphQLID },
     commentContent: { type: GraphQLString },
     commentDate: { type: DateInputType },
     commenter: { type: new GraphQLNonNull(GraphQLString) },
@@ -1045,7 +1046,7 @@ const Mutation = new GraphQLObjectType({
               .then((post) => {
                 if (!post) return new Error("Post doesn't exist");
 
-                let newComment = {commenter: args.username, commentContent: args.commentContent};
+                let newComment = {commenter: args.username, commentContent: args.commentContent, commenterProfilePic: user.profilePicture};
                 post.comments.push(newComment);
                 post.save();
                 let date = post.comments[post.comments.length - 1].commentDate;

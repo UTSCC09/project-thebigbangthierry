@@ -1,9 +1,9 @@
 import {ProfileName} from "./profileName"; 
 
 export default function Comment(props) {
-  const comment = props.comment; 
+  const comment = props.comment;  
   return (
-    <div>
+    <div key={comment._id}>
       <ProfileName user={{username: comment.commenter , profilePicture: comment.commenterProfilePic}}/> 
       <p> {comment.commentContent} </p>
     </div>
