@@ -9,6 +9,9 @@ const PostSchema = new Schema({
     posterUsername: {
         type: String
     },
+    posterProfilePic:{
+        type: String
+    },
     textContent: {
         type: String
     },

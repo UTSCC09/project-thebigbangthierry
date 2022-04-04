@@ -94,6 +94,7 @@ const PostType = new GraphQLObjectType({
     _id: { type: GraphQLID },
     poster: { type: new GraphQLNonNull(GraphQLID) },
     posterUsername: {type: new GraphQLNonNull(GraphQLString)},
+    posterProfilePic: {type: GraphQLString},
     textContent: { type: GraphQLString },
     image: { type: GraphQLString },
     likes: { type: new GraphQLList(GraphQLString) },
@@ -149,18 +150,26 @@ const RootQuery = new GraphQLObjectType({
             return new Error("Invalid Page Index")
           }
           let skipPages = (args.pageIndex * 10) - 10;
-          return Post.find({posterUsername: args.username})
-            .skip(skipPages)
-            .limit(10)
-            .sort({createdAt: -1})
-            .then((posts) => {
-              if(!posts) return new Error("No posts found for the user " + args.username);
-              if(posts.length == 0) return new Error("No posts found for the user " + args.username);
+          return Users.findOne({username: args.username})
+            .then((user) => {
+              if (!user) return new Error("Username " + args.username + " does not exist");
 
-              console.log(posts);
-              return posts;
+              return Post.find({posterUsername: args.username})
+                .skip(skipPages)
+                .limit(10)
+                .sort({createdAt: -1})
+                .then((posts) => {
+                  if(!posts) return new Error("No posts found for the user " + args.username);
+                  if(posts.length == 0) return new Error("No posts found for the user " + args.username);
+
+                  return posts;
+                })
+                .catch(err => {
+                  console.log(err);
+                  throw err;
+                });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
               throw err;
             });
@@ -213,7 +222,6 @@ const RootQuery = new GraphQLObjectType({
                   if(!posts) return new Error("No posts found in the following list for the user " + args.username);
                   if(posts.length == 0) return new Error("No more posts found in the following list for the user " + args.username);
 
-                  console.log(posts);
                   return posts;
                 })
                 .catch(err => {

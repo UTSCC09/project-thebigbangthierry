@@ -308,6 +308,7 @@ app.post('/createPost', upload.single('image'), function (req, res, next) {
                 const postDetails = new Post({
                     poster: user._id,
                     posterUsername: username,
+                    posterProfilePic: user.profilePicture,
                     textContent: content,
                     image: profilePicUrl
                 });
