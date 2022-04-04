@@ -126,10 +126,14 @@ const SEND_MESSAGE = gql`
 const NEW_MESSAGE = gql`
   subscription newMessage ($username: String!) {
     newMessage(username: $username){
+      _id
       fromUsername
       toUsername
       content
       createdAt
+      reaction {
+        reactEmoji
+      }
     } 
   }
 `;
@@ -201,7 +205,7 @@ const reactStyle = {
 export function ChattingMessages(props) {
   const {users} = useMessageState(); 
   const dispatch = useMessageDispatch();
-  const currentUser = AuthService.getCurrentUser().username; 
+  const currentUser = AuthService.getCurrentUser(); 
   
   const selectedUser = users?.find((u) => u.username === props.selected); 
   // console.log(users);
@@ -269,7 +273,7 @@ export function ChattingMessages(props) {
           reaction: newReactData.newReactions,
         },
       })
-      console.log(users); 
+      // console.log(users); 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newReactData, newReactError]);

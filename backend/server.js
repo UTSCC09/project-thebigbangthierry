@@ -15,7 +15,7 @@ const bcrypt = require('bcrypt');
 const enforce = require("express-sslify");
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-require('dotenv').config({path: __dirname + '/./../.env'});
+require('dotenv').config({path: __dirname + '/./.env'});
 const {WebSocketServer} = require('ws');
 const {useServer} = require('graphql-ws/lib/use/ws');
 const { createServer } = require('http');
@@ -28,13 +28,16 @@ const cloudinary = require('./config/cloudinary');
 const upload = require('./config/multer');
 const context = require('./auth/contextMiddleware');
 const { ApolloServerPluginDrainHttpServer } = require('apollo-server-core');
+const config = require('./config/config'); 
 
 // Calling express server
 const app = express();
 app.use(bodyParser.json());
 
 // Add cors
-app.use(cors());
+app.use(cors({ 
+    origin: config.app.origin, 
+}));
 
 // Add cookie session
 app.use(session({
@@ -64,6 +67,7 @@ mongoose
 //     context: contextSub,
 //     graphiql: true,
 //     subscriptionsEndpoint: subscriptionsEndpoint
+//     graphiql: true
 // }));
 
 // Display the HTTP request requested on console
@@ -96,7 +100,7 @@ const checkPassword = function(req, res, next) {
 };
 
 // Signup rest api
-app.post('/api/signup', upload.single('profilePicture'), checkUsername, checkPassword, (req, res, err) => {
+app.post('/signup', upload.single('profilePicture'), checkUsername, checkPassword, (req, res, err) => {
     // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).end('username is missing');
     if (!('password' in req.body)) return res.status(400).end('password is missing');
@@ -314,15 +318,14 @@ async function startServer()
     await server.start();
     server.applyMiddleware({app});
 }
-startServer();
 
+startServer();
 // Listen localhost server at port 4000
 const PORT = 4000;
-httpServer.listen(PORT, (err) => {
+httpServer.listen(config.server.port, function(err){
     if (err) console.log(err);
     else 
     {
-        console.log(server.graphqlPath);
-        console.log("HTTP server on http://localhost:%s%s", PORT, server.graphqlPath);
+        console.log("HTTP server on http://localhost:%s%s", config.server.port, server.graphqlPath);
     }
 });

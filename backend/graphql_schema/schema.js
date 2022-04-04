@@ -195,7 +195,7 @@ const RootQuery = new GraphQLObjectType({
       async resolve(parent, args, {authUser})
       {
         try {
-          if(authUser.username !== args.username)
+          if(authUser.username !== args.fromUsername)
           {
             return new Error("Unauthenticated user");
           }
@@ -552,10 +552,10 @@ const Mutation = new GraphQLObjectType({
           }
 
           // check user
-          if(authUser.username !== args.username)
-          {
-            return new Error('Unauthenticated user');
-          }
+          // if(authUser.username !== args.username)
+          // {
+          //   return new Error('Unauthenticated user');
+          // }
           // Check whether the user reacting exist in DB or not
           let username = authUser.username ? authUser.username : '';
           let user = await Users.findOne({username: username});

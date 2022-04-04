@@ -1,6 +1,6 @@
 import {Box, Avatar } from "@mui/material"; 
 import {useWindowSize} from "../utils/windowSize";
-import { useQuery } from "@apollo/react-hooks";
+import { useLazyQuery } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
 import { useMessageDispatch, useMessageState } from "../services/message";
 import AuthService from "../services/auth.service";
@@ -57,16 +57,19 @@ export function ChattingUsers(props) {
   const size = useWindowSize();
   const selected = props.selected; 
   const dispatch = useMessageDispatch(); 
-  const username = AuthService.getCurrentUser().username;
+  const username = AuthService.getCurrentUser();
   const { users } = useMessageState(); 
   
-  const { loading } = useQuery(GET_USERS, {
+  const [getUsers, { loading, called }] = useLazyQuery(GET_USERS, {
     variables: {user: username}, 
     onCompleted: (data) => 
       dispatch({type: 'SET_USERS', payload: data.user.followingList}), 
     onError: (err) => console.log(err),
   });
 
+  if (!called) {
+    getUsers(); 
+  }
   let usersList; 
   if (!users || loading) {
    usersList = <p> Loading ... </p>

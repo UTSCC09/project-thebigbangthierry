@@ -1,7 +1,7 @@
 
 import { useLazyQuery } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
-import Cookies from 'js-cookie'; 
+import AuthService from "../services/auth.service";
 import {NavBar} from "./navbar"; 
 import DisplayProfile from "./displayProfile"; 
 import {useState} from "react"; 
@@ -33,10 +33,10 @@ export function Profile(){
   const [editMode, setEditMode] = useState(false);
   const [notif, setNotif] = useState(false);  
   const [notifMsg, setNotifMsg] = useState(" ");   
-  const username = Cookies.get("username"); 
+  const username = AuthService.getCurrentUser();
   const dispatch = useMessageDispatch(); 
-  // const [data, setData] = useState(null); 
-  const [loadProfile, { called, loading , data , error}]= useLazyQuery(GET_PROFILE, {
+   
+  const [loadProfile, { called, loading, data , error}]= useLazyQuery(GET_PROFILE, {
     variables: { user: username},
     onCompleted: (data) => {
       dispatch({type: 'ADD_USER', payload: data.user.followingList});  

@@ -5,13 +5,13 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
+    "start": "NODE_ENV=production node server.js",
+    "dev": "NODE_ENV=development nodemon server.js",
     "server": "nodemon server.js"
   },
   "author": "The Big Bang Thierry",
   "license": "ISC",
   "dependencies": {
-    "apollo-server": "^3.6.6",
     "apollo-server-express": "^3.6.6",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.2",
