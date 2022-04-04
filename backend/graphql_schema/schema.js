@@ -94,7 +94,7 @@ const PostType = new GraphQLObjectType({
     _id: { type: GraphQLID },
     poster: { type: new GraphQLNonNull(GraphQLID) },
     posterUsername: {type: new GraphQLNonNull(GraphQLString)},
-    content: { type: GraphQLString },
+    textContent: { type: GraphQLString },
     image: { type: GraphQLString },
     likes: { type: new GraphQLList(GraphQLString) },
     dislikes: { type: new GraphQLList(GraphQLString) },
