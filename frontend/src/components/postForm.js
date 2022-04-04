@@ -11,7 +11,7 @@ export default function PostForm() {
   };
 
   const submitPost = () => {
-    
+    console.log(post); 
   };
 
   return (

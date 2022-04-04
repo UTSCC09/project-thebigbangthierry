@@ -96,7 +96,7 @@ export function Signup() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <label htmlFor="upload-photo">
             <Input  {...register("profilePicture", { onChange: (e) => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
-            <IconButton size="large" component="span"> <PersonAddIcon/> </IconButton>
+            <IconButton size="large" component="span"> <PersonAddIcon color="grey" fontSize="large"/> </IconButton>
             {uploaded? <label> Uploaded </label> : null }
           </label>
 
@@ -137,7 +137,7 @@ export function Signup() {
           })}
           <label htmlFor="submit-signup">
             <Input value="Signup" type="submit" id="submit-signup" sx={{ display: 'none'}}/>
-            <Button sx={{margin: '10px'}} variant="outlined " component="span"> Sign Up </Button>
+            <Button sx={{margin: '10px', backgroundColor: "green"}} variant="contained" component="span"> Sign Up </Button>
           </label>
           
         </form>

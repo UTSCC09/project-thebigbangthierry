@@ -1,9 +1,12 @@
-const {graphqlHTTP} = require('express-graphql');
+/*** SOURCES THAT NEED TO BE CREDITED ***/
+/*** 
+ * Web socket code from https://www.apollographql.com/docs/apollo-server/data/subscriptions/
+***/
+
+// const {graphqlHTTP} = require('express-graphql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const https = require('https');
-const fs = require('fs');
 const path = require("path");
 const session = require('express-session');
 const cookie = require('cookie');
@@ -12,9 +15,11 @@ const bcrypt = require('bcrypt');
 const enforce = require("express-sslify");
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-require('dotenv').config({path: __dirname + '/./../.env'});
-const {ApolloServer} = require('apollo-server-express');
+require('dotenv').config({path: __dirname + '/./.env'});
+const {WebSocketServer} = require('ws');
+const {useServer} = require('graphql-ws/lib/use/ws');
 const { createServer } = require('http');
+const {ApolloServer} = require('apollo-server-express');
 
 const db = require('./config/keys').mongoURI;
 const Users = require('./database/Model/Users');
@@ -22,13 +27,17 @@ const schema = require('./graphql_schema/schema');
 const cloudinary = require('./config/cloudinary');
 const upload = require('./config/multer');
 const context = require('./auth/contextMiddleware');
+const { ApolloServerPluginDrainHttpServer } = require('apollo-server-core');
+const config = require('./config/config'); 
 
 // Calling express server
 const app = express();
 app.use(bodyParser.json());
 
 // Add cors
-app.use(cors());
+app.use(cors({ 
+    origin: config.app.origin, 
+}));
 
 // Add cookie session
 app.use(session({
@@ -55,10 +64,13 @@ mongoose
 // GraphQL APIs
 // app.use('/graphql', graphqlHTTP({
 //     schema: schema,
+//     context: contextSub,
+//     graphiql: true,
+//     subscriptionsEndpoint: subscriptionsEndpoint
 //     graphiql: true
 // }));
 
-// Display the HTTPS request requested on console
+// Display the HTTP request requested on console
 app.use(function (req, res, next){
     let username = (req.session.user)? req.session.user.username : '';
     res.setHeader('Set-Cookie', cookie.serialize('username', username, {
@@ -88,7 +100,7 @@ const checkPassword = function(req, res, next) {
 };
 
 // Signup rest api
-app.post('/api/signup', upload.single('profilePicture'), checkUsername, checkPassword, (req, res, err) => {
+app.post('/signup', upload.single('profilePicture'), checkUsername, checkPassword, (req, res, err) => {
     // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).end('username is missing');
     if (!('password' in req.body)) return res.status(400).end('password is missing');
@@ -117,13 +129,13 @@ app.post('/api/signup', upload.single('profilePicture'), checkUsername, checkPas
                                         if (req.file != undefined)
                                         {
                                             let pathFile = req.file.path;
-                                            if (pathFile != undefined && pathFile != null && pathFile != "")
+                                            if (pathFile !== undefined && pathFile !== null && pathFile !== "")
                                             {
                                                 const picture = await cloudinary.uploader.upload(pathFile, {
                                                     public_id: req.body.username,
                                                     eager: [{ width: 180, height: 180, crop: "scale", quality: "100" }]
                                                 });
-                                                profilePicUrl = picture.eager[0].secure_url
+                                                profilePicUrl = picture.eager[0].secure_url;
                                             }
                                         }
                                         
@@ -214,7 +226,9 @@ app.post('/login', checkUsername, checkPassword, (req, res, err) => {
                 })
                 .catch(error => {
                     console.log(error);
-                    throw error;
+                    res.status(500).json({
+                        error: error
+                    });
                 });
         })
         .catch(error => {
@@ -249,11 +263,57 @@ if (process.env.NODE_ENV === "production") {
 }
 
 const httpServer = createServer(app);
-let server;
-async function startServer() {
+const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: '/graphql'
+});
+
+const serverCleanup = useServer({ 
+        schema,
+        context: (ctx) => {
+            let token;
+            if(ctx.connectionParams.authorization)
+            {
+                token = ctx.connectionParams.authorization.split('Bearer ')[1];
+            }
+            let decodeToken;
+            if(token)
+            {
+                try {
+                    decodeToken = jwt.verify(token, process.env.JSON_SECRET);
+                    ctx.authUser = decodeToken;
+                } 
+                catch (error) {
+                    console.log(error);
+                    throw error;
+                }
+            }
+            return ctx;
+        }
+    }, 
+    wsServer);
+
+let server
+async function startServer()
+{
     server = new ApolloServer({
         schema,
-        context: context
+        context: context,
+        plugins: [
+            // Shutdown http server
+            ApolloServerPluginDrainHttpServer({httpServer}),
+            // Shutdown web socket server
+            {
+                async serverWillStart()
+                {
+                    return {
+                        async drainServer() {
+                            await serverCleanup.dispose();
+                        },
+                    };
+                },
+            },
+        ]
     });
     await server.start();
     server.applyMiddleware({app});
@@ -262,10 +322,10 @@ async function startServer() {
 startServer();
 // Listen localhost server at port 4000
 const PORT = 4000;
-httpServer.listen(PORT, function(err){
+httpServer.listen(config.server.port, function(err){
     if (err) console.log(err);
     else 
     {
-        console.log("HTTP server on http://localhost:%s%s", PORT, server.graphqlPath);
+        console.log("HTTP server on http://localhost:%s%s", config.server.port, server.graphqlPath);
     }
 });
