@@ -61,7 +61,22 @@ const CommentsInputType = new GraphQLObjectType({
   fields: () => ({
     commentContent: { type: GraphQLString },
     commentDate: { type: DateInputType },
-    commenter: { type: new GraphQLNonNull(GraphQLString) }
+    commenter: { type: new GraphQLNonNull(GraphQLString) },
+    commenterProfilePic: { type: GraphQLString }
+  })
+});
+
+const LikesInputType = new GraphQLObjectType({
+  name: 'Likes',
+  fields: () => ({
+    liker: { type: new GraphQLNonNull(GraphQLString) }
+  })
+});
+
+const DislikesInputType = new GraphQLObjectType({
+  name: 'Dislikes',
+  fields: () => ({
+    disliker: { type: new GraphQLNonNull(GraphQLString) }
   })
 });
 
@@ -97,8 +112,8 @@ const PostType = new GraphQLObjectType({
     posterProfilePic: {type: GraphQLString},
     textContent: { type: GraphQLString },
     image: { type: GraphQLString },
-    likes: { type: new GraphQLList(GraphQLString) },
-    dislikes: { type: new GraphQLList(GraphQLString) },
+    likes: { type: new GraphQLList(LikesInputType) },
+    dislikes: { type: new GraphQLList(DislikesInputType) },
     comments: { type: new GraphQLList(CommentsInputType) },
     createdAt: { type: GraphQLString }
   })
@@ -753,7 +768,7 @@ const Mutation = new GraphQLObjectType({
                 post.save();
                 let date = post.comments[post.comments.length - 1].commentDate;
                 let returnComment = {commenter: args.username, commentContent: args.commentContent, 
-                  commentDate: date};
+                  commentDate: date, commenterProfilePic: user.profilePicture};
                 return returnComment;
               })
               .catch((err) => {

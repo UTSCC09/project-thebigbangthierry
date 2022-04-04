@@ -19,7 +19,7 @@ const PostSchema = new Schema({
         type: String
     },
     likes: [{
-        liker: {type: String},
+        liker: {type: String}
     }],
     dislikes: [{
         disliker: {type: String}
@@ -27,7 +27,8 @@ const PostSchema = new Schema({
     comments: [{
         commentContent: {type: String, required: true},
         commentDate: {type: Date, default: Date.now},
-        commenter: {type: String}
+        commenter: {type: String},
+        commenterProfilePic: {type: String}
     }]
 }, {timestamps: true});
 
