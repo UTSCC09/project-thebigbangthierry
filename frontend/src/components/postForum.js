@@ -56,7 +56,7 @@ export default function PostForum({profile}){
   const [posts, setPosts] = useState(null);
   const [page, setPage] = useState(1);  
   const [noPosts, setNoPosts] = useState(false); 
-  const username = AuthService.getCurrentUser(); 
+  const username = AuthService.getCurrentUser();   
 
   const [getProfilePosts] = useLazyQuery(GET_PROFILE_POSTS, {
     onCompleted: data => {
@@ -110,7 +110,7 @@ export default function PostForum({profile}){
   // }, [users])
   return ( 
     <div>
-      <PostForm getPost={profile? getProfilePosts: getFollowingPost }  resetPage={resetPage} page={page}/> 
+      {profile ? <PostForm getPost={profile? getProfilePosts: getFollowingPost }  resetPage={resetPage} page={page}/> : null}
       <h1 style={{fontSize: '5vmin'}}> Posts </h1> 
       <div style={{display: 'flex', justifyContent: 'flex-end'}}>
         <Button onClick={goBack}>  Prev </Button>

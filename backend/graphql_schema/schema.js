@@ -328,7 +328,7 @@ const RootQuery = new GraphQLObjectType({
                   let comments = post.comments.sort(function(a, b){
                     return DateInputType.parseValue(b.commentDate) - DateInputType.parseValue(a.commentDate);
                   });
-                  let startComment = (args.pageIndex * 5)
+                  let startComment = (args.pageIndex * 5 - 5)
                   return comments.slice(startComment, startComment + 5);
                 })
                 .catch((err) => {

@@ -1,4 +1,4 @@
-import {Box, Avatar, Paper, IconButton, Snackbar, Menu, MenuItem} from "@mui/material"
+import {Box, Avatar, Paper, IconButton, Snackbar, Menu, MenuItem, Button} from "@mui/material"
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import { useMutation } from "@apollo/react-hooks";
@@ -6,6 +6,7 @@ import { gql } from "apollo-boost";
 import AuthService from "../services/auth.service";
 import {useEffect, useState} from "react";
 import MoreVert from "@mui/icons-material/MoreVert";
+import PostComments from "./postComments";
 
 const month = ["Jan","Feb","Mar","Apr","May","June","July","Aug","Sept","Oct","Nov","Dec"];
 
@@ -25,6 +26,7 @@ export default function Post(props) {
   const createdAt = new Date(post.createdAt * 1000);
   const timeStamp = month[createdAt.getMonth()] + " " + createdAt.getDate() + ", " + createdAt.toLocaleTimeString('en-US');   
   
+  const [showComments, setShowComments] = useState(false); 
   const [notifMsg, setNotifMsg] = useState(""); 
   const [openNotif, setOpenNotif] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes.length); 
@@ -116,7 +118,15 @@ export default function Post(props) {
       {likeCount} 
       <IconButton onClick={handleDislike}> <ThumbDownOffAltIcon/> </IconButton>  
       {dislikeCount}
+      <Button onClick={()=>setShowComments(!showComments)}> {showComments? "Hide Comments" : "Show Comments"} </Button>
     </Paper>
+    
+    {showComments? 
+    <Paper sx={{padding: '2vmin'}}> 
+      <PostComments post={post} />
+    </Paper> 
+    : null}
+
     <Snackbar open={openNotif} onClose={()=> setOpenNotif(false)} autoHideDuration={2000} message={notifMsg} />
     </Box>
   );
