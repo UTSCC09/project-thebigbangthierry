@@ -106,8 +106,8 @@ export default function PostForum({profile}){
   return ( 
     <div>
       {profile ? <PostForm getPost={profile? getProfilePosts: getFollowingPost }  resetPage={resetPage} page={page}/> : null}
-      <h1 style={{fontSize: '5vmin'}}> Posts </h1> 
-      <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+      <h1 style={{fontSize: '5vmin', textAlign: 'center'}}> Posts </h1> 
+      <div style={{display: 'flex', justifyContent: 'flex-end', backgroundColor: 'white', color: '#002f65'}}>
         <Button onClick={goBack}>  Prev </Button>
         <Button onClick={goForward}> Next  </Button>
       </div>

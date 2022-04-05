@@ -5,6 +5,7 @@ import {Login} from "./components/login";
 import {Profile} from "./components/profile";
 import {Home} from "./components/home";
 import {Chatting} from "./components/chatting"; 
+import Credits from "./components/credits"; 
 import {AuthProvider} from './services/auth'; 
 import { MessageProvider} from './services/message'; 
 import DynamicRoute from './utils/dynamicRoute'; 
@@ -72,14 +73,6 @@ const client = new ApolloClient({
   cache: new InMemoryCache()
 });
 
-/*** SOURCES THAT NEEDED TO BE CREDITED ***/
-/***
- * JWT Authetication: https://www.bezkoder.com/react-hooks-jwt-auth/ 
- * Contexts : https://github.com/hidjou/node-graphql-react-chat-app/blob/ 
- * Dynamic Routes: https://www.youtube.com/watch?v=NTU-vLYNTJQ&list=PLMhAeHCz8S3_VYiYxpcXtMz96vePOuOX3&index=8&ab_channel=Classsed
- * Subscription: https://www.apollographql.com/docs/react/data/subscriptions/#the-older-subscriptions-transport-ws-library
-***/
-
 function App() {
   return (
     <ApolloProvider client={client}>
@@ -92,6 +85,7 @@ function App() {
                     <Route path="/profile" element={<Profile/>}/> 
                     <Route path="/chatting" element={<Chatting/>}/> 
                     <Route path="/video" element={<VideoChatting/>}/> 
+                    <Route path="/credit" element={<Credits/>} /> 
               </Route>
               <Route element={<DynamicRoute guest/>}>
                     <Route path="/signup" element={<Signup />} />

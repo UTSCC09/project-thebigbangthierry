@@ -1,7 +1,3 @@
-/*** SOURCES THAT NEEDED TO BE CREDITED ***/
-  /***
-   * https://www.youtube.com/watch?v=mf-oQLH2TGE&list=PLMhAeHCz8S3_VYiYxpcXtMz96vePOuOX3&index=21&ab_channel=Classsed
-  ***/
 import React, { createContext , useReducer, useContext} from 'react'; 
 import jwtDecode from 'jwt-decode'; 
 

@@ -1,7 +1,3 @@
-/*** SOURCES THAT NEED TO BE CREDITED ***/
-/*** 
- * Web socket code from https://www.apollographql.com/docs/apollo-server/data/subscriptions/
-***/
 
 // const {graphqlHTTP} = require('express-graphql');
 const express = require('express');

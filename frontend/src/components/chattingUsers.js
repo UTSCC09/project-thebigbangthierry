@@ -5,27 +5,6 @@ import { gql } from "apollo-boost";
 import { useMessageDispatch, useMessageState } from "../services/message";
 import AuthService from "../services/auth.service";
 
-// const dummyUsers = [
-//   {
-//     username: 'john',
-//     email: 'john@email.com',
-//     profilePicture:
-//       'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1700&q=80',
-//   },
-//   {
-//     username: 'jane',
-//     email: 'jane@email.com',
-//     profilePicture:
-//       'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2190&q=80',
-//   },
-//   {
-//     username: 'boss',
-//     email: 'boss@email.com',
-//     profilePicture:
-//       'https://images.unsplash.com/photo-1566753323558-f4e0952af115?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2122&q=80',
-//   },
-// ];
-
 const unselectedStyle={ 
   display: 'flex', 
   alignItems: 'center', 

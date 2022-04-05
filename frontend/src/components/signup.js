@@ -1,21 +1,10 @@
 import {Box, Paper, TextField , Input, Button, IconButton} from "@mui/material"; 
-//IconButton
 import { useForm, Controller } from "react-hook-form";
 import {useRef, useState} from "react";
-//setState 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useNavigate , Link } from 'react-router-dom'
 import AuthService from "../services/auth.service";
-
-/*** SOURCES THAT NEEDED TO BE CREDITED ***/
-/***
- * For file upload:  https://stackoverflow.com/questions/69485737/upload-file-using-react-hook-form-in-version-7 
- * For Text field:  https://levelup.gitconnected.com/using-react-hook-form-with-material-ui-components-ba42ace9507a
- * For Confirm Password: https://codesandbox.io/s/react-hook-form-password-match-check-standard-validation-eo6en?file=/src/index.js
- * Customization for input : https://kiranvj.com/blog/blog/file-upload-in-material-ui/
-***/
-
 
 const signUpPaper={padding: 20, height: '75%' , width: '40vw', margin:"20px auto"};
 

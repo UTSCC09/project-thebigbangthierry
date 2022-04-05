@@ -1,8 +1,4 @@
 import React, { createContext, useReducer, useContext } from 'react'
-/*** SOURCES THAT NEEDED TO BE CREDITED ***/
-  /***
-   * https://www.youtube.com/watch?v=IdlA5fhEXoA&list=PLMhAeHCz8S3_VYiYxpcXtMz96vePOuOX3&index=15&ab_channel=Classsed
-  ***/
 const MessageStateContext = createContext()
 const MessageDispatchContext = createContext()
 
@@ -70,13 +66,6 @@ const messageReducer = (state, action) => {
 
         let reactionsCopy = [{reactEmoji: reaction.reactEmoji}] ; 
 
-        // const reactionIndex = reactionsCopy?.findIndex(r => r._id === reaction._id);
-
-        // if (reactionIndex > -1) {
-        //   reactionsCopy[reactionIndex] = reaction
-        // } else {
-        //   reactionsCopy = [...reactionsCopy, reaction]; 
-        // }
         messagesCopy[messageIndex] = {
           ...messagesCopy[messageIndex], 
           reaction: reactionsCopy

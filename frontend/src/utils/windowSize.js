@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 export function useWindowSize() {
   
-  /*** SOURCES THAT NEEDED TO BE CREDITED ***/
-  /***
-   * For windowSize variable: https://usehooks.com/useWindowSize/
-  ***/
   // Initialize state with undefined width/height so server and client renders match
   // Learn more here: https://joshwcomeau.com/react/the-perils-of-rehydration/
   const [windowSize, setWindowSize] = useState({

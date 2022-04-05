@@ -2,11 +2,6 @@ import React from 'react';
 import {TextField, Button, Paper, Typography} from "@mui/material"; 
 import {NavBar} from "./navbar"; 
 
-/*** SOURCES THAT NEEDED TO BE CREDITED ***/
-  /***
-   * https://www.twilio.com/blog/video-chat-react-hooks
-  ***/
-
 export default function VideoLobby({handleSubmit, handleRoomName, fullRoom}) {
 
   return (

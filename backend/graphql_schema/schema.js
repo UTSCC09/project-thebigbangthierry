@@ -1,10 +1,3 @@
-/*** SOURCES THAT NEED TO BE CREDITED ***/
-/*** 
- * Idea for structure of graphql apis from https://atheros.ai/blog/graphql-list-how-to-use-arrays-in-graphql-schema
- * CRUD functions for mongodb database https://www.mongodb.com/docs/manual/crud/
- * Subscription code from https://www.apollographql.com/docs/apollo-server/data/subscriptions/
- * Video call code from https://www.twilio.com/docs/video/tutorials/get-started-with-twilio-video-node-express-server
-***/
 
 // package imports
 const graphql = require('graphql');
