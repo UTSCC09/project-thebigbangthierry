@@ -1,3 +1,4 @@
+import React from "react"; 
 import {Box, Paper } from "@mui/material"; 
 import {NavBar} from "./navbar"; 
 import {ChattingUsers} from "./chattingUsers";

@@ -1,3 +1,4 @@
+import React from "react"; 
 import {ProfileName} from "./profileName"; 
 
 export default function Comment(props) {

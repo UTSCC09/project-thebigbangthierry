@@ -1,3 +1,4 @@
+import React from "react"; 
 import {Box, Paper, TextField , Input, Button, IconButton} from "@mui/material"; 
 import { useForm, Controller } from "react-hook-form";
 import {useRef, useState} from "react";
@@ -84,7 +85,7 @@ export function Signup() {
         <h1> Sign up </h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           <label htmlFor="upload-photo">
-            <Input  {...register("profilePicture", { onChange: (e) => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
+            <Input  {...register("profilePicture", { onChange: () => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
             <IconButton size="large" component="span"> <PersonAddIcon color="grey" fontSize="large"/> </IconButton>
             {uploaded? <label> Uploaded </label> : null }
           </label>

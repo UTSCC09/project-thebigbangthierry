@@ -1,4 +1,4 @@
-import {useState, useEffect} from "react"; 
+import React, {useState, useEffect} from "react"; 
 import {Button} from "@mui/material"; 
 import { useLazyQuery } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
@@ -45,7 +45,8 @@ export default function PostComments(props) {
 
   const resetPage = () => {
     setPage(0); 
-  }
+  };
+
   useEffect(() => {
     getComments({variables: {username: username, postId: post._id, pageIndex: page}}); 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -59,7 +60,7 @@ export default function PostComments(props) {
       {comments ? 
       comments.map((comment) => {
         return (
-          <Comment comment={comment}/> 
+          <Comment key={comment._id} comment={comment}/> 
         );
       }) 
       :null}

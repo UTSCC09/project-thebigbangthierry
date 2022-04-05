@@ -42,7 +42,7 @@ const login = (data) => {
     }
     return null;   
   })
-  .catch( err=> {return null;})
+  .catch( ()=> {return null;})
 };
 
 const logout = () => {

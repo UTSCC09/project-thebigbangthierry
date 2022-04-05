@@ -2,7 +2,7 @@ import {TextField, InputAdornment, IconButton, Input} from "@mui/material";
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import {useForm} from "react-hook-form"; 
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import {useState} from "react"; 
+import React, {useState} from "react"; 
 import SendIcon from '@mui/icons-material/Send';
 import AuthService from "../services/auth.service";
 import { api_base } from "../config";
@@ -64,7 +64,7 @@ export default function PostForm({getPost, resetPage, page}) {
           <div style={{display: 'flex', justifyContent:'flex-end'}}>  
             <label htmlFor="upload-photo">
                 {uploaded? <label> Uploaded </label> : null }
-                <Input  {...register("postPicture", { onChange: (e) => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
+                <Input  {...register("postPicture", { onChange: () => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
                 <IconButton sx={{width: '50px' , height: '50px'}} component="span"> <PersonAddIcon/> </IconButton>
             </label>
             <IconButton sx={{color: '#002f65'}}type="submit"> <SendIcon/> </IconButton>

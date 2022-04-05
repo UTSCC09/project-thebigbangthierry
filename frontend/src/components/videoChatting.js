@@ -35,6 +35,7 @@ export function VideoChatting () {
   }, [roomName]);
 
   const leaveRoom = useCallback(event => {
+    event.preventDefault();
     setToken(null);
   }, []);
 

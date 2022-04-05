@@ -1,3 +1,4 @@
+import React from "react"; 
 import { Container } from "@mui/material";
 import {NavBar} from "./navbar"; 
 import PostForum from "./postForum"; 

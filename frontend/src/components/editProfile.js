@@ -1,6 +1,6 @@
 import {Box, Paper, TextField , Input, Button, IconButton} from "@mui/material"; 
 import { useForm, Controller } from "react-hook-form";
-import {useRef, useState} from "react";
+import React, {useRef, useState} from "react";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useMutation } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
@@ -152,7 +152,7 @@ export default function EditProfile(props) {
         <h1> Edit Profile </h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           <label htmlFor="upload-photo">
-            <Input  {...register("profilePicture", { onChange: (e) => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
+            <Input  {...register("profilePicture", { onChange: () => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
             <IconButton sx={{width: '50px' , height: '50px'}} component="span"> <PersonAddIcon/> </IconButton>
             {uploaded? <label> Uploaded </label> : null }
           </label>

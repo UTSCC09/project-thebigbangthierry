@@ -1,3 +1,4 @@
+import React from "react"; 
 import {Box, Avatar } from "@mui/material"; 
 import {useWindowSize} from "../utils/windowSize";
 import { useLazyQuery } from "@apollo/react-hooks";

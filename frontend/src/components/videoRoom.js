@@ -1,3 +1,4 @@
+import React from "react"; 
 import {  Box, Container} from "@mui/material";
 import {useState, useEffect} from "react"; 
 import Video from "twilio-video"; 
@@ -39,7 +40,8 @@ export default function VideoRoom({setFull, token, roomName, leaveRoom}) {
       room.on('participantDisconnected', participantDisconnected);
       room.participants.forEach(participantConnected);
     })
-    .catch(err => {
+    .catch((err) => {
+      console.log(err); 
       setFull(); 
     });
     return () => {

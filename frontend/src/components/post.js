@@ -1,3 +1,4 @@
+import React from "react"; 
 import {Box, Avatar, Paper, IconButton, Snackbar, Menu, MenuItem, Button} from "@mui/material"
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
@@ -38,7 +39,7 @@ export default function Post(props) {
       setLikeCount(data.updatePostLikesDislikes.likeCount);
       setDislikeCount(data.updatePostLikesDislikes.dislikeCount); 
     },
-    onError: (err) => {
+    onError: () => {
       if (action === "like") {
         setNotifMsg("User has already liked the post"); 
         setOpenNotif(true); 

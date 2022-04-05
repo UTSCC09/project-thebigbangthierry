@@ -1,3 +1,4 @@
+import React from "react"; 
 import Post from "./post";
 import PostForm from "./postForm";
 import { useLazyQuery, useMutation } from "@apollo/react-hooks";
@@ -62,7 +63,7 @@ export default function PostForum({profile}){
       setNoPosts(false);
       setPosts(data.getMyPosts);
     },  
-    onError: (err) => {
+    onError: () => {
       if (page === 1) setNoPosts(true); 
       else setPage(page-1); 
     }, 
@@ -73,7 +74,7 @@ export default function PostForum({profile}){
       setNoPosts(false);
       setPosts(data.getFollowingPosts);
     },  
-    onError: (err) => {
+    onError: () => {
       if (page === 1) setNoPosts(true); 
       else setPage(page-1); 
     }, 
