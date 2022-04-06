@@ -9,7 +9,9 @@ const Messages = require('../database/Model/Messages');
 const Reactions = require('../database/Model/Reactions');
 const {PubSub, withFilter} = require('graphql-subscriptions');
 const {RedisPubSub} = require('graphql-redis-subscriptions');
-const pubsub = process.env.NODE_ENV == "development" ? new PubSub() : new RedisPubSub();
+const pubsub = process.env.NODE_ENV === "development" ? new PubSub() : new RedisPubSub();
+const redisPubSub = new RedisPubSub();
+console.log(process.env.NODE_ENV);
 const AccessToken = require('twilio').jwt.AccessToken;
 const VideoGrant = AccessToken.VideoGrant;
 const {
@@ -1103,8 +1105,8 @@ const Subscription = new GraphQLObjectType({
       type: new GraphQLNonNull(MessageType),
       args: {username: {type: new GraphQLNonNull(GraphQLString)}},
       subscribe: withFilter(
-        () => pubsub.asyncIterator('NEW_MESSAGE_ARRIVED'), 
-        ({newMessage}, args) => newMessage.fromUsername == args.username || newMessage.toUsername == args.username
+        () => redisPubSub.asyncIterator('NEW_MESSAGE_ARRIVED'), 
+        ({newMessage}, args) => (newMessage.fromUsername == args.username || newMessage.toUsername == args.username)
     )},
 
     // Reactions on messages
@@ -1112,8 +1114,8 @@ const Subscription = new GraphQLObjectType({
       type: new GraphQLNonNull(ReactionType),
       args: {username: {type: new GraphQLNonNull(GraphQLString)}},
       subscribe: withFilter(
-        () => pubsub.asyncIterator('NEW_REACTION_ARRIVED'), 
-        ({newReactions}, args) => newReactions.messageId.fromUsername == args.username || newReactions.messageId.toUsername == args.username
+        () => redisPubSub.asyncIterator('NEW_REACTION_ARRIVED'), 
+        ({newReactions}, args) => (newReactions.messageId.fromUsername == args.username || newReactions.messageId.toUsername == args.username)
       )}
     }
 });
