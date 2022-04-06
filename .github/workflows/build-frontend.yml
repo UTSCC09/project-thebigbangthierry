@@ -8,6 +8,7 @@ on:
     # Only run this workflow if the commit has modified files from frontend
     paths:
       - frontend/**
+      - '.github/workflows/build-frontend.yml'
 
 
 env:
