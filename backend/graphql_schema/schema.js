@@ -9,8 +9,8 @@ const Messages = require('../database/Model/Messages');
 const Reactions = require('../database/Model/Reactions');
 const {PubSub, withFilter} = require('graphql-subscriptions');
 const {RedisPubSub} = require('graphql-redis-subscriptions');
-const pubsub = process.env.NODE_ENV === "development" ? new PubSub() : new RedisPubSub();
-const redisPubSub = new RedisPubSub();
+const pubsub = new PubSub();
+const redisPubsub = new RedisPubSub();
 console.log(process.env.NODE_ENV);
 const AccessToken = require('twilio').jwt.AccessToken;
 const VideoGrant = AccessToken.VideoGrant;
@@ -792,7 +792,7 @@ const Mutation = new GraphQLObjectType({
 
           const save = await message.save();
           console.log(save);
-          redisPubSub.publish('NEW_MESSAGE_ARRIVED', { newMessage: save });
+          pubsub.publish('NEW_MESSAGE_ARRIVED', { newMessage: save });
           return save;
         } 
         catch (error) {
@@ -852,7 +852,7 @@ const Mutation = new GraphQLObjectType({
           await Messages.updateOne({_id: args.messageId}, {reaction: reaction._id});
 
           let emojiReact = {reactEmoji: args.reactEmoji, userId: user, messageId: message};
-          redisPubSub.publish('NEW_REACTION_ARRIVED', { newReactions: emojiReact });
+          pubsub.publish('NEW_REACTION_ARRIVED', { newReactions: emojiReact });
           return emojiReact;
         } 
         catch (error) 
@@ -1105,7 +1105,7 @@ const Subscription = new GraphQLObjectType({
       type: new GraphQLNonNull(MessageType),
       args: {username: {type: new GraphQLNonNull(GraphQLString)}},
       subscribe: withFilter(
-        () => redisPubSub.asyncIterator('NEW_MESSAGE_ARRIVED'), 
+        () => pubsub.asyncIterator('NEW_MESSAGE_ARRIVED'), 
         ({newMessage}, args) => (newMessage.fromUsername == args.username || newMessage.toUsername == args.username)
     )},
 
@@ -1114,7 +1114,7 @@ const Subscription = new GraphQLObjectType({
       type: new GraphQLNonNull(ReactionType),
       args: {username: {type: new GraphQLNonNull(GraphQLString)}},
       subscribe: withFilter(
-        () => redisPubSub.asyncIterator('NEW_REACTION_ARRIVED'), 
+        () => pubsub.asyncIterator('NEW_REACTION_ARRIVED'), 
         ({newReactions}, args) => (newReactions.messageId.fromUsername == args.username || newReactions.messageId.toUsername == args.username)
       )}
     }
