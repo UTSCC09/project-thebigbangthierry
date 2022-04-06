@@ -5,8 +5,8 @@
   "main": "",
   "scripts": {
     "start": "npm start --prefix backend",
-    "install-frontend": "cd frontend npm install npm run build",
-    "install-backend": "cd backend npm install",
+    "install-frontend": "cd frontend npm install npm run build cd ..",
+    "install-backend": "cd backend npm install cd ..",
     "heroku-postbuild": "npm run install-frontend && npm run install-backend"
   },
   "author": "",
