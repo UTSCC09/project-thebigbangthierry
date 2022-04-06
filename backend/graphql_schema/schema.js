@@ -792,7 +792,7 @@ const Mutation = new GraphQLObjectType({
 
           const save = await message.save();
           console.log(save);
-          pubsub.publish('NEW_MESSAGE_ARRIVED', { newMessage: save });
+          redisPubSub.publish('NEW_MESSAGE_ARRIVED', { newMessage: save });
           return save;
         } 
         catch (error) {
@@ -852,7 +852,7 @@ const Mutation = new GraphQLObjectType({
           await Messages.updateOne({_id: args.messageId}, {reaction: reaction._id});
 
           let emojiReact = {reactEmoji: args.reactEmoji, userId: user, messageId: message};
-          pubsub.publish('NEW_REACTION_ARRIVED', { newReactions: emojiReact });
+          redisPubSub.publish('NEW_REACTION_ARRIVED', { newReactions: emojiReact });
           return emojiReact;
         } 
         catch (error) 
