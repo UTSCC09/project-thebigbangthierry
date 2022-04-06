@@ -10,8 +10,6 @@ WORKDIR /app
 # where available (npm@5+)
 COPY ./package.json ./
 
-COPY .env ./ 
-
 RUN npm install
 
 # Bundle app source
