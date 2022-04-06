@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 const VideoParticipant = ({ participant , self }) => {
   const [videoTracks, setVideoTracks] = useState([]);
   const [audioTracks, setAudioTracks] = useState([]);
-  const [mute, setMute] = useState(true); 
+  const [mute, setMute] = self ? false: true; 
   
   const videoRef = useRef(); 
   const audioRef= useRef(); 
@@ -67,7 +67,7 @@ const VideoParticipant = ({ participant , self }) => {
     <div style={{ display: 'flex' , justifyContent: 'center', flexDirection: 'column'}}>
       <div style={{ display: 'flex' }}>
         <h3>{participant.identity}</h3>
-        {self ? 
+        {!self ? 
           <div style={{paddingLeft: '30vw', alignSelf: 'flex-end'}}>
             <Button sx={{color: 'white'}} onClick={() => setMute(!mute)}> {mute? 'Unmute' : 'Mute'}  </Button>
           </div>
