@@ -5,7 +5,7 @@ on:
     # Only run this workflow if it is a commit to master.
     branches:
       - master
-    # Only run this workflow if the commit has modified files from frontend
+    # Only run this workflow if the commit has modified files from backend
     paths:
       - backend/**
 
