@@ -81,7 +81,7 @@ const checkPassword = function(req, res, next) {
 };
 
 // Signup rest api
-app.post('/signup', upload.single('profilePicture'), checkUsername, checkPassword, (req, res, err) => {
+app.post('/api/signup', upload.single('profilePicture'), checkUsername, checkPassword, (req, res, err) => {
     // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).end('username is missing');
     if (!('password' in req.body)) return res.status(400).end('password is missing');
@@ -176,7 +176,7 @@ app.post('/signup', upload.single('profilePicture'), checkUsername, checkPasswor
 });
 
 // Login rest api
-app.post('/login', checkUsername, checkPassword, (req, res, err) => {
+app.post('/api/login', checkUsername, checkPassword, (req, res, err) => {
     // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).end('username is missing');
     if (!('password' in req.body)) return res.status(400).end('password is missing');
@@ -219,7 +219,7 @@ app.post('/login', checkUsername, checkPassword, (req, res, err) => {
 });
 
 // Rest api for sign out
-app.get('/signout', function (req, res, next) {
+app.get('/api/signout', function (req, res, next) {
     // destroy session after sign out
     req.session.destroy(function(err){
         if (err) return res.status(500).end(err);
