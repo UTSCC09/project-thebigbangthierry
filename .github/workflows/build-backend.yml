@@ -11,7 +11,7 @@ on:
 
 
 env:
-  IMAGE_NAME: backend-Vineet1610
+  IMAGE_NAME: backend-vineet1610
 
 jobs:
   # Push image to GitHub Packages.
