@@ -1,0 +1,14 @@
+{
+  "name": "project-thebigbangthierry",
+  "version": "1.0.0",
+  "description": "Root package",
+  "main": "",
+  "scripts": {
+    "start": "npm start --prefix backend",
+    "install-frontend": "cd frontend npm install npm run build",
+    "install-backend": "cd backend npm install",
+    "heroku-postbuild": "npm run install-frontend && npm run install-backend"
+  },
+  "author": "",
+  "license": "ISC"
+}
