@@ -1,9 +1,6 @@
-const {graphqlHTTP} = require('express-graphql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const https = require('https');
-const fs = require('fs');
 const path = require("path");
 const session = require('express-session');
 const cookie = require('cookie');
@@ -53,12 +50,6 @@ mongoose
     .catch((err) => {
         console.log(err);
     });
-
-// GraphQL APIs
-// app.use('/graphql', graphqlHTTP({
-//     schema: schema,
-//     graphiql: true
-// }));
 
 // Display the HTTPS request requested on console
 app.use(function (req, res, next){

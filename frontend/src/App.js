@@ -61,6 +61,7 @@ const client = new ApolloClient({
 /***
  * JWT Authetication: https://www.bezkoder.com/react-hooks-jwt-auth/ 
  * Dynamic Routes: https://www.youtube.com/watch?v=NTU-vLYNTJQ&list=PLMhAeHCz8S3_VYiYxpcXtMz96vePOuOX3&index=8&ab_channel=Classsed
+ * Gibberish comments for pushing
 ***/
 
 function App() {
