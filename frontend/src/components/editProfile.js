@@ -1,10 +1,11 @@
 import {Box, Paper, TextField , Input, Button, IconButton} from "@mui/material"; 
 import { useForm, Controller } from "react-hook-form";
-import {useRef, useState} from "react";
+import React, {useRef, useState} from "react";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useMutation } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
 import AuthService from "../services/auth.service";
+import {api_base} from "../config"; 
 
 const editProfilePaper={padding: 20, height: '75%' , width: '40vw', margin:"20px auto"};
 
@@ -33,6 +34,7 @@ export default function EditProfile(props) {
   const { register ,handleSubmit, control, watch, setError } = useForm();
   const data = props.data; 
   const username = AuthService.getCurrentUser(); 
+  const token = AuthService.getToken(); 
   const [editAbout] = useMutation(EDIT_ABOUT, {
     onCompleted: () => {
       props.changeMsg("Updated successfully");
@@ -61,7 +63,6 @@ export default function EditProfile(props) {
     onError: (err) => console.log(err), 
   });
   const onSubmit = (newData) => {
-    
     // console.log(newData);
     if (password.current) {
       if (/^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9]).{8}/.test(password.current)) {
@@ -84,6 +85,32 @@ export default function EditProfile(props) {
     if (newData.fullName !== data.fullName) {
       editFullName({variables: {username: username , fullName: (newData.fullName)}}); 
     } 
+
+    if (uploaded) {
+      const formData = new FormData(); 
+      formData.append( 'profilePicture', newData.profilePicture[0])      
+      formData.append("username", username); 
+      // console.log(formData); 
+      fetch(api_base + "/editProfilePicture", {
+        method: "PUT",
+        headers: new Headers({
+          'authorization': 'Bearer ' + token,
+        }),
+        body: formData
+      })
+      .then((res) => {
+        if (res.ok) {
+          props.changeMsg("Updated successfully");
+          props.displayNotif(); 
+          props.loadProfile();
+          props.closeEditMode(); 
+        }
+        else {
+          throw res.json();
+        }
+      })
+      .catch(err => console.log(err))
+    }
   } 
 
   const [uploaded, setUploaded] = useState(false);
@@ -125,7 +152,7 @@ export default function EditProfile(props) {
         <h1> Edit Profile </h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           <label htmlFor="upload-photo">
-            <Input  {...register("profilePicture", { onChange: (e) => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
+            <Input  {...register("profilePicture", { onChange: () => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
             <IconButton sx={{width: '50px' , height: '50px'}} component="span"> <PersonAddIcon/> </IconButton>
             {uploaded? <label> Uploaded </label> : null }
           </label>

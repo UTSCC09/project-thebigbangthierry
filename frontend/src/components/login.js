@@ -2,7 +2,7 @@ import {Box, Paper, TextField , Input, Button} from "@mui/material";
 import LockIcon from '@mui/icons-material/Lock';
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { useState} from "react"; 
+import React, { useState} from "react"; 
 import { useAuthDispatch } from "../services/auth";
 import AuthService from "../services/auth.service";
 
@@ -19,7 +19,7 @@ const loginPaper={
   margin: 'auto'
 };
 
-export function Login(props) {
+export function Login() {
   const {register, handleSubmit} = useForm();
   const [loginError, setLoginError] = useState(false);
   const navigate = useNavigate();

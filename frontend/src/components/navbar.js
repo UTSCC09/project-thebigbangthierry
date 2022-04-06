@@ -14,7 +14,7 @@ import AuthService from "../services/auth.service";
 import UofTSocialLogo from "../media/UofTSocials_logo.png"
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useAuthDispatch } from '../services/auth'; 
-import Notification from "./notifications"; 
+
 const pages = [
   {
     name: 'Home', 
@@ -22,12 +22,20 @@ const pages = [
   }, 
   {
     name: 'Chatting', 
-    link: 'chatting',
+    link: '/chatting',
   }, 
   {
     name: 'Profile',
     link: '/profile'
   }, 
+  {
+    name: 'Video', 
+    link: '/video'
+  },
+  {
+    name: 'Credits', 
+    link: '/credit'
+  }
   
 ];
 
@@ -87,7 +95,6 @@ export const NavBar = () => {
                 </Button>
               ))}
             </Box>
-            <Notification/>  
             <IconButton
                 size="large"
                 aria-label="account of current user"

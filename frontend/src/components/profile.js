@@ -1,4 +1,4 @@
-
+import React from "react"; 
 import { useLazyQuery } from "@apollo/react-hooks";
 import { gql } from "apollo-boost";
 import AuthService from "../services/auth.service";
@@ -7,6 +7,7 @@ import DisplayProfile from "./displayProfile";
 import {useState} from "react"; 
 import EditProfile from "./editProfile"; 
 import {Snackbar} from "@mui/material"; 
+import { useMessageDispatch } from "../services/message";
 
 const GET_PROFILE = gql`
   query($user: String!) {
@@ -32,9 +33,14 @@ export function Profile(){
   const [editMode, setEditMode] = useState(false);
   const [notif, setNotif] = useState(false);  
   const [notifMsg, setNotifMsg] = useState(" ");   
-  const username = AuthService.getCurrentUser(); 
+  const username = AuthService.getCurrentUser();
+  const dispatch = useMessageDispatch(); 
+   
   const [loadProfile, { called, loading, data , error}]= useLazyQuery(GET_PROFILE, {
     variables: { user: username},
+    onCompleted: (data) => {
+      dispatch({type: 'ADD_USER', payload: data.user.followingList});  
+    }, 
     // pollInterval: 1000,
   });
 

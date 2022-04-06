@@ -37,11 +37,12 @@ const login = (data) => {
     // console.log(data);
     if (data.token) {
       localStorage.setItem("user", JSON.stringify(data)); 
+      localStorage.setItem("token", data.token);  
       return data;
     }
     return null;   
   })
-  .catch( err=> {return null;})
+  .catch( ()=> {return null;})
 };
 
 const logout = () => {
@@ -59,11 +60,18 @@ const getCurrentUser = () => {
   return user.username; 
 };
 
+
+const getToken = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  return user.token; 
+};
+
 const AuthService = {
   register,
   login,
   logout,
   getCurrentUser, 
+  getToken, 
 };  
 
 export default AuthService; 
