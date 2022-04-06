@@ -2,19 +2,19 @@ version: '3'
 services:
   frontend:
     build: ./frontend 
-    image: uoftsocials.azurecr.io/frontend
+    image: ghcr.io/utscc09/frontend-vineet1610
     restart: always
     networks:
       - sub-etha
   backend:
     build: ./backend
-    image: uoftsocials.azurecr.io/backend
+    image: ghcr.io/utscc09/backend-vineet1610
     restart: always 
     networks:
       - sub-etha
   revproxy:
     build: ./nginx
-    image: "uoftsocials.azurecr.io/reverseproxy:1.0.0"
+    image: ghcr.io/utscc09/reverse-proxy-vineet1610
     networks:
       - sub-etha
     ports:
