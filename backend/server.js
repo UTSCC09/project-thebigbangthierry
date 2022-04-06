@@ -1,5 +1,3 @@
-
-// const {graphqlHTTP} = require('express-graphql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -58,16 +56,7 @@ mongoose
         console.log(err);
     });
 
-// GraphQL APIs
-// app.use('/graphql', graphqlHTTP({
-//     schema: schema,
-//     context: contextSub,
-//     graphiql: true,
-//     subscriptionsEndpoint: subscriptionsEndpoint
-//     graphiql: true
-// }));
-
-// Display the HTTP request requested on console
+// Display the HTTPS request requested on console
 app.use(function (req, res, next){
     let username = (req.session.user)? req.session.user.username : '';
     res.setHeader('Set-Cookie', cookie.serialize('username', username, {
@@ -237,7 +226,7 @@ app.post('/login', checkUsername, checkPassword, (req, res, next) => {
 });
 
 // Rest api for sign out
-app.get('/signout', function (req, res, next) {
+app.get('/api/signout', function (req, res, next) {
     // destroy session after sign out
     req.session.destroy(function(err){
         if (err) return res.status(500).end(err);
