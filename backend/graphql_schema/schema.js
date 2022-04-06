@@ -8,7 +8,8 @@ const cloudinary = require('../config/cloudinary');
 const Messages = require('../database/Model/Messages');
 const Reactions = require('../database/Model/Reactions');
 const {PubSub, withFilter} = require('graphql-subscriptions');
-const pubsub = new PubSub();
+const {RedisPubSub} = require('graphql-redis-subscriptions');
+const pubsub = process.env.NODE_ENV == "development" ? new PubSub() : new RedisPubSub();
 const AccessToken = require('twilio').jwt.AccessToken;
 const VideoGrant = AccessToken.VideoGrant;
 const {
@@ -816,11 +817,6 @@ const Mutation = new GraphQLObjectType({
             return new Error('Invalid emoji input');
           }
 
-          // check user
-          // if(authUser.username !== args.username)
-          // {
-          //   return new Error('Unauthenticated user');
-          // }
           // Check whether the user reacting exist in DB or not
           let username = authUser.username ? authUser.username : '';
           let user = await Users.findOne({username: username});
@@ -1106,56 +1102,20 @@ const Subscription = new GraphQLObjectType({
     newMessage: {
       type: new GraphQLNonNull(MessageType),
       args: {username: {type: new GraphQLNonNull(GraphQLString)}},
-      subscribe: withFilter((parent, args, {authUser}) => {
-        try 
-        {
-          if(authUser.username !== args.username)
-          {
-            return new Error("Unauthenticated user");
-          }
-          return pubsub.asyncIterator('NEW_MESSAGE_ARRIVED');
-        } 
-        catch (error) 
-        {
-          console.log(error);
-          throw error;
-        }
-      }, ({newMessage}, args) => {
-        if(newMessage.fromUsername == args.username || newMessage.toUsername == args.username)
-        {
-          return true;
-        }
-        return false;
-      }) 
-    },
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('NEW_MESSAGE_ARRIVED'), 
+        ({newMessage}, args) => newMessage.fromUsername == args.username || newMessage.toUsername == args.username
+    )},
 
     // Reactions on messages
     newReactions: {
       type: new GraphQLNonNull(ReactionType),
       args: {username: {type: new GraphQLNonNull(GraphQLString)}},
-      subscribe: withFilter((parent, args, {authUser}) => {
-        try 
-        {
-          if(authUser.username !== args.username)
-          {
-            return new Error("Unauthenticated user");
-          }
-          return pubsub.asyncIterator('NEW_REACTION_ARRIVED');
-        } 
-        catch (error) 
-        {
-          console.log(error);
-          throw error;
-        }
-      }, ({newReactions}, args) => {
-        if(newReactions.messageId.fromUsername == args.username || newReactions.messageId.toUsername == args.username)
-        {
-          return true;
-        }
-        return false;
-      })
+      subscribe: withFilter(
+        () => pubsub.asyncIterator('NEW_REACTION_ARRIVED'), 
+        ({newReactions}, args) => newReactions.messageId.fromUsername == args.username || newReactions.messageId.toUsername == args.username
+      )}
     }
-  }
 });
 
 module.exports = new GraphQLSchema({
