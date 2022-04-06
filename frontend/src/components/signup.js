@@ -10,7 +10,7 @@ import AuthService from "../services/auth.service";
 const signUpPaper={padding: 20, height: '75%' , width: '40vw', margin:"20px auto"};
 
 export function Signup() {
-  const { register ,handleSubmit, control, watch } = useForm();
+  const { register ,handleSubmit, control, watch, setError } = useForm();
   //setError
   const navigate = useNavigate(); 
   const onSubmit = (data) => {
@@ -26,12 +26,17 @@ export function Signup() {
     })
     .catch(err => {
       // err is not a promise
-      console.log(err)
+      console.log(err); 
+      if (err.error.includes("Username")) {
+        setError("username", {type: "manual", message: "Username taken"});  
+      }
+      else if (err.includes("Email")){ 
+        setError("email", {type: "manual", message: "Email Address already in use "});  
+      }
     });
     // setError("username", {type: "manual", message: "Username taken"});    
   }
   const [uploaded, setUploaded] = useState(false);
-  // const [userTaken, setUserTaken] = useState(true); 
   const password = useRef({}); 
   password.current = watch("password", "");  
   const signupOptions = [
