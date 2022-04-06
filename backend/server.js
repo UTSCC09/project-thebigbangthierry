@@ -226,7 +226,7 @@ app.post('/login', checkUsername, checkPassword, (req, res, next) => {
 });
 
 // Rest api for sign out
-app.get('/api/signout', function (req, res, next) {
+app.get('/signout', function (req, res, next) {
     // destroy session after sign out
     req.session.destroy(function(err){
         if (err) return res.status(500).end(err);
