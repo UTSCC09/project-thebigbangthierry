@@ -4,7 +4,7 @@
   "description": "Root package",
   "main": "",
   "scripts": {
-    "start": "npm start --prefix backend",
+    "start": "npm start --prefix backend/server",
     "install-frontend": "cd frontend npm install npm run build cd ..",
     "install-backend": "cd backend npm install cd ..",
     "heroku-postbuild": "npm run install-frontend && npm run install-backend"
