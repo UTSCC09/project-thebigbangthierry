@@ -5,7 +5,7 @@ const config = {
     port: port 
   },
   app : {
-    origin: ["http://localhost:3000", "https://uoftsocials.herokuapp.com"]
+    origin: ["http://localhost:3000", "https://uoftsocials.herokuapp.com", "wss://uoftsocials.herokuapp.com"]
   }
  }; 
 
