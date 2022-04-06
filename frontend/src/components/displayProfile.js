@@ -1,10 +1,10 @@
+import React from "react"; 
 import {Box, Paper, Avatar , Tab, Tabs, Button} from "@mui/material"; 
 import {TabPanel} from "./tabPanel";
 import { useState} from "react"; 
 import { ProfileName } from "./profileName";
-import PostForm from "./postForm"; 
-import Post from "./post";
 import AddFollowers from "./addFollowers"; 
+import PostFourm from "./postForum";
 
 const pictureStyle = {
   display: 'flex', 
@@ -33,41 +33,6 @@ const aboutStyle ={
 };
 export default function DisplayProfile(props) {
   const [value, setValue] = useState(0);
-  const dummyPost = [
-    {
-      username: "user1", 
-      profilePicture: "", 
-      content: "Here is a sample post ",
-      timePosted: "01/02/2022",
-      comments: [
-        {
-          username: "test", 
-          content: "Hello! "
-        }, 
-      ]
-    },
-    {
-      username: "user1", 
-      profilePicture: "", 
-      content: "Hello there! ",
-      timePosted: "01/02/2022",
-      comments: [
-        {
-          username: "test", 
-          content: "Hello! "
-        }, 
-        {
-          username: "test1", 
-          content: "Hello! "
-        }, 
-        {
-          username: "test2", 
-          content: "Hello! "
-        }, 
-      ]
-    },
-
-  ]; 
 
   function a11yProps(index) {
     return {
@@ -107,12 +72,7 @@ export default function DisplayProfile(props) {
               </Box>
             </TabPanel>
             <TabPanel id="post" value={value} index={1}>
-              <PostForm/> 
-              {dummyPost.map((post, index)=> {
-                return (
-                  <Post key={index} post={post}/> 
-                );
-              })}
+              <PostFourm profile={true}/> 
             </TabPanel>
             <TabPanel id="follow" value={value} index={2}>
               <Box sx={{display:'flex'}}> 

@@ -1,17 +1,24 @@
 
+import React from "react"; 
 import './App.css';
 import {Signup} from "./components/signup"; 
 import {Login} from "./components/login";
 import {Profile} from "./components/profile";
 import {Home} from "./components/home";
-import { ApolloProvider } from "@apollo/react-hooks";
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
+import {Chatting} from "./components/chatting"; 
+import Credits from "./components/credits"; 
 import {AuthProvider} from './services/auth'; 
+import { MessageProvider} from './services/message'; 
 import DynamicRoute from './utils/dynamicRoute'; 
-import {api_base} from "./config"; 
+import {VideoChatting} from './components/videoChatting';
+import { split, HttpLink } from '@apollo/client';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { ApolloClient, InMemoryCache , ApolloProvider} from '@apollo/client';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { createClient } from 'graphql-ws';
+import { setContext } from '@apollo/client/link/context'
+import {api_base, ws_base} from "./config"; 
 
-// import { WebSocketLink } from "apollo-link-ws";
 import {
   BrowserRouter,
   Routes,
@@ -19,8 +26,9 @@ import {
   
 } from 'react-router-dom';
 
-const httpLink = createHttpLink({
+const httpLink = new HttpLink({
   uri: api_base + '/graphql',
+  
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -39,47 +47,54 @@ const authLink = setContext((_, { headers }) => {
   
 });
 
-const client = new ApolloClient({
-  // uri: "http://localhost:4000/graphql",
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache()
-  // link: new WebSocketLink({
-  //   uri: "wss://localhost:4000/graphql",
-  //   options: {
-  //     reconnect: true,
-  //     connectionParams: {
-  //       headers: {
-  //         Authorization: "Bearer yourauthtoken",
-  //       },
-  //     },
-  //   },
-  // }),
-  // cache: new InMemoryCache(),
-});
+const wsLink =new GraphQLWsLink(createClient({
+  url: ws_base + `/graphql`, 
+  options: {
+    reconnect: true , 
+  }, 
+  connectionParams: {
+    authorization: `Bearer ${localStorage.getItem("token")}`,
+  }, 
+})); 
 
-/*** SOURCES THAT NEEDED TO BE CREDITED ***/
-/***
- * JWT Authetication: https://www.bezkoder.com/react-hooks-jwt-auth/ 
- * Dynamic Routes: https://www.youtube.com/watch?v=NTU-vLYNTJQ&list=PLMhAeHCz8S3_VYiYxpcXtMz96vePOuOX3&index=8&ab_channel=Classsed
- * Gibberish comments for pushing
-***/
+const splitLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
+    );
+  },
+  wsLink,
+  authLink.concat(httpLink),
+);
+
+const client = new ApolloClient({
+  link: splitLink,
+  cache: new InMemoryCache()
+});
 
 function App() {
   return (
     <ApolloProvider client={client}>
       <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route element={<DynamicRoute authenticated/>}>
-                <Route exact path='/' element={<Home/>}/>
-                <Route path="/profile" element={<Profile/>}/> 
-          </Route>
-          <Route element={<DynamicRoute guest/>}>
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/login" element={<Login />}/>
-          </Route>
-        </Routes>
-      </BrowserRouter>
+        <MessageProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<DynamicRoute authenticated/>}>
+                    <Route exact path='/' element={<Home/>}/>
+                    <Route path="/profile" element={<Profile/>}/> 
+                    <Route path="/chatting" element={<Chatting/>}/> 
+                    <Route path="/video" element={<VideoChatting/>}/> 
+                    <Route path="/credit" element={<Credits/>} /> 
+              </Route>
+              <Route element={<DynamicRoute guest/>}>
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/login" element={<Login />}/>
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </MessageProvider>
       </AuthProvider>
     </ApolloProvider>
     
