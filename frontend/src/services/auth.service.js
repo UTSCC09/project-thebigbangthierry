@@ -17,7 +17,7 @@ const register = (data) => {
     }
   }
   // console.log(formData); 
-  return fetch(api_base + "/api/signup", {
+  return fetch(api_base + "/signup", {
     method: "POST",
     body: formData
   })
@@ -25,7 +25,7 @@ const register = (data) => {
 const login = (data) => {
    // console.log(data);
   // const { setUser } = useContext(UserContext);
-  return fetch(api_base + "/api/login", {
+  return fetch(api_base + "/login", {
     method: "POST",
     headers: {
       'Content-type' : " application/json", 
@@ -46,7 +46,7 @@ const login = (data) => {
 
 const logout = () => {
   localStorage.removeItem("user");
-  fetch(api_base + "/api/signout", {
+  fetch(api_base + "/signout", {
     method: "GET",
     headers: {
       'Content-type' : " application/json", 
