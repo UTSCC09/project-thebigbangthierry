@@ -28,10 +28,19 @@ const config = require('./config/config');
 // Calling express server
 const app = express();
 app.use(bodyParser.json());
-
+const appOrigin = config.app.origin
 // Add cors
 app.use(cors({ 
-    origin: config.app.origin, 
+    origin: function(origin, callback) {
+        if(!origin) return callback(null, true);
+
+        if(appOrigin.indexOf(origin) === -1){
+            var msg = 'The CORS policy for this site does not ' +
+                      'allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+          }
+        return callback(null, true);
+    } 
 }));
 
 // Add cookie session
