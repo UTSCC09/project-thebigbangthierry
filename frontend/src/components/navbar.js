@@ -47,7 +47,6 @@ export const NavBar = () => {
   const logout = () => {
     AuthService.logout(); 
     dispatch({type: 'LOGOUT'}); 
-    // props.handleLogout(); 
     navigate("/login");
   }
   const darkTheme = createTheme({

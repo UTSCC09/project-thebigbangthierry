@@ -25,12 +25,9 @@ export function Login() {
   const navigate = useNavigate();
   const dispatch = useAuthDispatch(); 
   const onSubmit = data =>{
-    // console.log(data); 
-    // props.handleLogin(data); 
     AuthService.login(data)
     .then ((data)=> {
       if (data) {
-        // console.log(data);
         dispatch({type: 'LOGIN', payload: data}); 
         navigate("/"); 
       }

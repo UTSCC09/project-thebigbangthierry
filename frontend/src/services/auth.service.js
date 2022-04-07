@@ -1,30 +1,22 @@
 import {api_base} from "../config"; 
 const register = (data) => {
   const formData = new FormData(); 
-  // console.log(data);
   for (var key in data) {
     if (key === "profilePicture") {
-      // console.log("honk"); 
       if (data.profilePicture.length === 1) {
-        // console.log("screech"); 
-        // console.log(data.profilePicture[0]);
         formData.append(key, data.profilePicture[0])
       } 
     }
     else {
-      // console.log("beep: " + key + " what: " + data[key]);
       formData.append(key, data[key]); 
     }
   }
-  // console.log(formData); 
   return fetch(api_base + "/signup", {
     method: "POST",
     body: formData
   })
 };
 const login = (data) => {
-   // console.log(data);
-  // const { setUser } = useContext(UserContext);
   return fetch(api_base + "/login", {
     method: "POST",
     headers: {
@@ -34,7 +26,6 @@ const login = (data) => {
   })
   .then(res=> res.json()) 
   .then(data => {
-    // console.log(data);
     if (data.token) {
       localStorage.setItem("user", JSON.stringify(data)); 
       localStorage.setItem("token", data.token);  

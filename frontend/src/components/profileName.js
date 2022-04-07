@@ -2,7 +2,6 @@ import React from "react";
 import { Avatar } from "@mui/material";
 
 export function ProfileName(props) {
-  // console.log(props);
   const user = props.user?  props.user : null;
   var profilePicture = ""
   if (user) profilePicture =  user.profilePicture ? user.profilePicture : ""; 

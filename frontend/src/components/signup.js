@@ -11,12 +11,10 @@ const signUpPaper={padding: 20, height: '75%' , width: '40vw', margin:"20px auto
 
 export function Signup() {
   const { register ,handleSubmit, control, watch, setError } = useForm();
-  //setError
   const navigate = useNavigate(); 
   const onSubmit = (data) => {
     AuthService.register(data)
     .then (async (res)=> {
-      //console.log(res.body); 
       if (!res.ok) {
         throw await res.json();
       }
@@ -125,7 +123,6 @@ export function Signup() {
                   validate: value => value === password.current || "The passwords do not match"
                 }: option.id==="username"? {
                   required: option.label + ' required', 
-                  // validate: value => userTaken || "The username was taken"
                 }
                   :{
                     required: option.label + ' required', 

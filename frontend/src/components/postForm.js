@@ -19,7 +19,6 @@ export default function PostForm({getPost, resetPage, page}) {
     formData.append( 'image', newData.postPicture[0])      
     formData.append('username', username); 
     formData.append('textContent', newData.content); 
-    // console.log(formData); 
     fetch(api_base + "/createPost", {
       method: "POST",
       headers: new Headers({

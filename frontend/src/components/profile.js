@@ -41,7 +41,6 @@ export function Profile(){
     onCompleted: (data) => {
       dispatch({type: 'ADD_USER', payload: data.user.followingList});  
     }, 
-    // pollInterval: 1000,
   });
 
   const openEditMode = () => setEditMode(true); 

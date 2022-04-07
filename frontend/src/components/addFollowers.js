@@ -55,7 +55,7 @@ export default function AddFollowers(props) {
       displayNotif();
     }
   });
-  // console.log(props);  
+
   const displayNotif = () => {
     setAddNotif(true);
   }; 
@@ -77,7 +77,6 @@ export default function AddFollowers(props) {
   } 
 
   const searchResults = () => {
-    // console.log(search);
     if (search.length < 3 ) setSearchError(true); 
     else {
       searchUser({variables: {username: username, searchContent: search}}); 

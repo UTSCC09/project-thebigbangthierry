@@ -8,96 +8,6 @@ import AuthService from "../services/auth.service";
 import { useMessageDispatch, useMessageState } from "../services/message";
 import ReactBar from './reactBar'; 
 
-// const messages = [
-//   {
-//     uuid: '7648485a-6657-48d7-87d6-6a98931d3598',
-//     content: 'Hey Jane!',
-//     from: 'john',
-//     to: 'jane',
-//     createdAt: '2020-07-01 07:00:00',
-//     updatedAt: '2020-07-01 07:00:00',
-//   },
-//   {
-//     uuid: 'ae4df4f1-a428-400d-bb16-edd4237e0c47',
-//     content: "Hey John, how's it going?",
-//     from: 'jane',
-//     to: 'john',
-//     createdAt: '2020-07-01 08:00:00',
-//     updatedAt: '2020-07-01 08:00:00',
-//   },
-//   {
-//     uuid: '0a7c92ac-f69c-4799-8aad-9663a4afb47d',
-//     content: 'Not too bad, just getting to work, you?',
-//     from: 'john',
-//     to: 'jane',
-//     createdAt: '2020-07-01 09:00:00',
-//     updatedAt: '2020-07-01 09:00:00',
-//   },
-//   {
-//     uuid: '240dd560-5825-4d5d-b089-12a67e8ec84c',
-//     content: "I'm working from home now",
-//     from: 'jane',
-//     to: 'john',
-//     createdAt: '2020-07-01 10:00:00',
-//     updatedAt: '2020-07-01 10:00:00',
-//   },
-//   {
-//     uuid: 'fd4cee68-5caf-4b1b-80a9-5b9add7fd863',
-//     content: 'Hey John, are you done with that task?',
-//     from: 'boss',
-//     to: 'john',
-//     createdAt: '2020-07-01 11:00:00',
-//     updatedAt: '2020-07-01 11:00:00',
-//   },
-//   {
-//     uuid: '0a7c92ac-f69c-4799-8aad-9663a4afb47d',
-//     content: 'Not too bad, just getting to work, you?',
-//     from: 'john',
-//     to: 'jane',
-//     createdAt: '2020-07-01 09:00:00',
-//     updatedAt: '2020-07-01 09:00:00',
-//   },
-//   {
-//     uuid: '240dd560-5825-4d5d-b089-12a67e8ec84c',
-//     content: "I'm working from home now",
-//     from: 'jane',
-//     to: 'john',
-//     createdAt: '2020-07-01 10:00:00',
-//     updatedAt: '2020-07-01 10:00:00',
-//   },
-//   {
-//     uuid: 'fd4cee68-5caf-4b1b-80a9-5b9add7fd863',
-//     content: 'Hey John, are you done with that task?',
-//     from: 'boss',
-//     to: 'john',
-//     createdAt: '2020-07-01 11:00:00',
-//     updatedAt: '2020-07-01 11:00:00',
-//   },
-//   {
-//     uuid: '0a7c92ac-f69c-4799-8aad-9663a4afb47d',
-//     content: 'Not too bad, just getting to work, you?',
-//     from: 'john',
-//     to: 'jane',
-//     createdAt: '2020-07-01 09:00:00',
-//     updatedAt: '2020-07-01 09:00:00',
-//   },
-//   {
-//     uuid: '240dd560-5825-4d5d-b089-12a67e8ec84c',
-//     content: "I'm working from home now",
-//     from: 'jane',
-//     to: 'john',
-//     createdAt: '2020-07-01 10:00:00',
-//     updatedAt: '2020-07-01 10:00:00',
-//   },
-//   {
-//     uuid: 'fd4cee68-5caf-4b1b-80a9-5b9add7fd863',
-//     content: 'Hey John, are you done with that task?',
-//     from: 'boss',
-//     to: 'john',
-//     createdAt: '2020-07-01 11:00:00',
-//     updatedAt: '2020-07-01 11:00:00',
-//   },
-// ]
 const GET_MESSAGES = gql`
   query($from: String!, $to: String!) {
     getMessages(fromUsername: $from , toUsername: $to){
@@ -208,7 +118,6 @@ export function ChattingMessages(props) {
   const currentUser = AuthService.getCurrentUser(); 
   
   const selectedUser = users?.find((u) => u.username === props.selected); 
-  // console.log(users);
   const messages = selectedUser?.messages; 
 
   const { register ,handleSubmit , reset} = useForm();
@@ -250,7 +159,6 @@ export function ChattingMessages(props) {
   useEffect(() => {
     if (newError) console.log(newError); 
     if (newData) { 
-      // console.log(newData); 
       dispatch({
         type: 'ADD_MESSAGE',
         payload: {
@@ -265,7 +173,6 @@ export function ChattingMessages(props) {
   useEffect(() => {
     if (newReactError) console.log(newReactError); 
     if (newReactData) { 
-      // console.log(newReactData.newReactions); 
       dispatch({
         type: 'ADD_REACTION',
         payload: {
@@ -273,7 +180,6 @@ export function ChattingMessages(props) {
           reaction: newReactData.newReactions,
         },
       })
-      // console.log(users); 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newReactData, newReactError]);

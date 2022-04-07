@@ -35,7 +35,6 @@ export default function Post(props) {
   const [action , setAction] = useState('');  
   const [updateLikeDislike] = useMutation(LIKE_DISLIKE, {
     onCompleted: (data) => {
-      // console.log(data.updatePostLikesDislikes.likeCount);
       setLikeCount(data.updatePostLikesDislikes.likeCount);
       setDislikeCount(data.updatePostLikesDislikes.dislikeCount); 
     },

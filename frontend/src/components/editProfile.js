@@ -63,7 +63,6 @@ export default function EditProfile(props) {
     onError: (err) => console.log(err), 
   });
   const onSubmit = (newData) => {
-    // console.log(newData);
     if (password.current) {
       if (/^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9]).{8}/.test(password.current)) {
         if (password.current === confirmPass.current) {
@@ -90,7 +89,6 @@ export default function EditProfile(props) {
       const formData = new FormData(); 
       formData.append( 'profilePicture', newData.profilePicture[0])      
       formData.append("username", username); 
-      // console.log(formData); 
       fetch(api_base + "/editProfilePicture", {
         method: "PUT",
         headers: new Headers({
@@ -114,7 +112,6 @@ export default function EditProfile(props) {
   } 
 
   const [uploaded, setUploaded] = useState(false);
-  // const [userTaken, setUserTaken] = useState(true); 
   const password = useRef({}); 
   const confirmPass = useRef({}); 
   password.current = watch("password", "");

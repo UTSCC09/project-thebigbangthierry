@@ -7,7 +7,6 @@ const AuthDispatchContext = createContext();
 let usertoken = null; 
 const user = JSON.parse(localStorage.getItem('user')); 
 if (user) {
-  // console.log(user); 
   const token = user.token; 
   const decodedToken = jwtDecode(token) 
   const expiresAt = new Date(decodedToken.exp * 1000); 
