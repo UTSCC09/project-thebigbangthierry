@@ -1,10 +1,8 @@
-import { Button } from '@mui/material';
 import React, { useState, useEffect, useRef } from 'react';
 
 const VideoParticipant = ({ participant , self }) => {
   const [videoTracks, setVideoTracks] = useState([]);
   const [audioTracks, setAudioTracks] = useState([]);
-  const [mute, setMute] = useState(false); 
   
   const videoRef = useRef(); 
   const audioRef= useRef(); 
@@ -67,15 +65,10 @@ const VideoParticipant = ({ participant , self }) => {
     <div style={{ display: 'flex' , justifyContent: 'center', flexDirection: 'column'}}>
       <div style={{ display: 'flex' }}>
         <h3>{participant.identity}</h3>
-        {self ? 
-          <div style={{paddingLeft: '30vw', alignSelf: 'flex-end'}}>
-            <Button sx={{color: 'white'}} onClick={() => setMute(!mute)}> {mute? 'Unmute' : 'Mute'}  </Button>
-          </div>
-          : null }
       </div>
       
-      <video style={{height: '30vw', width: 'auto', paddingRight: '5vw'}} muted ref={videoRef} autoPlay={true}/> 
-      <audio ref={audioRef} autoPlay={true} muted={mute} />
+      <video style={{height: '30vw', width: 'auto', paddingRight: '5vw'}} ref={videoRef} autoPlay={true}/> 
+      {self ? <audio ref={audioRef} autoPlay={true} muted={true} /> : <audio ref={audioRef} autoPlay={true}/>} 
     </div>
   );
 };
