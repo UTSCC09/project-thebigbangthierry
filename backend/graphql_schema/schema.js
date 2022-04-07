@@ -8,10 +8,7 @@ const cloudinary = require('../config/cloudinary');
 const Messages = require('../database/Model/Messages');
 const Reactions = require('../database/Model/Reactions');
 const {PubSub, withFilter} = require('graphql-subscriptions');
-const {RedisPubSub} = require('graphql-redis-subscriptions');
 const pubsub = new PubSub();
-const redisPubsub = new RedisPubSub();
-console.log(process.env.NODE_ENV);
 const AccessToken = require('twilio').jwt.AccessToken;
 const VideoGrant = AccessToken.VideoGrant;
 const {
