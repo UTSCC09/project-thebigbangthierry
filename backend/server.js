@@ -444,28 +444,6 @@ const wsServer = new WebSocketServer({
 
 const serverCleanup = useServer({ 
         schema,
-        context: (ctx) => {
-            let token;
-            console.log(ctx.connectionParams); 
-            if(ctx.connectionParams.authorization)
-            {
-                token = ctx.connectionParams.authorization.split('Bearer ')[1];
-                console.log(token); 
-            }
-            let decodeToken;
-            if(token)
-            {
-                try {
-                    decodeToken = jwt.verify(token, process.env.JSON_SECRET);
-                    ctx.authUser = decodeToken;
-                } 
-                catch (error) {
-                    console.log(error);
-                    throw error;
-                }
-            }
-            return ctx;
-        }
     }, 
     wsServer);
 
