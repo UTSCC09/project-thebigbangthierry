@@ -24,7 +24,8 @@ export default function Post(props) {
   const post = props.post; 
   const profile = props.profile; 
   const username = AuthService.getCurrentUser(); 
-  const createdAt = new Date(post.createdAt * 1000);
+  const createdInt = parseInt(post.createdAt); 
+  const createdAt  = new Date(createdInt);
   const timeStamp = month[createdAt.getMonth()] + " " + createdAt.getDate() + ", " + createdAt.toLocaleTimeString('en-US');   
   
   const [showComments, setShowComments] = useState(false); 
