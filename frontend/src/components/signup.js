@@ -65,8 +65,8 @@ export function Signup() {
       key: "password" , 
       label: "Password", 
       type: "password" ,
-      pattern: /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9]).{8}/,
-      patternmessage: "The password must be at least 8 characters long and contain at least 1 capital letter , number and special character"
+      pattern: /^(?=.*[A-Z])(?=.*?[a-z])(?=.*[!@#$&*])(?=.*[0-9]).{8}/,
+      patternmessage: "The password must be at least 8 characters long and contain at least 1 capital letter, lower case letter , number and special character"
     },
     {
       id: "confirmPass",
