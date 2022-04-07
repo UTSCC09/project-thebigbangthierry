@@ -13,6 +13,8 @@ export default function PostForm({getPost, resetPage, page}) {
   const [uploaded, setUploaded] = useState(false);
   const username = AuthService.getCurrentUser(); 
   const token = AuthService.getToken(); 
+  const [postError, setPostError] = useState(false); 
+  const [errMessage, setErrMessage] = useState(''); 
 
   const submitPost = (newData) => {
     const formData = new FormData(); 
@@ -33,6 +35,7 @@ export default function PostForm({getPost, resetPage, page}) {
           postPicture: null, 
         })
         setUploaded(false); 
+        setPostError(false); 
         resetPage(); 
         getPost({variables: {username: username, pageIndex: page}}); 
       }
@@ -40,7 +43,12 @@ export default function PostForm({getPost, resetPage, page}) {
         throw res.json();
       }
     })
-    .catch(err => console.log(err))
+    .catch(err => {
+      if (err) {
+        setPostError(true);
+        setErrMessage("Post needs to have some text or upload an image"); 
+      }
+    })
   };
 
   return (
@@ -69,6 +77,7 @@ export default function PostForm({getPost, resetPage, page}) {
             <IconButton sx={{color: '#002f65'}}type="submit"> <SendIcon/> </IconButton>
           </div>
         </form>
+        {postError? <p style={{color: "red"}}> {errMessage} </p>: null }
       </div>
   ) ; 
 }
