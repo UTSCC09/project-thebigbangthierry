@@ -78,7 +78,7 @@ app.use(function (req, res, next){
 
 // Check username for bad inputs
 const checkUsername = function(req, res, next) {
-    if (!validator.isAlphanumeric(req.body.username)) return res.status(400).end(" Username should be alphabet or numeric");
+    if (!validator.isAlphanumeric(req.body.username)) return res.status(400).json({"error": "Username should be alphabet or numeric"});
     next();
 };
 
@@ -88,19 +88,19 @@ const checkPassword = function(req, res, next) {
     const regex = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$");
     if (!regex.test(password))
     {
-        return res.status(400).end("Password should be atleast 1 uppercase and atleast 1 lowercase alphabet, atleast 1 number and atleast 1 of !@#$&*");   
+        return res.status(400).json({"error": "Password should be atleast 1 uppercase and atleast 1 lowercase alphabet, atleast 1 number and atleast 1 of !@#$&*"});   
     }
-    if(password.length <= 7) return res.status(400).end(" Password should atleast be 8 characters long");
+    if(password.length <= 7) return res.status(400).json({"error": " Password should atleast be 8 characters long"});
     next();
 };
 
 // Signup rest api
 app.post('/signup', upload.single('profilePicture'), checkUsername, checkPassword, (req, res, next) => {
     // extract data from HTTPS request
-    if (!('username' in req.body)) return res.status(400).end('username is missing');
-    if (!('password' in req.body)) return res.status(400).end('password is missing');
-    if (!('fullName' in req.body)) return res.status(400).end('Full name is missing');
-    if (!('email' in req.body)) return res.status(400).end('Email is missing');
+    if (!('username' in req.body)) return res.status(400).json({"error": "username is missing"});
+    if (!('password' in req.body)) return res.status(400).json({"error": "password is missing"});
+    if (!('fullName' in req.body)) return res.status(400).json({"error": "Full name is missing"});
+    if (!('email' in req.body)) return res.status(400).json({"error": "Email is missing"});
 
     Users.findOne({username: req.body.username})
         .then((checkUser, error) => {
@@ -192,8 +192,8 @@ app.post('/signup', upload.single('profilePicture'), checkUsername, checkPasswor
 // Login rest api
 app.post('/login', checkUsername, checkPassword, (req, res, next) => {
     // extract data from HTTPS request
-    if (!('username' in req.body)) return res.status(400).end('username is missing');
-    if (!('password' in req.body)) return res.status(400).end('password is missing');
+    if (!('username' in req.body)) return res.status(400).json({"error": "username is missing"});
+    if (!('password' in req.body)) return res.status(400).json({"error": "password is missing"});
 
     let username = req.body.username;
     let password = req.body.password;
@@ -202,10 +202,10 @@ app.post('/login', checkUsername, checkPassword, (req, res, next) => {
     Users.findOne({username: username})
         .then(user => {
             console.log(user);
-            if (!user) return res.status(401).end("Invalid username or password");
+            if (!user) return res.status(401).json({"error": "Invalid username or password"});
             bcrypt.compare(password, user.password)
                 .then(validUser => {
-                    if (!validUser) return res.status(401).end("Invalid username or password");
+                    if (!validUser) return res.status(401).json({"error": "Invalid username or password"});
 
                     // start a session
                     req.session.user = user;
@@ -238,7 +238,7 @@ app.post('/login', checkUsername, checkPassword, (req, res, next) => {
 app.get('/signout', function (req, res, next) {
     // destroy session after sign out
     req.session.destroy(function(err){
-        if (err) return res.status(500).end(err);
+        if (err) return res.status(500).json({"error": err});
         res.setHeader('Set-Cookie', cookie.serialize('username', '', {
             path : '/', 
             maxAge: 60 * 60 * 24 * 7 // 1 week in number of seconds
@@ -250,10 +250,10 @@ app.get('/signout', function (req, res, next) {
 // Rest api for create post (doing it in rest because of multer and cloudinary so that it is consistent)
 // Request body - username, textContent, image; Request header - authorization
 app.post('/createPost', upload.single('image'), function (req, res, next) {
-    if (!('username' in req.body)) return res.status(400).end('username is missing');
+    if (!('username' in req.body)) return res.status(400).json({"error": "username is missing"});
     if (!('textContent' in req.body) && !('image' in req.body)) 
     {
-        return res.status(400).end('Text and Image are missing');
+        return res.status(400).json({"error": "Text and Image are missing"});
     }
 
     let token;
@@ -277,7 +277,7 @@ app.post('/createPost', upload.single('image'), function (req, res, next) {
 
     if(decodedToken.username !== req.body.username)
     {
-        return res.status(401).end('Unauthenticated user');
+        return res.status(401).json({"error": "Unauthenticated user"});
     }
 
     let username = req.body.username;
@@ -285,13 +285,13 @@ app.post('/createPost', upload.single('image'), function (req, res, next) {
 
     if(content === "" && (req.file === undefined || req.file === null))
     {
-        return res.status(400).end("Post needs to have some text or upload an image");
+        return res.status(400).json({"error": "Post needs to have some text or upload an image"});
     }
 
     // Find the user 
     Users.findOne({username: username})
         .then(async (user) => {
-            if (!user) return res.status(401).end("Username does not exist in the db");
+            if (!user) return res.status(401).json({"error": "Username does not exist in the db"});
 
             try 
             {
@@ -347,7 +347,7 @@ app.post('/createPost', upload.single('image'), function (req, res, next) {
 // Rest api for updating profile picture (doing it in rest because of multer and cloudinary so that it is consistent)
 // Request body - username, profile picture file; Request header - authorization
 app.put('/editProfilePicture',upload.single('profilePicture'), function (req, res, next) {
-    if (!('username' in req.body)) return res.status(400).end('username field is missing');
+    if (!('username' in req.body)) return res.status(400).json({"error": "username field is missing"});
 
     let token;
     if(req.headers.authorization)
@@ -370,20 +370,20 @@ app.put('/editProfilePicture',upload.single('profilePicture'), function (req, re
 
     if(decodedToken.username !== req.body.username)
     {
-        return res.status(401).end('Unauthenticated user');
+        return res.status(401).json({"error": "Unauthenticated user"});
     }
 
     let username = req.body.username;
 
     if(req.file === undefined || req.file === null)
     {
-        return res.status(400).end("User needs to upload an image");
+        return res.status(400).json({"error": "User needs to upload an image"});
     }
 
     // Find the user
     Users.findOne({username: username})
         .then(async (user) => {
-            if (!user) return res.status(401).end("Username does not exist in the db");
+            if (!user) return res.status(401).json({"error": "Username does not exist in the db"});
 
             try 
             {
