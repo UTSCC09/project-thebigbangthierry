@@ -1,13 +1,10 @@
 import React from 'react';
 import {Outlet,  Navigate} from 'react-router-dom'; 
 
-import {useAuthState} from '../services/auth'; 
-
 export default function DynamicRoute(props) {
-  const {user } = useAuthState();
-  if (props.authenticated && !user) {
+  if (props.authenticated && !localStorage.getItem("isLogin")) {
     return <Navigate to="/login"/> 
-  } else if (props.guest && user ) {
+  } else if (props.guest && localStorage.getItem("isLogin") ) {
     return <Navigate to="/"/> 
   }else {
     return <Outlet/>

@@ -38,6 +38,7 @@ const login = (data) => {
     if (data.token) {
       localStorage.setItem("user", JSON.stringify(data)); 
       localStorage.setItem("token", data.token);  
+      localStorage.setItem("isLogin", true); 
       return data;
     }
     return null;   
@@ -48,6 +49,7 @@ const login = (data) => {
 const logout = () => {
   localStorage.removeItem("user");
   localStorage.removeItem("token");
+  localStorage.removeItem("isLogin");
   fetch(api_base + "/signout", {
     method: "GET",
     headers: {
