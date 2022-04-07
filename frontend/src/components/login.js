@@ -52,7 +52,7 @@ export function Login() {
           <Box sx={{ display: 'flex' , flexDirection: 'column'}}>
             <label htmlFor="submit-login">
               <Input value="Login" type="submit" id="submit-login" sx={{ display: 'none'}}/>
-              <Button sx={{margin: '10px'}} variant="outlined " component="span"> Login </Button>
+              <Button sx={{margin: '10px', backgroundColor: "green", color: 'white'}} variant="outlined " component="span"> Login </Button>
             </label>  
             <Link to="/signup"> Create an Account </Link>
           </Box>  

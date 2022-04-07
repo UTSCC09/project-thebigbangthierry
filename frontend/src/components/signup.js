@@ -27,14 +27,18 @@ export function Signup() {
     .catch(err => {
       // err is not a promise
       console.log(err); 
-      if (err.error.includes("Username")) {
-        setError("username", {type: "manual", message: "Username taken"});  
-      }
-      else if (err.includes("Email")){ 
-        setError("email", {type: "manual", message: "Email Address already in use "});  
+      if (err.error) {
+        if (err.error.includes("Username ") && err.error.includes("is already in use")) {
+          setError("username", {type: "manual", message: "Username taken"});  
+        }
+        else if (err.error.includes("Username should be alphabet or numeric")) {
+          setError("username", {type: "manual", message: "The username needs to be alpha numerical"})
+        }
+        else if (err.includes("Email")){ 
+          setError("email", {type: "manual", message: "Email Address already in use "});  
+        }
       }
     });
-    // setError("username", {type: "manual", message: "Username taken"});    
   }
   const [uploaded, setUploaded] = useState(false);
   const password = useRef({}); 
