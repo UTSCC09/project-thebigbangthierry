@@ -1,33 +1,72 @@
-# TheUofTsocials
+# UofTsocials
 
-## Team Members 
-* Cherie Kong , 1004800986 , kongcher, c.kong@mail.utoronto.ca 
-* Vineet Desai, 1004777100 , desaivi2, vineet.desai@mail.utoronto.ca
+## Project URL
 
-## Description of the Web Application 
-We are designing a social media site dedicated to UofT students that is similar to facebook where users will post UofT related articles to help in academics, extra curricular activities and social activities. Only UofT students will be able to signup to the website using their UofT email.
+**Task:** Provide the link to your deployed application. Please make sure the link works. 
 
-## Description of Key Feature that will be Completed by the Beta Version 
-* Account registration - Users will be able to register and log into their account (UofT only)
-* Video sharing - Users will be able to post and share videos 
-* Adding Friends - Users will be able to send friend requests to other users 
-* Group Creations - Users can create public groups for others to join and see group related posts 
+https://uoftsocials.herokuapp.com/
+## Project Video URL 
 
-## Description of Additional Features that will be completed by the Final Version 
-* Personal Profile - User has a place to update their profile (image) 
-* Posting and Comments - User can comment and post content on their personal / group page 
-* Chatting between users - Users can interact with each other in real time
+**Task:** Provide the link to your youtube video. Please make sure the link works. 
 
-## Description of the Technology Stack that you will use to build and deploy it 
-We will be using the following stack to build our web application:
-1. MongoDB - The database to store information about users
-2. React js - With Material UI, creating frontend components
-3. GraphQL - For creating APIs and returning information to the frontend
-4. Node js - Runtime environment for the JavaScript code
+https://youtu.be/0Pa6UtLa1yw
 
-## Description of the top 5 technical challenges 
-1. Learning how to deploy a project on a public URL
-2. Understanding how to use GraphQL for building APIs 
-3. Learning how to use the framework React 
-4. Figuring out how to store a video in the application 
-5. Figuring out how to make users chat in almost real time 
+## Project Description
+
+**Task:** Provide a detailed description of your app
+
+## Development
+
+**Task:** Leaving deployment aside, explain how the app is built. Please describe the overall code design and be specific about the programming languages, framework, libraries and third-party api that you have used. 
+
+**Frontend**
+The frontend folder was created using create-react-app. Making the main language of the program Javascript. The main files that are rendered can be found in `./frontend/src`
+
+The overall design based on folders is as follows: 
+- **components** : holds the pages as well as any smaller UI components used inside page 
+- **utils**: holds miscellaneous tools used by the overall structure of the app 
+- **services**: holds authentication and context components 
+- **media**: holds static UI images 
+
+**Libraries used:** 
+- react
+- @mui/material
+- @mui/icons-material 
+- react-hook-form
+
+**Third Party API** 
+- twilio-video
+- @apollo/client
+- @apollo/react-hooks
+- graphql
+- graphql-ws 
+- jwt-decode
+- react-router-dom 
+
+
+## Deployment
+
+**Task:** Explain how you have deployed your application. 
+
+## Maintenance
+
+**Task:** Explain how you monitor your deployed app to make sure that everything is working as expected.
+
+## Challenges
+
+**Task:** What is the top 3 most challenging things that you have learned/developed for you app? Please restrict your answer to only three items. 
+
+1. Deployment 
+2. Video Chatting  
+3. Subscription 
+
+## Contributions
+
+**Task:** Describe the contribution of each team member to the project. Please provide the full name of each team member (but no student number). 
+
+Cherie Chee Ching Kong - assisted in Deployments , Designed and implemented Frontend portion of features 
+
+# One more thing? 
+
+**Task:** Any additional comment you want to share with the course staff? 
+ Note: If you wish to emulate two users interacting it requires either two sepreate browsers (ie. safari, chrome, firefox) or one regular/ icognito tab  

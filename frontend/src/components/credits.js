@@ -29,7 +29,7 @@ export default function Credits() {
           <li> Backend code for Apollo Server was from <a href="https://www.apollographql.com/docs/apollo-server/data/subscriptions/"> Apollo official documentation</a> </li>
           <li> MongoDB CRUD api calls from <a href="https://www.mongodb.com/docs/manual/crud/"> MongoDB Official documentation </a></li>
           <li> Backend for Video chatting from <a href="https://www.twilio.com/docs/video/tutorials/get-started-with-twilio-video-node-express-server"> here </a></li>
-          <li> Code for websockets comes from <a href="https://www.apollographql.com/docs/apollo-server/data/subscriptions/"> Apollo Offical Documentation </a></li>
+          <li> Code for subscription comes from <a href="https://www.apollographql.com/docs/apollo-server/data/subscriptions/"> Apollo Offical Documentation </a></li>
         </ul>
       </div>
     </div>
