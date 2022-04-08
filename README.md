@@ -33,8 +33,6 @@ The overall design based on folders is as follows:
 - @mui/material
 - @mui/icons-material 
 - react-hook-form
-
-**Third Party API** 
 - twilio-video
 - @apollo/client
 - @apollo/react-hooks
