@@ -81,6 +81,7 @@ export default function Post(props) {
 
   const handleDelete = () => {
     props.deletePost({variables: {username: username, postId: post._id}});
+    handleClose(); 
   }
 
   useEffect(() => {
