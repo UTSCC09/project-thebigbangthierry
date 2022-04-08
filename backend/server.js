@@ -94,8 +94,23 @@ const checkPassword = function(req, res, next) {
     next();
 };
 
+// multer error
+const fileSizeLimitError = function(req, res, next) {
+    console.log(req.file);
+    const maxFileSize = 4 * 1024 * 1024;
+    if(req.file.mimetype !== 'image/jpeg' && req.file.mimetype !== 'image/jpg' && req.file.mimetype !== 'image/png')
+    {
+        return res.status(400).json({"error": "Only png, jpg, jpeg files are accepted"});
+    }
+    if(req.file.size > maxFileSize)
+    {
+        return res.status(400).json({"error": "File size exceeds the limit of 4MB"});
+    }
+    next()
+};
+
 // Signup rest api
-app.post('/signup', upload.single('profilePicture'), checkUsername, checkPassword, (req, res, next) => {
+app.post('/signup', upload.single('profilePicture'), checkUsername, checkPassword, fileSizeLimitError, (req, res, next) => {
     // extract data from HTTPS request
     if (!('username' in req.body)) return res.status(400).json({"error": "username is missing"});
     if (!('password' in req.body)) return res.status(400).json({"error": "password is missing"});
@@ -249,7 +264,7 @@ app.get('/signout', function (req, res, next) {
 
 // Rest api for create post (doing it in rest because of multer and cloudinary so that it is consistent)
 // Request body - username, textContent, image; Request header - authorization
-app.post('/createPost', upload.single('image'), function (req, res, next) {
+app.post('/createPost', upload.single('image'), fileSizeLimitError, function (req, res, next) {
     if (!('username' in req.body)) return res.status(400).json({"error": "username is missing"});
     if (!('textContent' in req.body) && !('image' in req.body)) 
     {
@@ -346,7 +361,7 @@ app.post('/createPost', upload.single('image'), function (req, res, next) {
 
 // Rest api for updating profile picture (doing it in rest because of multer and cloudinary so that it is consistent)
 // Request body - username, profile picture file; Request header - authorization
-app.put('/editProfilePicture',upload.single('profilePicture'), function (req, res, next) {
+app.put('/editProfilePicture',upload.single('profilePicture'), fileSizeLimitError, function (req, res, next) {
     if (!('username' in req.body)) return res.status(400).json({"error": "username field is missing"});
 
     let token;
