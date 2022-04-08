@@ -87,7 +87,6 @@ export default function PostForum({profile}){
       resetPage();
       if (profile) getProfilePosts({variables: {username: username, pageIndex: page}});
     },
-    onError: (err) => console.log(err),  
   });
 
   const goBack = () => {

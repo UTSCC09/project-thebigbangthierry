@@ -43,8 +43,7 @@ export default function VideoRoom({setFull, token, roomName, leaveRoom}) {
       room.on('participantDisconnected', participantDisconnected);
       room.participants.forEach(participantConnected);
     })
-    .catch((err) => {
-      console.log(err); 
+    .catch(() => {
       setFull(); 
     });
     return () => {

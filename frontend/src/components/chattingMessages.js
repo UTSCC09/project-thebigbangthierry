@@ -122,11 +122,11 @@ export function ChattingMessages(props) {
 
   const { register ,handleSubmit , reset} = useForm();
   const [ getMessages, {loading, data ,error} ] = useLazyQuery(GET_MESSAGES)
-  const [sendMessage] = useMutation(SEND_MESSAGE, { onError: err => console.log(err), }) 
-  const {data: newData, error: newError} = useSubscription(NEW_MESSAGE ,{
+  const [sendMessage] = useMutation(SEND_MESSAGE); 
+  const {data: newData} = useSubscription(NEW_MESSAGE ,{
     variables: {username: currentUser} , 
   });
-  const {data: newReactData, error: newReactError} = useSubscription(NEW_REACTION ,{
+  const {data: newReactData} = useSubscription(NEW_REACTION ,{
     variables: {username: currentUser} , 
   });
 
@@ -157,7 +157,6 @@ export function ChattingMessages(props) {
 
   
   useEffect(() => {
-    if (newError) console.log(newError); 
     if (newData) { 
       dispatch({
         type: 'ADD_MESSAGE',
@@ -168,10 +167,9 @@ export function ChattingMessages(props) {
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newError, newData]);
+  }, [newData]);
 
   useEffect(() => {
-    if (newReactError) console.log(newReactError); 
     if (newReactData) { 
       dispatch({
         type: 'ADD_REACTION',
@@ -182,7 +180,7 @@ export function ChattingMessages(props) {
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newReactData, newReactError]);
+  }, [newReactData]);
 
   let messageDisplay;
   if (loading) {

@@ -82,7 +82,6 @@ export function Signup() {
     })
     .catch(err => {
       // err is not a promise
-      console.log(err); 
       if (err.error) {
         if (err.error.includes("Username ") && err.error.includes("is already in use")) {
           setError("username", {type: "manual", message: "Username taken"});  
@@ -90,7 +89,7 @@ export function Signup() {
         else if (err.error.includes("Username should be alphabet or numeric")) {
           setError("username", {type: "manual", message: "The username needs to be alpha numerical"})
         }
-        else if (err.includes("Email")){ 
+        else if (err.error.includes("Email")){ 
           setError("email", {type: "manual", message: "Email Address already in use "});  
         }
       }

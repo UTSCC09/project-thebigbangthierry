@@ -44,7 +44,6 @@ export function ChattingUsers(props) {
     variables: {user: username}, 
     onCompleted: (data) => 
       dispatch({type: 'SET_USERS', payload: data.user.followingList}), 
-    onError: (err) => console.log(err),
   });
 
   if (!called) {

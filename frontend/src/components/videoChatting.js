@@ -21,7 +21,6 @@ export function VideoChatting () {
 
   const [getRoom] = useMutation(GET_ROOM, {
     onCompleted: data =>  setToken(data.joinVideoCallRoom.token) ,
-    onError: (err) => console.log(err), 
   }); 
 
   const handleRoomName = (event) => {

@@ -43,8 +43,7 @@ export default function EditProfile(props) {
       props.displayNotif(); 
       props.loadProfile();
       props.closeEditMode(); 
-    },
-    onError: (err) => console.log(err), 
+    }, 
   });
   const [editFullName] = useMutation(EDIT_FULLNAME, {
     onCompleted: () => {
@@ -52,8 +51,7 @@ export default function EditProfile(props) {
       props.displayNotif(); 
       props.loadProfile();
       props.closeEditMode(); 
-    },
-    onError: (err) => console.log(err), 
+    }, 
   });
   const [editPassword] = useMutation(EDIT_PASSWORD, {
     onCompleted: () => {
@@ -62,7 +60,6 @@ export default function EditProfile(props) {
       props.loadProfile();
       props.closeEditMode(); 
     },
-    onError: (err) => console.log(err), 
   });
   const onSubmit = (newData) => {
     if (password.current) {

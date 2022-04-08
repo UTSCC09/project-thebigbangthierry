@@ -23,7 +23,6 @@ export default function ReactBar(props) {
   const id = open ? 'simple-popover' : undefined;
 
   const [reactMessage] = useMutation(REACT_MESSAGE, {
-    onError: err => console.log(err), 
     onCompleted : () => handleClose() , 
   })
 
