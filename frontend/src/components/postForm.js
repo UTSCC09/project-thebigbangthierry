@@ -18,6 +18,21 @@ export default function PostForm({getPost, resetPage, page}) {
 
   const submitPost = (newData) => {
     const formData = new FormData(); 
+    if (uploaded) {
+      if (newData.postPicture.length !== 0)  {
+        if (newData.postPicture[0].type !== "image/png" && newData.postPicture[0].type !== "image/jpg" && newData.postPicture !== "image/jpeg") {
+          setPostError(true); 
+          setErrMessage('File must be png , jpg or jpeg '); 
+          return; 
+        }
+      }  
+      else {
+        setPostError(true); 
+        setErrMessage('Invalid file uploaded'); 
+        return; 
+      }
+    }
+    
     formData.append( 'image', newData.postPicture[0])      
     formData.append('username', username); 
     formData.append('textContent', newData.content); 

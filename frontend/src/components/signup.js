@@ -12,33 +12,10 @@ const signUpPaper={padding: 20, height: '75%' , width: '40vw', margin:"20px auto
 export function Signup() {
   const { register ,handleSubmit, control, watch, setError } = useForm();
   const navigate = useNavigate(); 
-  const onSubmit = (data) => {
-    AuthService.register(data)
-    .then (async (res)=> {
-      if (!res.ok) {
-        throw await res.json();
-      }
-      else {
-        navigate("/login"); 
-      }
-    })
-    .catch(err => {
-      // err is not a promise
-      console.log(err); 
-      if (err.error) {
-        if (err.error.includes("Username ") && err.error.includes("is already in use")) {
-          setError("username", {type: "manual", message: "Username taken"});  
-        }
-        else if (err.error.includes("Username should be alphabet or numeric")) {
-          setError("username", {type: "manual", message: "The username needs to be alpha numerical"})
-        }
-        else if (err.includes("Email")){ 
-          setError("email", {type: "manual", message: "Email Address already in use "});  
-        }
-      }
-    });
-  }
   const [uploaded, setUploaded] = useState(false);
+  const [signupError, setSignupError] = useState(false); 
+  const [errMessage, setErrMessage] = useState(''); 
+
   const password = useRef({}); 
   password.current = watch("password", "");  
   const signupOptions = [
@@ -78,6 +55,48 @@ export function Signup() {
     }
   ]
 
+  const onSubmit = (data) => {
+    if (uploaded) {
+      if (data.profilePicture.length !== 0)  {
+        if (data.profilePicture[0].type !== "image/png" && data.profilePicture[0].type !== "image/jpg" && data.profilePicture !== "image/jpeg") {
+          setSignupError(true); 
+          setErrMessage('File must be png , jpg or jpeg '); 
+          return; 
+        }
+      }  
+      else {
+        setSignupError(true); 
+        setErrMessage('Invalid file uploaded'); 
+        return; 
+      }
+    }
+    AuthService.register(data)
+    .then (async (res)=> {
+      if (!res.ok) {
+        throw await res.json();
+      }
+      else {
+        setSignupError(false); 
+        navigate("/login"); 
+      }
+    })
+    .catch(err => {
+      // err is not a promise
+      console.log(err); 
+      if (err.error) {
+        if (err.error.includes("Username ") && err.error.includes("is already in use")) {
+          setError("username", {type: "manual", message: "Username taken"});  
+        }
+        else if (err.error.includes("Username should be alphabet or numeric")) {
+          setError("username", {type: "manual", message: "The username needs to be alpha numerical"})
+        }
+        else if (err.includes("Email")){ 
+          setError("email", {type: "manual", message: "Email Address already in use "});  
+        }
+      }
+    });
+  }
+  
   return (
     <Box 
     sx={{
@@ -95,6 +114,7 @@ export function Signup() {
             <Input  {...register("profilePicture", { onChange: () => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
             <IconButton size="large" component="span"> <PersonAddIcon color="grey" fontSize="large"/> </IconButton>
             {uploaded? <label> Uploaded </label> : null }
+            {signupError? <p style={{color: "red"}}> {errMessage} </p>: null }
           </label>
 
           <TextField label="About" variant="standard" multiline maxRows={5} {...register("about")} fullWidth/> 

@@ -8,7 +8,6 @@ import AuthService from "../services/auth.service";
 import {api_base} from "../config"; 
 
 const editProfilePaper={padding: 20, height: '75%' , width: '40vw', margin:"20px auto"};
-
 const EDIT_ABOUT = gql`
   mutation editAbout($username: String!, $about: String! ) {
     editAbout(username: $username, about: $about) {
@@ -35,6 +34,9 @@ export default function EditProfile(props) {
   const data = props.data; 
   const username = AuthService.getCurrentUser(); 
   const token = AuthService.getToken(); 
+  const [profilePictureError, setProfilePictureError] = useState(false); 
+  const [errorMsg, setErrorMsg] = useState(''); 
+
   const [editAbout] = useMutation(EDIT_ABOUT, {
     onCompleted: () => {
       props.changeMsg("Updated successfully");
@@ -86,28 +88,48 @@ export default function EditProfile(props) {
     } 
 
     if (uploaded) {
-      const formData = new FormData(); 
-      formData.append( 'profilePicture', newData.profilePicture[0])      
-      formData.append("username", username); 
-      fetch(api_base + "/editProfilePicture", {
-        method: "PUT",
-        headers: new Headers({
-          'authorization': 'Bearer ' + token,
-        }),
-        body: formData
-      })
-      .then((res) => {
-        if (res.ok) {
-          props.changeMsg("Updated successfully");
-          props.displayNotif(); 
-          props.loadProfile();
-          props.closeEditMode(); 
+
+      if (newData.profilePicture.length !== 0)  {
+        if (newData.profilePicture[0].type === "image/png" || newData.profilePicture[0].type === "image/jpg" || newData.profilePicture[0].type === "image/jpeg") {
+          const formData = new FormData(); 
+          formData.append( 'profilePicture', newData.profilePicture[0])      
+          formData.append("username", username); 
+          fetch(api_base + "/editProfilePicture", {
+            method: "PUT",
+            headers: new Headers({
+              'authorization': 'Bearer ' + token,
+            }),
+            body: formData
+          })
+          .then((res) => {
+            if (res.ok) {
+              props.changeMsg("Updated successfully");
+              props.displayNotif(); 
+              props.loadProfile();
+              props.closeEditMode(); 
+            }
+            else {
+              throw res.json();
+            }
+          })
+          .catch(() => {
+            setUploaded(false); 
+            setProfilePictureError(true); 
+            setErrorMsg('file size too large');
+          })
         }
         else {
-          throw res.json();
+          setUploaded(false); 
+          setProfilePictureError(true); 
+          setErrorMsg('File must be of type png, jpg or jpeg');
         }
-      })
-      .catch(err => console.log(err))
+      }
+      else {
+        setProfilePictureError(true); 
+        setErrorMsg('Invalid file uploaded'); 
+        setUploaded(false); 
+      }
+      
     }
   } 
 
@@ -149,9 +171,10 @@ export default function EditProfile(props) {
         <h1> Edit Profile </h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           <label htmlFor="upload-photo">
-            <Input  {...register("profilePicture", { onChange: () => setUploaded(true) })} sx={{display:'none'}} id="upload-photo" type="file"/> 
+            <Input  {...register("profilePicture", { onChange: () => {setUploaded(true); setProfilePictureError(false); } })} sx={{display:'none'}} id="upload-photo" type="file"/> 
             <IconButton sx={{width: '50px' , height: '50px'}} component="span"> <PersonAddIcon/> </IconButton>
             {uploaded? <label> Uploaded </label> : null }
+            {profilePictureError ? <label style={{color: "red"}}> {errorMsg} </label> : null}
           </label>
 
           <TextField 
