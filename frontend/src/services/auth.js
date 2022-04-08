@@ -1,6 +1,9 @@
 import React, { createContext , useReducer, useContext} from 'react'; 
 import jwtDecode from 'jwt-decode'; 
 
+// Code of auth follows similarly to this link: 
+//https://github.com/hidjou/node-graphql-react-chat-app/tree/class-15
+
 const AuthStateContext = createContext(); 
 const AuthDispatchContext = createContext(); 
 

@@ -13,6 +13,9 @@ const buttonStyle = {
   right: '10vw',
   position: 'absolute',
 }; 
+// Code of room follows similarly to this guide: 
+//https://www.twilio.com/blog/video-chat-react-hooks
+
 export default function VideoRoom({setFull, token, roomName, leaveRoom}) {
   const [room, setRoom] = useState(null);   
   const [participants, setParticipants] = useState([]); 

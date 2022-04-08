@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+// Code of particpant follows similarly to this guide: 
+//https://www.twilio.com/blog/video-chat-react-hooks
 const VideoParticipant = ({ participant , self }) => {
   const [videoTracks, setVideoTracks] = useState([]);
   const [audioTracks, setAudioTracks] = useState([]);

@@ -2,6 +2,9 @@ import React from "react";
 import {Box, Typography} from "@mui/material"
 import PropTypes from 'prop-types';
 
+
+// Code of auth follows similarly to this link: 
+// https://mui.com/components/tabs/
 export function TabPanel(props) {
   const { children, value, index, ...other } = props;
 

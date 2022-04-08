@@ -207,7 +207,6 @@ export function ChattingMessages(props) {
             <div style={reactStyle}> 
               {message.reaction.map((react, index) => { 
                 return (
-                  // <div> {console.log(react)} helo </div>
                     <p key={index}> {react.reactEmoji} </p>
                 );
               })}

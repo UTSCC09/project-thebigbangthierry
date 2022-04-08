@@ -1,4 +1,8 @@
 import React, { createContext, useReducer, useContext } from 'react'
+
+// Code of message follows similarly to this link: 
+//https://github.com/hidjou/node-graphql-react-chat-app/tree/class-15
+
 const MessageStateContext = createContext()
 const MessageDispatchContext = createContext()
 

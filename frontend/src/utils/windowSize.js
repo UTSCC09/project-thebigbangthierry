@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+// Code of message follows similarly to this link: 
+//https://usehooks.com/useWindowSize/
+
 export function useWindowSize() {
   
   const [windowSize, setWindowSize] = useState({
