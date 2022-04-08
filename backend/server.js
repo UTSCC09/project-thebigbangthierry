@@ -96,15 +96,17 @@ const checkPassword = function(req, res, next) {
 
 // multer error
 const fileSizeLimitError = function(req, res, next) {
-    console.log(req.file);
     const maxFileSize = 4 * 1024 * 1024;
-    if(req.file.mimetype !== 'image/jpeg' && req.file.mimetype !== 'image/jpg' && req.file.mimetype !== 'image/png')
+    if(req.file !== undefined && req.file !== null)
     {
-        return res.status(400).json({"error": "Only png, jpg, jpeg files are accepted"});
-    }
-    if(req.file.size > maxFileSize)
-    {
-        return res.status(400).json({"error": "File size exceeds the limit of 4MB"});
+        if(req.file.mimetype !== 'image/jpeg' && req.file.mimetype !== 'image/jpg' && req.file.mimetype !== 'image/png')
+        {
+            return res.status(400).json({"error": "Only png, jpg, jpeg files are accepted"});
+        }
+        if(req.file.size > maxFileSize)
+        {
+            return res.status(400).json({"error": "File size exceeds the limit of 4MB"});
+        }
     }
     next()
 };
@@ -136,7 +138,7 @@ app.post('/signup', upload.single('profilePicture'), checkUsername, checkPasswor
                                     try
                                     {
                                         let profilePicUrl = "";
-                                        if (req.file != undefined)
+                                        if (req.file !== undefined && req.file !== null)
                                         {
                                             let pathFile = req.file.path;
                                             if (pathFile !== undefined && pathFile !== null && pathFile !== "")
