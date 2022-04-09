@@ -21,5 +21,5 @@ module.exports = (context) => {
         }
     }
 
-    return context
+    return context;
 };

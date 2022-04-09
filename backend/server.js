@@ -1,3 +1,8 @@
+/**
+ * Referencing sources
+ * Apollo server backend code - https://www.apollographql.com/docs/apollo-server/data/subscriptions/
+ */
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -28,7 +33,7 @@ const config = require('./config/config');
 // Calling express server
 const app = express();
 app.use(bodyParser.json());
-const appOrigin = config.app.origin
+const appOrigin = config.app.origin;
 // Add cors
 app.use(cors({ 
     origin: function(origin, callback) {
@@ -108,7 +113,7 @@ const fileSizeLimitError = function(req, res, next) {
             return res.status(400).json({"error": "File size exceeds the limit of 4MB"});
         }
     }
-    next()
+    next();
 };
 
 // Signup rest api
@@ -278,7 +283,7 @@ app.post('/createPost', upload.single('image'), fileSizeLimitError, function (re
     {
         token = req.headers.authorization.split('Bearer ')[1];
     }
-    let decodedToken
+    let decodedToken;
     if(token)
     {
         try 
@@ -336,7 +341,7 @@ app.post('/createPost', upload.single('image'), fileSizeLimitError, function (re
                 console.log(postDetails);
                 postDetails.save()
                     .then((data) => {
-                        return res.json(data)
+                        return res.json(data);
                     })
                     .catch((error) => {
                         console.log(error);
@@ -371,7 +376,7 @@ app.put('/editProfilePicture',upload.single('profilePicture'), fileSizeLimitErro
     {
         token = req.headers.authorization.split('Bearer ')[1];
     }
-    let decodedToken
+    let decodedToken;
     if(token)
     {
         try 
@@ -464,7 +469,7 @@ const serverCleanup = useServer({
     }, 
     wsServer);
 
-let server
+let server;
 async function startServer()
 {
     server = new ApolloServer({
@@ -492,7 +497,6 @@ async function startServer()
 
 startServer();
 // Listen localhost server at port 4000
-const PORT = 4000;
 httpServer.listen(config.server.port, function(err){
     if (err) console.log(err);
     else 

@@ -1,4 +1,10 @@
-
+/**
+ * Referencing sources 
+ * GraphQL structure - https://atheros.ai/blog/graphql-list-how-to-use-arrays-in-graphql-schema 
+ * Subscriptions code - https://www.apollographql.com/docs/apollo-server/data/subscriptions/
+ * MongoDB CRUD apis - https://www.mongodb.com/docs/manual/crud/
+ * Twilio backend code - https://www.twilio.com/docs/video/tutorials/get-started-with-twilio-video-node-express-server
+ */
 // package imports
 const graphql = require('graphql');
 const bcrypt = require('bcrypt');
@@ -274,7 +280,7 @@ const RootQuery = new GraphQLObjectType({
             let reactionData = await Reactions.findOne({_id: reactionId});
             if(reactionData) 
             {
-              reactArr.push({_id: reactionId, reactEmoji: reactionData.reactEmoji})
+              reactArr.push({_id: reactionId, reactEmoji: reactionData.reactEmoji});
               messages[i].reaction = reactArr;
             }
             modifiedMessage.push({_id: messages[i]._id, content: messages[i].content, fromUsername: messages[i].fromUsername, 
@@ -285,7 +291,7 @@ const RootQuery = new GraphQLObjectType({
           return modifiedMessage;
         } 
         catch (error) {
-          console.log(error)
+          console.log(error);
           throw error;
         }
       }
@@ -308,7 +314,7 @@ const RootQuery = new GraphQLObjectType({
           }
           if(args.pageIndex <= 0)
           {
-            return new Error("Invalid Page Index")
+            return new Error("Invalid Page Index");
           }
           let skipPages = (args.pageIndex * 10) - 10;
           return Users.findOne({username: args.username})
@@ -361,7 +367,7 @@ const RootQuery = new GraphQLObjectType({
 
           if(args.pageIndex <= 0)
           {
-            return new Error("Invalid Page Index")
+            return new Error("Invalid Page Index");
           }
           let skipPages = (args.pageIndex * 20) - 20;
 
@@ -388,12 +394,12 @@ const RootQuery = new GraphQLObjectType({
                 .catch(err => {
                   console.log(err);
                   throw err;
-                })
+                });
             })
             .catch(err => {
               console.log(err);
               throw err;
-            })
+            });
         } 
         catch (error) 
         {
@@ -421,7 +427,7 @@ const RootQuery = new GraphQLObjectType({
         {
           if(args.searchContent.length < 3)
           {
-            return new Error("Type atleast 3 characters for correct searches.")
+            return new Error("Type atleast 3 characters for correct searches.");
           }
 
           return Users.find({username: {$regex: args.searchContent, $options: 'i'}})
@@ -459,7 +465,7 @@ const RootQuery = new GraphQLObjectType({
         }
         if(args.pageIndex <= 0)
         {
-          return new Error("Invalid Page Index")
+          return new Error("Invalid Page Index");
         }
         try 
         {
@@ -474,7 +480,7 @@ const RootQuery = new GraphQLObjectType({
                   let comments = post.comments.sort(function(a, b){
                     return DateInputType.parseValue(b.commentDate) - DateInputType.parseValue(a.commentDate);
                   });
-                  let startComment = (args.pageIndex * 5 - 5)
+                  let startComment = (args.pageIndex * 5 - 5);
                   return comments.slice(startComment, startComment + 5);
                 })
                 .catch((err) => {
@@ -572,7 +578,7 @@ const Mutation = new GraphQLObjectType({
               .catch(err => {
                 console.log(err);
                 throw err;
-              })
+              });
           }
         } 
         catch (error) 
@@ -617,7 +623,7 @@ const Mutation = new GraphQLObjectType({
                       .then(hashPass => {
                         return Users.updateOne({username: args.username}, {password: hashPass})
                           .then(() => {
-                            const users = {username: args.username, password: hashPass}
+                            const users = {username: args.username, password: hashPass};
                             return users;
                           })
                           .catch(err => {
@@ -969,7 +975,7 @@ const Mutation = new GraphQLObjectType({
                       {
                         if(publicId !== null && publicId !== undefined && imageUrl !== "")
                         {
-                          await cloudinary.uploader.destroy(publicId, function(result) {console.log(result)});
+                          await cloudinary.uploader.destroy(publicId, function(result) {console.log(result);});
                         }
                         return "Post deleted successfully";
                       } 
