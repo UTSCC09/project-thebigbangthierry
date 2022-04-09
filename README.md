@@ -24,14 +24,14 @@ Features of UofTsocials app:
 - **Comments**: A user browsing the posts on Home page can comment on any of them.
 - **Following users** : A user can follow another user by going to the Profile page and under the Search tab. The user needs to search for the username of the user that they want to follow or they can write a part of the username and it will show the top 10 results.
 - **Edit profile information** - A user can update its profile picture, about section, full name and password.
-- **Signup** - User can signup using their UofT email address and needs to have a unique username. Same email cannot be used to signup for 2 accounts.
+- **Signup** - User can signup using their UofT email address (@utoronto.ca , @mail.utoronto.ca , @alum.utoronto.ca, @alumni.utoronto.ca) and needs to have a unique username. Same email cannot be used to signup for 2 accounts.
 
 ## Development
 
 **Task:** Leaving deployment aside, explain how the app is built. Please describe the overall code design and be specific about the programming languages, framework, libraries and third-party api that you have used. 
 
 **.github/workflows**
-This folder has a yml file which allows for Continuous Integration and builds action workflows to deploy on Heroku. Only after the CI passes, the app is deployed.
+This folder has a yml file which allows for Continuous Integration and builds action workflows to deploy on Heroku. Only after the CI passes, the app can then be deployed.
 
 **Backend**
 The backend uses JavaScript as its main programming language. Backend is built mostly with GraphQL apis and few REST apis. The main server for backend is Apollo Server and adding Express as its middleware. The main files for the backend are `./backend/server.js` and `./backend/graphql_schema/schema.js` as that is where all the APIs are present. `server.js` in the backend folder has all the information necessary to connect to servers or files in config folder or authorization in auth folder.
@@ -60,8 +60,8 @@ The overall design based on folders is as follows:
 The frontend folder was created using create-react-app. Making the main language of the program Javascript. The main files that are rendered can be found in `./frontend/src`
 
 The overall design based on folders is as follows: 
-- **components** : holds the pages as well as any smaller UI components used inside page 
-- **utils**: holds miscellaneous tools used by the overall structure of the app 
+- **components** : holds the pages as well as any smaller UI components used inside the pages 
+- **utils**: holds miscellaneous tools used by the overall structure of the app (windowsize, dynamicroute)
 - **services**: holds authentication and context components 
 - **media**: holds static UI images 
 
@@ -90,7 +90,7 @@ The website UofTSocials is deployed on Heroku. We have added CI/CD to our deploy
 
 **Task:** Explain how you monitor your deployed app to make sure that everything is working as expected.
 
-In order to monitor our deployed app, we check the heroku logs so that there are no errors happening while deployment. When a deployment is failed a member of our team receives an email from Heroku about it. Since we are using third party stuff like Cloudinary to store images and Twilio for video calling so we monitor those websites as well to ensure everything is working smoothly and there are no issues coming up which can halt the deployment on Heroku.
+In order to monitor our deployed app, we check the heroku logs so that there are no errors happening while deployed. When a deployment fails, a member of our team receives an email from Heroku about it. Since we are using third party applications like Cloudinary to store images and Twilio for video calling , we monitor those websites as well to ensure everything is working smoothly and there are no issues coming up which can halt the application on Heroku.
 
 ## Challenges
 
@@ -104,8 +104,9 @@ In order to monitor our deployed app, we check the heroku logs so that there are
 
 **Task:** Describe the contribution of each team member to the project. Please provide the full name of each team member (but no student number). 
 
-Cherie Chee Ching Kong - assisted in Deployments , Designed and implemented Frontend portion of features 
-Vineet Arunkumar Desai - Deployed the app to Heroku along with CI/CD, Designed and implemented the entire backend portion of features
+**Cherie Chee Ching Kong** - assisted in Deployments , Designed and implemented Frontend portion of features 
+
+**Vineet Arunkumar Desai** - Deployed the app to Heroku along with CI/CD, Designed and implemented the entire backend portion of features
 
 # One more thing? 
 
