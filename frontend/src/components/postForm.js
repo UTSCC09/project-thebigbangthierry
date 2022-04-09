@@ -33,7 +33,7 @@ export default function PostForm({getPost, resetPage, page}) {
       }
     }
     
-    formData.append( 'image', newData.postPicture[0])      
+    if (newData.postPicture) formData.append( 'image', newData.postPicture[0]);
     formData.append('username', username); 
     formData.append('textContent', newData.content); 
     fetch(api_base + "/createPost", {
